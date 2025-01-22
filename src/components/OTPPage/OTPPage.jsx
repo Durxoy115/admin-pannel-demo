@@ -14,8 +14,8 @@ const OTPPage = ({ navigate }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <form className="bg-white shadow-md p-6 rounded-md w-80" onSubmit={handleVerifyOTP}>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
+      <form className="bg-white shadow-md pl-80 pr-80 rounded-md pt-20" onSubmit={handleVerifyOTP}>
         <h2 className="text-2xl font-bold mb-4 text-center">Verify OTP</h2>
         <div className="mb-4">
           <label htmlFor="otp" className="block text-sm font-medium mb-1">
@@ -26,7 +26,7 @@ const OTPPage = ({ navigate }) => {
             id="otp"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-gray-200"
             required
           />
         </div>

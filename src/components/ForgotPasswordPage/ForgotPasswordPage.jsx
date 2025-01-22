@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-
 const ForgotPasswordPage = ({ navigate }) => {
   const [email, setEmail] = useState("");
 
@@ -11,9 +10,9 @@ const ForgotPasswordPage = ({ navigate }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <form className="bg-white shadow-md pl-60 pr-56 rounded-md w-80" onSubmit={handleSendOTP}>
-        <h2 className="text-2xl font-bold mb-4 text-center">Forgot Password</h2>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
+      <form className="bg-white shadow-md pl-80 pr-80 rounded-md pt-20" onSubmit={handleSendOTP}>
+        <h2 className="text-2xl font-bold mb-4 text-center pt-16">Forgot Password</h2>
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium mb-1">
             Enter Your Email
@@ -23,7 +22,7 @@ const ForgotPasswordPage = ({ navigate }) => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md bg-gray-200"
             required
           />
         </div>
@@ -34,7 +33,7 @@ const ForgotPasswordPage = ({ navigate }) => {
           Send OTP
         </button>
         <p
-          className="text-blue-500 text-sm mt-4 text-center cursor-pointer"
+          className="text-blue-500 text-sm mt-4 text-right cursor-pointer"
           onClick={() => navigate("login")}
         >
           Back to Login

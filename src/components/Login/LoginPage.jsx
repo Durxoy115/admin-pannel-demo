@@ -1,16 +1,45 @@
 import React, { useState } from "react";
 import './LoginPage.css';
+import localStorage from '../../../src/localStorage';
 
 const LoginPage = ({ navigate }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (password.length >= 6 && password.length <= 16) {
-            alert("Login successful!");
-        } else {
-            alert("Password must be between 6 and 16 characters.");
+
+        try {
+            const response = await fetch("http://192.168.0.131:8000/users/customer-login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Store user data in localStorage
+                localStorage.setItem("user", JSON.stringify(data));
+
+                setIsSuccess(true);
+                setMessage("Login successful!");
+                setTimeout(() => {
+                    navigate("dashboard"); // Redirect to dashboard after success
+                }, 1000); // Delay for message display
+            } else {
+                setIsSuccess(false);
+                setMessage(data.message || "Login failed. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            setIsSuccess(false);
+            setMessage("An error occurred. Please try again.");
         }
     };
 
@@ -55,6 +84,11 @@ const LoginPage = ({ navigate }) => {
                         Forgot Password?
                     </p>
                 </div>
+                {message && (
+                    <p className={`text-center mt-4 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+                        {message}
+                    </p>
+                )}
                 <button
                     type="submit"
                     className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
