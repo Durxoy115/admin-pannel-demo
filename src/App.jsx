@@ -10,17 +10,19 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState("login");
 
   const navigate = (page) => {
-    setCurrentPage(page);  // This triggers re-rendering of the page.
+    setCurrentPage(page);
+    console.log(`Navigating to: ${page, currentPage}`);
+    if (currentPage !== page) setCurrentPage(page);
   };
 
   return (
     <>
-      <Header />
+      {currentPage === "dashboard" && <Header />}
       {currentPage === "login" && <LoginPage navigate={navigate} />}
       {currentPage === "forgotPassword" && <ForgotPasswordPage navigate={navigate} />}
       {currentPage === "otp" && <OTPPage navigate={navigate} />}
       {currentPage === "resetPassword" && <ResetPasswordPage navigate={navigate} />}
-      {currentPage === "dashboard" && <Dashboard />}
+      {currentPage === "dashboard" && <Dashboard navigate={navigate} />}
     </>
   );
 };

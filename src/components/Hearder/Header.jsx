@@ -2,7 +2,7 @@ import React from 'react';
 
 const Header = () => {
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
+        <nav className=" top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
             <div className="flex items-center w-20">
                 <img
                     src="/src/assets/Images/Images-nav/images (1).jpeg" 
