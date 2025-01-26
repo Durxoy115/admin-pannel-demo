@@ -1,28 +1,44 @@
-import React, { useState } from "react";
-import LoginPage from "./components/Login/LoginPage";
-import ForgotPasswordPage from "./components/ForgotPasswordPage/ForgotPasswordPage";
-import OTPPage from "./components/OTPPage/OTPPage";
-import ResetPasswordPage from "./components/ResetPasswordPage/ResetPasswordPage";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Hearder/Header";
 import Dashboard from "./components/Dashboard/Dashboard";
+import Login from "./components/Login/LoginPage";
+import ForgotPassword from "./components/ForgotPasswordPage/ForgotPasswordPage";
+import OTPPage from "./components/OTPPage/OTPPage";
+import AddNewClient from "./components/AddNewClient/AddNewClient";
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("login");
+  return (
+    <Router>
+      <Routes>
+        {/* Routes without Header */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/otp" element={<OTPPage />} />
 
-  const navigate = (page) => {
-    setCurrentPage(page);
-    console.log(`Navigating to: ${page, currentPage}`);
-    if (currentPage !== page) setCurrentPage(page);
-  };
+        {/* Routes with Header */}
+        <Route
+          path="/*"
+          element={
+            <WithHeader>
+              <Routes>
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="addnewclient" element={<AddNewClient />} />
+              </Routes>
+            </WithHeader>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+};
 
+// Layout with Header
+const WithHeader = ({ children }) => {
   return (
     <>
-      {currentPage === "dashboard" && <Header />}
-      {currentPage === "login" && <LoginPage navigate={navigate} />}
-      {currentPage === "forgotPassword" && <ForgotPasswordPage navigate={navigate} />}
-      {currentPage === "otp" && <OTPPage navigate={navigate} />}
-      {currentPage === "resetPassword" && <ResetPasswordPage navigate={navigate} />}
-      {currentPage === "dashboard" && <Dashboard navigate={navigate} />}
+      <Header />
+      <main className="p-4">{children}</main>
     </>
   );
 };

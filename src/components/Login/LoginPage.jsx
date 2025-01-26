@@ -1,36 +1,43 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Use the hook for navigation
 import "./LoginPage.css";
-import localStorage from "../../../src/localStorage";
 
-const LoginPage = ({ navigate }) => {
-  const [email, setEmail] = useState("");
+const LoginPage = () => {
+  const [username, setUsername] = useState(""); // Renamed from email to username
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const navigate = useNavigate(); // Get the navigate function from the hook
+
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const response = await fetch("http://192.168.0.131:8000/users/customer-login/", {
+      const response = await fetch("https://admin.zgs.co.com/auth/user/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }), // Updated payload
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         // Save user data in localStorage
-        localStorage.setItem("user", data); // Replace with custom util
-        setIsSuccess(true);
-        setMessage("Login successful!");
+        if (data.success == true) {
+          setMessage("Login successful!");
+          localStorage.setItem("user", JSON.stringify(data));
+          setIsSuccess(true);
+        } else {
+          alert("Please input correct data");
+        }
+
+        // Redirect to the dashboard after a short delay
         setTimeout(() => {
-          // console.log("Dashboard")
-          navigate("dashboard"); 
+          navigate("/dashboard");
         }, 1000);
       } else {
         setIsSuccess(false);
@@ -48,14 +55,14 @@ const LoginPage = ({ navigate }) => {
       <form className="bg-white shadow-md pl-60 pr-56 rounded-md pt-20" onSubmit={handleLogin}>
         <h2 className="text-2xl font-bold mb-4 text-center pt-16">Login</h2>
         <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Email
+          <label htmlFor="username" className="block text-sm font-medium mb-1">
+            Username
           </label>
           <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            id="username"
+            value={username} // Updated state
+            onChange={(e) => setUsername(e.target.value)} // Updated state setter
             className="w-full px-3 py-2 border rounded-md bg-gray-200"
             required
           />
@@ -76,7 +83,7 @@ const LoginPage = ({ navigate }) => {
           />
           <p
             className="text-blue-500 text-sm mt-4 text-right cursor-pointer"
-            onClick={() => navigate("forgotPassword")}
+            onClick={() => navigate("/forgot-password")} // Updated route
           >
             Forgot Password?
           </p>
