@@ -11,6 +11,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Fetch client data from API
   const fetchClients = () => {
     fetch("https://admin.zgs.co.com/client/", {
       headers: {
@@ -19,7 +20,11 @@ const Dashboard = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setClients(data);
+        if (data.success) {
+          setClients(data.data); // Update the client list
+        } else {
+          console.error("Error fetching clients: ", data.message);
+        }
         setIsLoading(false);
       })
       .catch((error) => {
@@ -28,10 +33,18 @@ const Dashboard = () => {
       });
   };
 
+  // Fetch clients on load or when "reload" signal is passed from AddNewClient
   useEffect(() => {
-    fetchClients();
-  }, [location.state?.reload]);
+    const shouldReload = location.state?.reload;
+    if (shouldReload) {
+      fetchClients(); // Reload data
+      navigate(location.pathname, { replace: true, state: {} }); // Clear reload signal
+    } else {
+      fetchClients();
+    }
+  }, [location.state]);
 
+  // Navigate to AddNewClient page
   const handleOpenModal = () => {
     navigate("/addnewclient");
   };
@@ -81,7 +94,6 @@ const Dashboard = () => {
                 <th className="px-4 py-2">Mobile</th>
                 <th className="px-4 py-2">Email</th>
                 <th className="px-4 py-2">Company Name</th>
-                <th className="px-4 py-2">Currency</th>
                 <th className="px-4 py-2">Country</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Actions</th>
@@ -95,22 +107,21 @@ const Dashboard = () => {
                     index % 2 === 0 ? "bg-gray-100" : "bg-white"
                   }`}
                 >
-                  <td className="px-4 py-2">{client.clientName}</td>
-                  <td className="px-4 py-2">{client.clientId}</td>
-                  <td className="px-4 py-2">{client.clientMobile}</td>
-                  <td className="px-4 py-2">{client.clientEmail}</td>
-                  <td className="px-4 py-2">{client.companyName}</td>
-                  <td className="px-4 py-2">{client.currency}</td>
-                  <td className="px-4 py-2">{client.country}</td>
+                  <td className="px-4 py-2">{client.name || "N/A"}</td>
+                  <td className="px-4 py-2">{client.client_id || "N/A"}</td>
+                  <td className="px-4 py-2">{client.contact || "N/A"}</td>
+                  <td className="px-4 py-2">{client.email || "N/A"}</td>
+                  <td className="px-4 py-2">{client.company_name || "N/A"}</td>
+                  <td className="px-4 py-2">{client.country || "N/A"}</td>
                   <td className="px-4 py-2">
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
-                        client.status === "Active"
+                        client.user_id.is_active
                           ? "bg-green-200 text-green-800"
                           : "bg-red-200 text-red-800"
                       }`}
                     >
-                      {client.status}
+                      {client.user_id.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-4 py-2">
