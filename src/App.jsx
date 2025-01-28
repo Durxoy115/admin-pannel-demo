@@ -6,6 +6,7 @@ import Login from "./components/Login/LoginPage";
 import ForgotPassword from "./components/ForgotPasswordPage/ForgotPasswordPage";
 import OTPPage from "./components/OTPPage/OTPPage";
 import AddNewClient from "./components/AddNewClient/AddNewClient";
+import ClientProfile from "./components/ClientProfile/ClientProfile";
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
               <Routes>
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="addnewclient" element={<AddNewClient />} />
+                <Route path="client-profile" element={<ClientProfile></ClientProfile>} />
               </Routes>
             </WithHeader>
           }

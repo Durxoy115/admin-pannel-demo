@@ -1,17 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Use the hook for navigation
+import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 
 const LoginPage = () => {
-  const [username, setUsername] = useState(""); // Renamed from email to username
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const navigate = useNavigate(); // Get the navigate function from the hook
+  const [username, setUsername] = useState(""); // State for username
+  const [password, setPassword] = useState(""); // State for password
+  const [message, setMessage] = useState(""); // State for messages
+  const [isSuccess, setIsSuccess] = useState(false); // State for success or failure
+  const navigate = useNavigate(); // For navigation
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
 
     try {
       const response = await fetch("https://admin.zgs.co.com/auth/user/login/", {
@@ -20,20 +19,16 @@ const LoginPage = () => {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ username, password }), // Updated payload
+        body: JSON.stringify({ username, password }), // Send username and password
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Save user data in localStorage
-        if (data.success == true) {
-          setMessage("Login successful!");
-          localStorage.setItem("user", JSON.stringify(data));
-          setIsSuccess(true);
-        } else {
-          alert("Please input correct data");
-        }
+      if (response.ok && data.success) {
+        // Save user data and token in localStorage
+        localStorage.setItem("user", JSON.stringify(data));
+        setMessage("Login successful!");
+        setIsSuccess(true);
 
         // Redirect to the dashboard after a short delay
         setTimeout(() => {
@@ -52,7 +47,10 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
-      <form className="bg-white shadow-md pl-60 pr-56 rounded-md pt-20" onSubmit={handleLogin}>
+      <form
+        className="bg-white shadow-md pl-60 pr-56 rounded-md pt-20"
+        onSubmit={handleLogin}
+      >
         <h2 className="text-2xl font-bold mb-4 text-center pt-16">Login</h2>
         <div className="mb-4">
           <label htmlFor="username" className="block text-sm font-medium mb-1">
@@ -61,8 +59,8 @@ const LoginPage = () => {
           <input
             type="text"
             id="username"
-            value={username} // Updated state
-            onChange={(e) => setUsername(e.target.value)} // Updated state setter
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full px-3 py-2 border rounded-md bg-gray-200"
             required
           />
@@ -83,13 +81,17 @@ const LoginPage = () => {
           />
           <p
             className="text-blue-500 text-sm mt-4 text-right cursor-pointer"
-            onClick={() => navigate("/forgot-password")} // Updated route
+            onClick={() => navigate("/forgot-password")}
           >
             Forgot Password?
           </p>
         </div>
         {message && (
-          <p className={`text-center mt-4 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+          <p
+            className={`text-center mt-4 ${
+              isSuccess ? "text-green-500" : "text-red-500"
+            }`}
+          >
             {message}
           </p>
         )}
