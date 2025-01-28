@@ -1,4 +1,4 @@
-const localStorageUtil = {
+const localStorage = {
     setItem: (key, value) => {
         try {
             const serializedValue = JSON.stringify(value);
@@ -25,4 +25,4 @@ const localStorageUtil = {
     }
 };
 
-export default localStorageUtil;
+export default localStorage;

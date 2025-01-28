@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const ClientProfile = () => {
-  const { clientId } = useParams(); 
+  const { Id } = useParams(); 
   const navigate = useNavigate();
 
   const [clientData, setClientData] = useState({
@@ -20,7 +20,7 @@ const ClientProfile = () => {
   useEffect(() => {
     const fetchClientDetails = async () => {
       try {
-        const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${clientId}`, {
+        const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${Id}`, {
           headers: {
             Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
           },
@@ -28,7 +28,7 @@ const ClientProfile = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setClientData(data);
+          setClientData(data?.data);
         } else {
           console.error("Failed to fetch client details.");
         }
@@ -40,7 +40,8 @@ const ClientProfile = () => {
     };
 
     fetchClientDetails();
-  }, [clientId]);
+  }, [Id]);
+  console.log(clientData)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +51,7 @@ const ClientProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${clientId}`, {
+      const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${Id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -91,6 +92,7 @@ const ClientProfile = () => {
               { label: "Country", name: "country", type: "text" },
               { label: "Website URL", name: "website_url", type: "url" },
               { label: "Contact Person", name: "contact_person", type: "text" },
+            //   { label: "Contract ", name: "contract", type: "text" },
             ].map(({ label, name, type }) => (
               <div key={name}>
                 <label htmlFor={name} className="block mb-2 font-medium">
@@ -100,12 +102,25 @@ const ClientProfile = () => {
                   type={type}
                   id={name}
                   name={name}
-                  value={clientData[name]}
+                  value={clientData?.[name]|| ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
             ))}
+             <div className="col-span-2">
+              <label htmlFor="address" className="block mb-2 font-medium">
+                Notes
+              </label>
+              <textarea
+                id="address"
+                name="address"
+                value={clientData?.address || ""}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-4 py-2 border rounded-lg"
+              ></textarea>
+            </div>
             <div className="col-span-2">
               <label htmlFor="address" className="block mb-2 font-medium">
                 Address
@@ -113,7 +128,7 @@ const ClientProfile = () => {
               <textarea
                 id="address"
                 name="address"
-                value={clientData.address}
+                value={clientData?.address || ""}
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-4 py-2 border rounded-lg"

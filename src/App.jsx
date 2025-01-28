@@ -25,7 +25,7 @@ const App = () => {
               <Routes>
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="addnewclient" element={<AddNewClient />} />
-                <Route path="client-profile" element={<ClientProfile></ClientProfile>} />
+                <Route path="client-profile/:Id" element={<ClientProfile></ClientProfile>} />
               </Routes>
             </WithHeader>
           }

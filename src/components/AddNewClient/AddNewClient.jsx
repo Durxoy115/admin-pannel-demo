@@ -50,7 +50,7 @@ const AddNewClient = () => {
   return (
     <div className="w-full  flex items-center justify-center">
       <div className="w-full ">
-        <h2 className="text-3xl font-semibold mb-8 ml-56 ">Add New Client</h2>
+        <h2 className="text-3xl font-semibold mb-8 ml-64 ">Add New Client</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -69,7 +69,7 @@ const AddNewClient = () => {
           }}
         >
           <div className="grid grid-cols-3 gap-6 ">
-            <div className="flex flex-col items-center col-span-1 ">
+            <div className="flex flex-col items-center col-span-1 ms-auto">
               <label
                 htmlFor="imageUpload"
                 className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300 "

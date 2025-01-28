@@ -52,8 +52,8 @@ const Dashboard = () => {
   const handleOpenModal = () => {
     navigate("/addnewclient");
   };
-  const handleClientProfile = () => {
-    navigate("/client-profile")
+  const handleClientProfile = (Id) => {
+    navigate(`/client-profile/${Id}`)
   }
 
   return (
@@ -97,6 +97,7 @@ const Dashboard = () => {
     <thead className="bg-gray-800 text-white">
       <tr>
         <th className="text-left px-4 py-2">Client Name</th>
+        <th className="text-left px-4 py-2">Client ID</th>
         <th className="text-left px-4 py-2">Mobile</th>
         <th className="text-left px-4 py-2">Email</th>
         <th className="text-left px-4 py-2">Company Name</th>
@@ -114,6 +115,7 @@ const Dashboard = () => {
           }`}
         >
           <td className="text-left px-4 py-2">{client.name || "N/A"}</td>
+          <td className="text-left px-4 py-2">{client.client_id || "N/A"}</td>
           <td className="text-left px-4 py-2">{client.contact || "N/A"}</td>
           <td className="text-left px-4 py-2">{client.email || "N/A"}</td>
           <td className="text-left px-4 py-2">{client.company_name || "N/A"}</td>
@@ -134,7 +136,7 @@ const Dashboard = () => {
               <button className="p-2 bg-gray-50 text-black rounded-lg">
                 <AiOutlineEye />
               </button>
-              <button className="p-2 bg-purple-100 text-black rounded-lg" onClick={handleClientProfile}>
+              <button className="p-2 bg-purple-100 text-black rounded-lg" onClick={() =>handleClientProfile(client.client_id)}>
                 <AiOutlineEdit />
               </button>
               <button className="p-2 bg-yellow-100 text-black rounded-lg">
