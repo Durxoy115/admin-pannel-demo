@@ -69,7 +69,7 @@ const Dashboard = () => {
         <input
           type="text"
           placeholder="Search..."
-          className="flex-grow px-4 py-2 border border-gray-700 rounded-3xl h-8 ml-4 mr-96"
+          className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 ml-4 mr-96"
         />
 
         <div className="ml-96">

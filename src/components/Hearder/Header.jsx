@@ -31,12 +31,28 @@ const Header = () => {
   const handleActivityLog = () => {
     navigate("/activity-log");
   };
+  const handleHomePage = () => {
+    navigate("/dashboard")
+  };
+  const handleMessage = () => {
+    navigate("/message")
+  };
+  const handlePaymentHistory = () => {
+    navigate("/payment-history")
+  };
+  const handleOrderList = () => {
+    navigate("/orderlist")
+  };
+  const handleChangePassword = () => {
+    navigate("/change-password")
+  };
 
   return (
     <nav className="top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
       {/* Logo Section */}
       <div className="w-20">
         <img
+        onClick={handleHomePage}
           src="/src/assets/Images/Images-nav/logo-image.jpg"
           alt="Company Logo"
           className="h-12 w-full  ml-24"
@@ -80,7 +96,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleProfile}
+                    onClick={ handleProfile}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -92,51 +108,51 @@ const Header = () => {
 
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                  onClick={handleMessage}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <LuMessageSquareText className="mr-2" /> Message
-                  </a>
+                  </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                  onClick={handlePaymentHistory}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <HiOutlineDocumentCurrencyDollar className="mr-2" /> Payment
                     History
-                  </a>
+                  </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                  onClick={handleOrderList}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <CiViewList className="mr-2" /> Order List
-                  </a>
+                  </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                  onClick={handleChangePassword}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <RiLockPasswordFill className="mr-2" /> Change Password
-                  </a>
+                  </button>
                 )}
               </MenuItem>
             </div>

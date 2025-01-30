@@ -60,8 +60,8 @@ const AddNewClient = () => {
               email: e.target.clientEmail.value,
               country: e.target.country.value,
               company_name: e.target.companyName.value,
-              wensite_url: e.target.companyUrl.value,
-              client_id: e.target.clientId.value,
+              website_url: e.target.companyUrl.value,
+              // client_id: e.target.clientId.value,
               contact_person: e.target.contactPerson.value,
               address: e.target.address.value,
             };
@@ -165,7 +165,7 @@ const AddNewClient = () => {
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="clientId" className="block mb-2 font-medium">
                   Client ID <span className="text-red-500">*</span>
                 </label>
@@ -201,7 +201,7 @@ const AddNewClient = () => {
     <option value="JPY">JPY</option>
     <option value="CNY">CNY</option>
   </select>
-</div>
+</div> */}
 
 
               <div>
