@@ -8,6 +8,11 @@ import OTPPage from "./components/OTPPage/OTPPage";
 import AddNewClient from "./components/AddNewClient/AddNewClient";
 import ClientProfile from "./components/ClientProfile/ClientProfile";
 import UserProfile from "./components/UserProfile/UserProfile";
+import ActivityLog from "./components/ActivityLog/ActivityLog";
+import Message from "./components/Message/Message";
+import PaymentHistory from "./components/PaymentHistory/PaymentHistory";
+import OrderList from "./components/OrderList/OrderList";
+import ChangePassword from "./components/ChangePassword/ChangePassword";
 
 const App = () => {
   return (
@@ -28,6 +33,11 @@ const App = () => {
                 <Route path="addnewclient" element={<AddNewClient />} />
                 <Route path="client-profile/:Id" element={<ClientProfile></ClientProfile>} />
                 <Route path="profile" element={<UserProfile></UserProfile>} />
+                <Route path="activity-log" element={<ActivityLog></ActivityLog>} />
+                <Route path="message" element={<Message></Message>} />
+                <Route path="payment-history" element={<PaymentHistory></PaymentHistory>} />
+                <Route path="orderlist" element={<OrderList></OrderList>} />
+                <Route path="change-password" element={<ChangePassword></ChangePassword>} />
               </Routes>
             </WithHeader>
           }

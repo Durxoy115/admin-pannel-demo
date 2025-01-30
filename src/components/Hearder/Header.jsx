@@ -28,6 +28,9 @@ const Header = () => {
   const handleProfile = () => {
     navigate("/profile");
   };
+  const handleActivityLog = () => {
+    navigate("/activity-log");
+  };
 
   return (
     <nav className="top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
@@ -60,14 +63,14 @@ const Header = () => {
             <div className="py-1">
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                  onClick={handleActivityLog}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <RxActivityLog className="mr-2" /> Activity Log
-                  </a>
+                  </button>
                 )}
               </MenuItem>
               <span className=" items-center ml-4 font-bold">
