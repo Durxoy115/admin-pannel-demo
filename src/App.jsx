@@ -13,7 +13,8 @@ import Message from "./components/Message/Message";
 import PaymentHistory from "./components/PaymentHistory/PaymentHistory";
 import OrderList from "./components/OrderList/OrderList";
 import ChangePassword from "./components/ChangePassword/ChangePassword";
-// import Test from "./components/test";
+import EditUserProfile from "./components/EditUserProfile/EditUserProfile";
+// import Test from "./components/Test";
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
                 <Route path="payment-history" element={<PaymentHistory></PaymentHistory>} />
                 <Route path="orderlist" element={<OrderList></OrderList>} />
                 <Route path="change-password" element={<ChangePassword></ChangePassword>} />
+                <Route path="edit-user-profile/:id" element={<EditUserProfile></EditUserProfile>} />
                 {/* <Route path="test" element={<Test></Test>} /> */}
               </Routes>
             </WithHeader>

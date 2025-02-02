@@ -41,12 +41,20 @@ const MyProfile = () => {
       reader.readAsDataURL(file);
     }
   };
+  const handleEditUserProfile = (id) => {
+    console.log(id)
+    if (userData?.id) {
+      navigate(`/edit-user-profile/${id}`);
+    } else {
+      console.error("User ID not found");
+    }
+  };
 
   return (
     <div className="p-6">
       <div className="flex items-start justify-around mb-4">
         <h2 className="text-3xl font-semibold">My Profile</h2>
-        <button className="bg-blue-700 text-lg p-2 text-white rounded">Edit</button>
+        <button className="bg-blue-700 text-lg p-2 text-white rounded" onClick={() => handleEditUserProfile(userData.id)}>Edit</button>
       </div>
 
       <div className="w-full flex flex-col items-center justify-center">
