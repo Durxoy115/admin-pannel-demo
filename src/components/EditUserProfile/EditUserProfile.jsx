@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TfiPlus } from 'react-icons/tfi';
+import { IoArrowBack } from "react-icons/io5";
+
+
 
 const EditUserProfile = () => {
     const [editProfile, setEditProfile] = useState({ first_name: '', last_name: '', email: '', contact: '', photo: null });
+    const [postableProfile, setPostableProfile] = useState(null);
     const { id } = useParams();
     const navigate = useNavigate();
     const [imagePreview, setImagePreview] = useState(null);
-    console.log("ID is----",id);
+    // const [message, setMessage] = useState("");
+    // const [open, setOpen] = useState(true)
+    
     useEffect(() => {
         const fetchClientDetails = async () => {
             try {
@@ -18,9 +24,9 @@ const EditUserProfile = () => {
                         Authorization: 'Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466',
                     },
                 });
-                console.log(id);
-                if (response.ok) {
-                    const data = await response.json();
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    
                     setEditProfile({
                         first_name: data?.data?.first_name || '',
                         last_name: data?.data?.last_name || '',
@@ -45,6 +51,7 @@ const EditUserProfile = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEditProfile({ ...editProfile, [name]: value });
+        setPostableProfile({ [name]: value });
     };
 
     const handleFileChange = (e) => {
@@ -61,6 +68,7 @@ const EditUserProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(postableProfile)
         const formData = new FormData();
         formData.append('first_name', editProfile.first_name);
         formData.append('last_name', editProfile.last_name);
@@ -80,8 +88,10 @@ const EditUserProfile = () => {
             });
 
             if (response.ok) {
-                alert('Profile updated successfully!');
-                navigate('/user-profile');
+                            
+                
+                // alert('Profile updated successfully!');
+                navigate('/profile');
             } else {
                 console.error('Failed to update profile.');
             }
@@ -91,14 +101,14 @@ const EditUserProfile = () => {
     };
 
     return (
-        <div className="p-6">
-            <div className="flex items-start justify-around mb-4">
-                <h2 className="text-3xl font-semibold">Edit Profile</h2>
-                <button className="bg-blue-700 text-lg p-2 text-white rounded" onClick={() => navigate(-1)}>Back</button>
-            </div>
+        <div className="p-6 relative">
+            <button className="absolute top-0 left-0 p-2 text-3xl text-black" onClick={() => navigate(-1)}>
+                <IoArrowBack />
+            </button>
+            <h2 className="text-3xl font-semibold text-center mb-4">Edit Profile</h2>
             <form onSubmit={handleSubmit} className="w-full flex flex-col items-center justify-center">
                 <div className="w-full max-w-6xl bg-white p-6 rounded-lg shadow-md relative">
-                    <div className="grid grid-cols-3 gap-6 items-start">
+                    <div className="grid grid-cols-3 gap-6 items-center">
                         <div className="flex flex-col items-center col-span-1">
                             <label
                                 htmlFor="imageUpload"
@@ -165,10 +175,14 @@ const EditUserProfile = () => {
                             </div>
                         </div>
                     </div>
-                    <button type="submit" className="mt-4 bg-blue-700 text-lg p-2 text-white rounded ms-auto">Update Profile</button>
+                    <div className="flex justify-center mt-4">
+                        <button type="submit" className="bg-blue-700 w-72 text-lg p-2 px-6 text-white rounded-lg">Save</button>
+                    </div>
                 </div>
             </form>
+          
         </div>
+        
     );
 };
 

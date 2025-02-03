@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
+import SubAdmin from "../SubAdmin/SubAdmin";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -124,6 +125,7 @@ const MyProfile = () => {
           </div>
         </div>
       </div>
+      <SubAdmin></SubAdmin>
     </div>
   );
 };
