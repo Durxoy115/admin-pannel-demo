@@ -76,14 +76,18 @@ const AddressBook = () => {
                   <td className="py-3 px-6 border-b">
                     {address.routing_number}
                   </td>
-                  <td className="border border-gray-300 p-2 flex gap-2">
+                  <td className="py-3 px-6 border-b">
+                  <div className=" p-2 flex justify-center gap-2  ">
                     
-                      <FiEdit className="text-purple-500 hover:text-purple-700" />
-                    
-                    
-                      <FiTrash2 className="text-red-500 hover:text-red-700"/>
-                    
+                    <FiEdit className="text-purple-500 hover:text-purple-700" />
+                  
+                  
+                    <FiTrash2 className="text-red-500 hover:text-red-700"/>
+                  
+                </div>
                   </td>
+                
+                
                 </tr>
               ))}
             </tbody>

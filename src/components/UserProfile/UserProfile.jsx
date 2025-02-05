@@ -4,6 +4,7 @@ import { TfiPlus } from "react-icons/tfi";
 import SubAdmin from "../SubAdmin/SubAdmin";
 import Products from "../Products/Products";
 import AddressBook from "../AddressBook/AddressBook";
+import SupportContactList from "../SupportContactList/SupportContactList";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -130,6 +131,7 @@ const MyProfile = () => {
       <SubAdmin></SubAdmin>
       <Products></Products>
       <AddressBook></AddressBook>
+      <SupportContactList></SupportContactList>
     </div>
   );
 };
