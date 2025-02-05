@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
 import SubAdmin from "../SubAdmin/SubAdmin";
+import Products from "../Products/Products";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -52,14 +53,14 @@ const MyProfile = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6  bg-white shadow-md ">
       <div className="flex items-start justify-around mb-4">
         <h2 className="text-3xl font-semibold">My Profile</h2>
         <button className="bg-blue-700 text-lg p-2 text-white rounded" onClick={() => handleEditUserProfile(userData.id)}>Edit</button>
       </div>
 
       <div className="w-full flex flex-col items-center justify-center">
-        <div className="w-full max-w-6xl bg-white p-6 rounded-lg shadow-md relative">
+        <div className="w-full max-w-6xl p-6 rounded-lg  relative">
           <div className="grid grid-cols-3 gap-6 items-start">
             <div className="flex flex-col items-center col-span-1">
               <label
@@ -126,6 +127,7 @@ const MyProfile = () => {
         </div>
       </div>
       <SubAdmin></SubAdmin>
+      <Products></Products>
     </div>
   );
 };

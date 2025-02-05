@@ -14,6 +14,9 @@ import PaymentHistory from "./components/PaymentHistory/PaymentHistory";
 import OrderList from "./components/OrderList/OrderList";
 import ChangePassword from "./components/ChangePassword/ChangePassword";
 import EditUserProfile from "./components/EditUserProfile/EditUserProfile";
+import EditSubAdmin from "./components/EditSubAdmin/EditSubAdmin";
+import AddUser from "./components/AddUser/AddUser";
+import AddProductCard from "./components/AddProductCard/AddProductCard";
 // import Test from "./components/Test";
 
 const App = () => {
@@ -41,6 +44,9 @@ const App = () => {
                 <Route path="orderlist" element={<OrderList></OrderList>} />
                 <Route path="change-password" element={<ChangePassword></ChangePassword>} />
                 <Route path="edit-user-profile/:id" element={<EditUserProfile></EditUserProfile>} />
+                <Route path="edit-user" element={<EditSubAdmin></EditSubAdmin>} />
+                <Route path="add-user" element={<AddUser></AddUser>} />
+                <Route path="add-product" element={<AddProductCard></AddProductCard>} />
                 {/* <Route path="test" element={<Test></Test>} /> */}
               </Routes>
             </WithHeader>

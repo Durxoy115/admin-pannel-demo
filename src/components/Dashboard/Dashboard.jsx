@@ -114,7 +114,18 @@ const Dashboard = () => {
             index % 2 === 0 ? "bg-gray-100" : "bg-white"
           }`}
         >
-          <td className="text-left px-4 py-2">{client.name || "N/A"}</td>
+          <td className="text-left px-4 py-2">
+            <img src={`https://admin.zgs.co.com${client?.photo}`} alt="client"
+            style={{
+              width:"20px",
+              height:"20px",
+              borderRadius: "50%",
+              display: "inline-flex",
+              marginRight: "5px", 
+            }}
+             />
+            {client.name || "N/A"}
+          </td>
           <td className="text-left px-4 py-2">{client.client_id || "N/A"}</td>
           <td className="text-left px-4 py-2">{client.contact || "N/A"}</td>
           <td className="text-left px-4 py-2">{client.email || "N/A"}</td>

@@ -5,16 +5,60 @@ import { TfiPlus } from "react-icons/tfi";
 const AddNewClient = () => {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState(null);
+  const [image, setImage] = useState(null);
+  const [document, setDocument] = useState(null);
 
-  const handleSave = async (formData) => {
+  // const handleSave = async (formData) => {
+  //   formData.image = image;
+  //   console.log("formData", formData)
+  //   try {
+  //     const response = await fetch("http://192.168.0.131:8002/client/", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: "Token 0d76e9ba2f36fc5637e12ded4f5cb95393c50cb3",
+  //       },
+  //       body: JSON.stringify(formData),
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log("Success:", data);
+  //       // navigate("/dashboard", { state: { reload: true } });
+  //     } else {
+  //       const errorData = await response.json();
+  //       console.error("Error:", errorData);
+  //       alert(errorData.detail || "Failed to add client");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     alert("An error occurred. Please try again.");
+  //   }
+  // };
+
+  const formData = new FormData();
+  formData.append("names", "e.target.clientName.value");
+  const handleSave = async (e) => {
+    e.preventDefault();
+    formData.append("name", e.target.clientName.value);
+    formData.append("contact", e.target.clientMobile.value);
+    formData.append("email", e.target.clientEmail.value);
+    formData.append("country", e.target.country.value);
+    formData.append("company_name", e.target.companyName.value);
+    formData.append("website_url", e.target.companyUrl.value);
+    formData.append("contact_person", e.target.contactPerson.value);
+    formData.append("address", e.target.address.value);
+    formData.append("photo", image);
+    formData.append("contact_doc", document);
+
     try {
       const response = await fetch("https://admin.zgs.co.com/client/", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
           Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
         },
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
       if (response.ok) {
@@ -30,17 +74,41 @@ const AddNewClient = () => {
       console.error("Error:", error);
       alert("An error occurred. Please try again.");
     }
-  };
 
+    //   console.log(e.target.files)
+    //   console.log(e);
+    //   console.log("e.target", formData.keys())
+
+    for (let [key, value] of formData) {
+      console.log(`${key}: ${value}`);
+    }
+  };
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    setImagePreview(URL.createObjectURL(file));
+    setImage(file);
+    // if (file) {
+    //   const reader = new FileReader();
+    //   reader.onload = () => {
+    //     setImagePreview(reader.result);
+    //     setImage(file);
+    //   };
+    //   reader.readAsDataURL(file);
+    // }
+    console.log(file);
+  };
+  const handleFileeUpload = (e) => {
+    const file = e.target.files[0];
+    setDocument(file);
+  //   // if (file) {
+  //   //   const reader = new FileReader();
+  //   //   reader.onload = () => {
+  //   //     setImagePreview(reader.result);
+  //   //     setImage(file);
+  //   //   };
+  //   //   reader.readAsDataURL(file);
+  //   // }
+  //   console.log(file);
   };
 
   const handleClose = () => {
@@ -51,23 +119,25 @@ const AddNewClient = () => {
     <div className="w-full  flex items-center justify-center">
       <div className="w-full ">
         <h2 className="text-3xl font-semibold mb-8 ml-64 ">Add New Client</h2>
-        <form
+        {/* <form
           onSubmit={(e) => {
             e.preventDefault();
             const formData = {
+              
               name: e.target.clientName.value,
               contact: e.target.clientMobile.value,
               email: e.target.clientEmail.value,
               country: e.target.country.value,
               company_name: e.target.companyName.value,
               website_url: e.target.companyUrl.value,
-              // client_id: e.target.clientId.value,
               contact_person: e.target.contactPerson.value,
               address: e.target.address.value,
             };
+            
             handleSave(formData);
           }}
-        >
+        > */}
+        <form onSubmit={handleSave}>
           <div className="grid grid-cols-3 gap-6 ">
             <div className="flex flex-col items-center col-span-1 ms-auto">
               <label
@@ -91,7 +161,6 @@ const AddNewClient = () => {
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              
             </div>
             <div className="col-span-2 grid grid-cols-2 gap-6">
               <div>
@@ -107,7 +176,10 @@ const AddNewClient = () => {
                 />
               </div>
               <div>
-                <label htmlFor="clientMobile" className="block mb-2 font-medium">
+                <label
+                  htmlFor="clientMobile"
+                  className="block mb-2 font-medium"
+                >
                   Client Mobile Number <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -120,7 +192,7 @@ const AddNewClient = () => {
               </div>
               <div>
                 <label htmlFor="clientEmail" className="block mb-2 font-medium">
-                 Client Email <span className="text-red-500">*</span>
+                  Client Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -130,7 +202,7 @@ const AddNewClient = () => {
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="companyName" className="block mb-2 font-medium">
                   Company Name
@@ -203,9 +275,11 @@ const AddNewClient = () => {
   </select>
 </div> */}
 
-
               <div>
-                <label htmlFor="contactPerson" className="block mb-2 font-medium">
+                <label
+                  htmlFor="contactPerson"
+                  className="block mb-2 font-medium"
+                >
                   Contact Person
                 </label>
                 <input
@@ -216,18 +290,22 @@ const AddNewClient = () => {
                 />
               </div>
               <div>
-  <label htmlFor="contractDocument" className="block mb-2 font-medium">
-    Contract Document <span className="text-red-500">*</span>
-  </label>
-  <input
-    type="file"
-    id="contractDocument"
-    name="contractDocument"
-    accept=".pdf,.doc,.docx"
-    required
-    className="w-full px-4 py-2 border rounded-lg"
-  />
-</div>
+                <label
+                  htmlFor="contractDocument"
+                  className="block mb-2 font-medium"
+                >
+                  Contract Document <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="file"
+                  id="contractDocument"
+                  name="contractDocument"
+                  accept=".pdf,.doc,.docx"
+                  required
+                  className="w-full px-4 py-2 border rounded-lg"
+                  onChange={handleFileeUpload}
+                />
+              </div>
 
               <div className="col-span-2">
                 <label htmlFor="address" className="block mb-2 font-medium">
@@ -252,7 +330,6 @@ const AddNewClient = () => {
                 ></textarea>
               </div>
             </div>
-            
           </div>
           <div className="flex justify-end space-x-4 mt-6 mb-10">
             <button

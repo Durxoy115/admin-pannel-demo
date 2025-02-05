@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+
+
 
 
 const SubAdmin = () => {
   const [users, setUsers] = useState([]);
-
+  const navigate = useNavigate();
   const fetchUsers = async () => {
     try {
       const response = await fetch("https://admin.zgs.co.com/auth/user/", {
@@ -28,18 +31,25 @@ const SubAdmin = () => {
     fetchUsers();
   }, []);
 
+  const handleEditSubAdmin = () => {
+    navigate("/edit-user");
+  }
+  const handleAddSubAdmin = () => {
+    navigate("/add-user");
+  }
+
   return (
     <div className="p-4">
-        <div className="mt-8 flex bg-black rounded-lg text-white justify-between justify-center items-center pl-4 pr-4">
+        <div className=" flex bg-black rounded-lg text-white justify-between justify-center items-center pl-4 pr-4 ml-10 mr-10">
         <h1 className="text-2xl font-semibold mb-4">Sub-Admin List</h1>
-    <IoMdAddCircleOutline className="text-xl"></IoMdAddCircleOutline>
+    <IoMdAddCircleOutline className="text-xl" onClick={handleAddSubAdmin}></IoMdAddCircleOutline>
         </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto ml-10 mr-10">
         <table className="min-w-full border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border border-gray-300 p-2 text-left">Sub-Admin Name</th>
+              <th className="border border-gray-300 p-2 text-left"> Name</th>
               <th className="border border-gray-300 p-2 text-left">User Name</th>
               <th className="border border-gray-300 p-2 text-left">Email</th>
               <th className="border border-gray-300 p-2 text-left">Contact</th>
@@ -51,14 +61,14 @@ const SubAdmin = () => {
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="border border-gray-300 p-2">
-                  {user.first_name} {user.last_name || "N/A"}
+                  {user.first_name} {user.last_name }
                 </td>
                 <td className="border border-gray-300 p-2">{user.username}</td>
                 <td className="border border-gray-300 p-2">{user.email}</td>
                 <td className="border border-gray-300 p-2">{user.contact || "N/A"}</td>
                 <td className="border border-gray-300 p-2">{user.user_type?.name || "N/A"}</td>
                 <td className="border border-gray-300 p-2 flex gap-2">
-                  <button className="text-purple-500 hover:text-purple-700">
+                  <button className="text-purple-500 hover:text-purple-700" onClick={handleEditSubAdmin}>
                     <FiEdit />
                   </button>
                   <button className="text-red-500 hover:text-red-700">
