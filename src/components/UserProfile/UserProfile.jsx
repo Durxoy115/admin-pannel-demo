@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
 import SubAdmin from "../SubAdmin/SubAdmin";
 import Products from "../Products/Products";
+import AddressBook from "../AddressBook/AddressBook";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -128,6 +129,7 @@ const MyProfile = () => {
       </div>
       <SubAdmin></SubAdmin>
       <Products></Products>
+      <AddressBook></AddressBook>
     </div>
   );
 };
