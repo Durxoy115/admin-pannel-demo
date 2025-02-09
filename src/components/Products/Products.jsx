@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { CiEdit } from "react-icons/ci";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
-
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
   const navigate = useNavigate();
 
   const fetchProducts = async () => {
@@ -34,10 +35,52 @@ const Products = () => {
     navigate("/add-product");
   };
 
+  const openDeleteModal = (serviceId) => {
+    setSelectedProductId(serviceId);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsModalOpen(false);
+    setSelectedProductId(null);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedProductId) return;
+
+    try {
+      const response = await fetch(
+        `https://admin.zgs.co.com/service/?service_id=${selectedProductId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          },
+        }
+      );
+
+      if (response.ok) {
+        setProducts((prevProducts) =>
+          prevProducts.filter((product) => product.id !== selectedProductId)
+        );
+      } else {
+        console.error("Failed to delete the service.");
+        alert("Error: Unable to delete service.");
+      }
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("An error occurred while deleting the service.");
+    } finally {
+      closeDeleteModal();
+    }
+  };
+
   return (
     <div className="mt-16">
       <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
-        <h1 className="text-3xl font-bold mb-4">Our Products and Services List</h1>
+        <h1 className="text-3xl font-bold mb-4">
+          Our Products and Services List
+        </h1>
         <button
           className="bg-blue-700 w-20 text-white p-2 rounded-md hover:bg-blue-800"
           onClick={handleAddProduct}
@@ -58,30 +101,51 @@ const Products = () => {
               <hr className="border-gray-300 my-2" />
               <ul className="text-left text-gray-800 mt-4 space-y-2">
                 <li className="flex items-center">
-                  <span className="text-blue-500 mr-2">•</span> Helps understand performance.
-                </li>
-                <li className="flex items-center">
-                  <span className="text-blue-500 mr-2">•</span> Research to anticipate trends.
-                </li>
-                <li className="flex items-center">
-                  <span className="text-blue-500 mr-2">•</span> Insights into consumer behavior.
-                </li>
-                <li className="flex items-center">
-                  <span className="text-blue-500 mr-2">•</span> Investing in analytics & research.
+                  <span
+                    className="text-black mr-2"
+                    dangerouslySetInnerHTML={{ __html: product?.description }}
+                  ></span>
                 </li>
               </ul>
+
               <p className="mt-4 text-lg font-semibold text-gray-700">
                 Price: {product?.price ? `$${product.price} USD` : "Contact us"}
               </p>
-              <CiEdit className="absolute top-4 right-4 text-black  bg-gray-100 text-xl">
-                
-              </CiEdit>
-              <RiDeleteBin6Line className="absolute top-4 right-10 bg-gray-100 text-gray-700 text-xl">
-                
-              </RiDeleteBin6Line>
+              <CiEdit className="absolute top-4 right-4 text-black bg-gray-100 text-xl" />
+              <RiDeleteBin6Line
+                className="absolute top-4 right-10 bg-gray-100 text-gray-700 text-xl cursor-pointer"
+                onClick={() => openDeleteModal(product.id)}
+              />
             </div>
           ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
+            <p className="text-gray-700">
+              Are you sure you want to delete this service?
+            </p>
+            <div className="mt-6 flex justify-center gap-4">
+              <button
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                onClick={handleDelete}
+              >
+                {" "}
+                Delete
+              </button>
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                onClick={closeDeleteModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
