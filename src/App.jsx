@@ -18,6 +18,10 @@ import EditSubAdmin from "./components/EditSubAdmin/EditSubAdmin";
 import AddUser from "./components/AddUser/AddUser";
 import AddProductCard from "./components/AddProductCard/AddProductCard";
 import AddAddress from "./components/AddAddress/AddAddress";
+import EditService from "./EditService/EditService";
+import EditCompanyAddress from "./components/EditCompanyAddress/EditCompanyAddress";
+import ListOrder from "./components/ListOrder/ListOrder";
+import OrderAdd from "./components/OrderAdd/OrderAdd";
 // import Test from "./components/Test";
 
 const App = () => {
@@ -49,6 +53,10 @@ const App = () => {
                 <Route path="add-user" element={<AddUser></AddUser>} />
                 <Route path="add-product" element={<AddProductCard></AddProductCard>} />
                 <Route path="add-address" element={<AddAddress></AddAddress>} />
+                <Route path="edit-service" element={<EditService></EditService>} />
+                <Route path="edit-address" element={<EditCompanyAddress></EditCompanyAddress>} />
+                <Route path="order-list" element={<ListOrder></ListOrder>} />
+                <Route path="add-order" element={<OrderAdd></OrderAdd>} />
                 {/* <Route path="test" element={<Test></Test>} /> */}
               </Routes>
             </WithHeader>

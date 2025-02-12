@@ -39,7 +39,7 @@ const SupportContactList = () => {
            <div>
               <div className="mt-16">
                 <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
-                  <h1 className="text-3xl font-bold mb-4">Company Address Book</h1>
+                  <h1 className="text-3xl font-bold mb-4">Support Contact List</h1>
                   <button
                     className="bg-blue-700 w-20 text-white p-2 rounded-md hover:bg-blue-800"
                     onClick={handleContact}

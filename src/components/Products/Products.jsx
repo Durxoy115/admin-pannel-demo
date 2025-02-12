@@ -35,6 +35,10 @@ const Products = () => {
     navigate("/add-product");
   };
 
+  const handleEditProduct = () => {
+    navigate("/edit-service")
+  }
+
   const openDeleteModal = (serviceId) => {
     setSelectedProductId(serviceId);
     setIsModalOpen(true);
@@ -111,7 +115,7 @@ const Products = () => {
               <p className="mt-4 text-lg font-semibold text-gray-700">
                 Price: {product?.price ? `$${product.price} USD` : "Contact us"}
               </p>
-              <CiEdit className="absolute top-4 right-4 text-black bg-gray-100 text-xl" />
+              <CiEdit className="absolute top-4 right-4 text-black bg-gray-100 text-xl" onClick={handleEditProduct} />
               <RiDeleteBin6Line
                 className="absolute top-4 right-10 bg-gray-100 text-gray-700 text-xl cursor-pointer"
                 onClick={() => openDeleteModal(product.id)}

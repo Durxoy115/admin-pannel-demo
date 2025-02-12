@@ -35,9 +35,9 @@ const AddressBook = () => {
     navigate("/add-address");
   };
 
-  // const handleEdit = (id) => {
-  //   navigate(`/edit-address/${id}`);
-  // };
+  const handleEditAddress = () => {
+    navigate("/edit-address");
+  };
 
   return (
     <div>
@@ -79,7 +79,8 @@ const AddressBook = () => {
                   <td className="py-3 px-6 border-b">
                   <div className=" p-2 flex justify-center gap-2  ">
                     
-                    <FiEdit className="text-purple-500 hover:text-purple-700" />
+                    <FiEdit className="text-purple-500 hover:text-purple-700"
+                    onClick={handleEditAddress} />
                   
                   
                     <FiTrash2 className="text-red-500 hover:text-red-700"/>

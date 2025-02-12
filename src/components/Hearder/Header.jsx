@@ -41,7 +41,7 @@ const Header = () => {
     navigate("/payment-history")
   };
   const handleOrderList = () => {
-    navigate("/orderlist")
+    navigate("/order-list")
   };
   const handleChangePassword = () => {
     navigate("/change-password")
