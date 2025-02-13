@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { LuCirclePlus } from "react-icons/lu";
-import { AiOutlineEdit } from "react-icons/ai";
-import { RiDeleteBin6Line } from "react-icons/ri";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -19,7 +16,7 @@ const AddProductCard = () => {
     type: "",
     image: null,
   });
-
+  console.log(services)
   const apiUrl = "https://admin.zgs.co.com/service/";
 
   // Fetch service data from API
@@ -39,19 +36,19 @@ const AddProductCard = () => {
   // Submit new service to API
   const handleAddService = async (e) => {
     e.preventDefault();
-    const payload = new FormData();
-    payload.append("name", formData.name);
-    payload.append("short_description", formData.short_description);
-    payload.append("description", formData.description);
-    payload.append("price", formData.price);
-    payload.append("currency", formData.currency);
-    payload.append("type", formData.type);
+    const formdata = new FormData();
+    formdata.append("name", formData.name);
+    formdata.append("short_description", formData.short_description);
+    formdata.append("description", formData.description);
+    formdata.append("price", formData.price);
+    formdata.append("currency", formData.currency);
+    formdata.append("type", formData.type);
     if (formData.image) {
-      payload.append("image", formData.image);
+      formdata.append("image", formData.image);
     }
 
     try {
-      const response = await axios.post(apiUrl, payload, {
+      const response = await axios.post(apiUrl, formdata, {
         headers: {
           //   "Content-Type": "multipart/form-data",
           Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
@@ -82,14 +79,14 @@ const AddProductCard = () => {
   }, []);
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center">
       <h1 className="text-3xl font-semibold mt-6 ml-28 ">
         Add Our Products & Services
       </h1>
 
       {/* Form Section */}
       <form
-        className="bg-white p-6 rounded-lg shadow-md mt-6 w-full mr-28 ml-20 space-y-4 "
+        className="bg-white p-6 rounded-lg shadow-md mt-6 w-3/4 space-y-4 "
         onSubmit={handleAddService}
       >
         <div className="grid grid-cols-4 gap-6">
@@ -173,7 +170,7 @@ const AddProductCard = () => {
             />
           </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 w-3/4">
           <label className="block font-medium mb-1">Project Information*</label>
           <ReactQuill
             className="w-full "
@@ -186,7 +183,7 @@ const AddProductCard = () => {
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 mt-6 rounded-lg w-60 mx-auto shadow-md block"
+          className="bg-blue-500 text-white px-4 py-2 mt-6 rounded-lg w-60 mx-auto shadow-md flex items-center justify-center mt-auto"
           onClick={handleAddservicepath}
         >
           Save
