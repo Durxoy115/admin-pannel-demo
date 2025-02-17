@@ -49,7 +49,7 @@ const App = () => {
                 <Route path="orderlist" element={<OrderList></OrderList>} />
                 <Route path="change-password" element={<ChangePassword></ChangePassword>} />
                 <Route path="edit-user-profile/:id" element={<EditUserProfile></EditUserProfile>} />
-                <Route path="edit-user" element={<EditSubAdmin></EditSubAdmin>} />
+                <Route path="edit-user/:id" element={<EditSubAdmin></EditSubAdmin>} />
                 <Route path="add-user" element={<AddUser></AddUser>} />
                 <Route path="add-product" element={<AddProductCard></AddProductCard>} />
                 <Route path="add-address" element={<AddAddress></AddAddress>} />

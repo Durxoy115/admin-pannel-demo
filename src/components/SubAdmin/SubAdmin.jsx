@@ -31,8 +31,8 @@ const SubAdmin = () => {
     fetchUsers();
   }, []);
 
-  const handleEditSubAdmin = () => {
-    navigate("/edit-user");
+  const handleEditSubAdmin = (id) => {
+    navigate(`/edit-user/${id}`);
   }
   const handleAddSubAdmin = () => {
     navigate("/add-user");
@@ -68,7 +68,7 @@ const SubAdmin = () => {
                 <td className="border border-gray-300 p-2">{user.contact || "N/A"}</td>
                 <td className="border border-gray-300 p-2">{user.user_type?.name || "N/A"}</td>
                 <td className="border border-gray-300 p-2 flex gap-2">
-                  <button className="text-purple-500 hover:text-purple-700" onClick={handleEditSubAdmin}>
+                  <button className="text-purple-500 hover:text-purple-700" onClick={() => handleEditSubAdmin(user.id)}>
                     <FiEdit />
                   </button>
                   <button className="text-red-500 hover:text-red-700">
