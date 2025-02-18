@@ -46,6 +46,30 @@ const Header = () => {
   const handleChangePassword = () => {
     navigate("/change-password")
   };
+  const handleLogOut = async () => {
+    try {
+      const response = await fetch(
+        "https://admin.zgs.co.com/auth/user/logout/",
+        {
+          headers: {
+            Authorization: "Token e004bb719dfa12460e620cca2985f1ae6e8b23eb",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.removeItem("office_token");
+        navigate("/login");
+      } else {
+        alert("Logout failed: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   return (
     <nav className="top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
@@ -159,14 +183,14 @@ const Header = () => {
             <div className="py-1">
               <MenuItem>
                 {({ active }) => (
-                  <a
-                    href="#"
+                  <button
+                    onClick={handleLogOut}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
                   >
                     <CiLogout className="mr-2" /> Log Out
-                  </a>
+                  </button>
                 )}
               </MenuItem>
             </div>

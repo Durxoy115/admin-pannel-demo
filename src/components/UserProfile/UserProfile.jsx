@@ -5,6 +5,7 @@ import SubAdmin from "../SubAdmin/SubAdmin";
 import Products from "../Products/Products";
 import AddressBook from "../AddressBook/AddressBook";
 import SupportContactList from "../SupportContactList/SupportContactList";
+import LogOut from "../LogOut/LogOut";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -132,6 +133,7 @@ const MyProfile = () => {
       <Products></Products>
       <AddressBook></AddressBook>
       <SupportContactList></SupportContactList>
+      <LogOut></LogOut>
     </div>
   );
 };

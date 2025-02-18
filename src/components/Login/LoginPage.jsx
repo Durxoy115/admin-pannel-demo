@@ -26,7 +26,7 @@ const LoginPage = () => {
 
       if (response.ok && data.success) {
         // Save user data and token in localStorage
-        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("office_token", data.data.token);
         setMessage("Login successful!");
         setIsSuccess(true);
 
