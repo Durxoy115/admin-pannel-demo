@@ -3,12 +3,12 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
-
-
-
 const SubAdmin = () => {
   const [users, setUsers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const navigate = useNavigate();
+
   const fetchUsers = async () => {
     try {
       const response = await fetch("https://admin.zgs.co.com/auth/user/", {
@@ -33,23 +33,56 @@ const SubAdmin = () => {
 
   const handleEditSubAdmin = (id) => {
     navigate(`/edit-user/${id}`);
-  }
+  };
+
   const handleAddSubAdmin = () => {
     navigate("/add-user");
-  }
+  };
+
+  const handleDeleteSubAdmin = async () => {
+    if (!selectedUserId) return;
+    
+    try {
+      const response = await fetch(`https://admin.zgs.co.com/auth/user/?user_id=${selectedUserId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+        },
+      });
+
+      if (response.ok) {
+        setUsers(users.filter((user) => user.id !== selectedUserId));
+        setIsModalOpen(false);
+      } else {
+        console.error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
+  const openDeleteModal = (id) => {
+    setSelectedUserId(id);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsModalOpen(false);
+    setSelectedUserId(null);
+  };
 
   return (
     <div className="p-4">
-        <div className=" flex bg-black rounded-lg text-white justify-between justify-center items-center pl-4 pr-4 ml-10 mr-10">
+      <div className="flex bg-black rounded-lg text-white justify-between items-center pl-4 pr-4 ml-10 mr-10">
         <h1 className="text-2xl font-semibold mb-4">Sub-Admin List</h1>
-    <IoMdAddCircleOutline className="text-xl" onClick={handleAddSubAdmin}></IoMdAddCircleOutline>
-        </div>
-      
+        <IoMdAddCircleOutline className="text-xl cursor-pointer" onClick={handleAddSubAdmin} />
+      </div>
+
       <div className="overflow-x-auto ml-10 mr-10">
         <table className="min-w-full border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border border-gray-300 p-2 text-left"> Name</th>
+              <th className="border border-gray-300 p-2 text-left">Name</th>
               <th className="border border-gray-300 p-2 text-left">User Name</th>
               <th className="border border-gray-300 p-2 text-left">Email</th>
               <th className="border border-gray-300 p-2 text-left">Contact</th>
@@ -60,9 +93,7 @@ const SubAdmin = () => {
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="border border-gray-300 p-2">
-                  {user.first_name} {user.last_name }
-                </td>
+                <td className="border border-gray-300 p-2">{user.first_name} {user.last_name}</td>
                 <td className="border border-gray-300 p-2">{user.username}</td>
                 <td className="border border-gray-300 p-2">{user.email}</td>
                 <td className="border border-gray-300 p-2">{user.contact || "N/A"}</td>
@@ -71,7 +102,7 @@ const SubAdmin = () => {
                   <button className="text-purple-500 hover:text-purple-700" onClick={() => handleEditSubAdmin(user.id)}>
                     <FiEdit />
                   </button>
-                  <button className="text-red-500 hover:text-red-700">
+                  <button className="text-red-500 hover:text-red-700" onClick={() => openDeleteModal(user.id)}>
                     <FiTrash2 />
                   </button>
                 </td>
@@ -80,6 +111,19 @@ const SubAdmin = () => {
           </tbody>
         </table>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
+            <p className="text-gray-700">Are you sure you want to delete this member?</p>
+            <div className="mt-6 flex justify-center gap-4">
+              <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700" onClick={handleDeleteSubAdmin}>Delete</button>
+              <button className="bg-green-300 px-4 py-2 rounded-md hover:bg-green-400" onClick={closeDeleteModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

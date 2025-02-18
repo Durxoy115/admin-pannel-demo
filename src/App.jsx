@@ -53,8 +53,8 @@ const App = () => {
                 <Route path="add-user" element={<AddUser></AddUser>} />
                 <Route path="add-product" element={<AddProductCard></AddProductCard>} />
                 <Route path="add-address" element={<AddAddress></AddAddress>} />
-                <Route path="edit-service" element={<EditService></EditService>} />
-                <Route path="edit-address" element={<EditCompanyAddress></EditCompanyAddress>} />
+                <Route path="edit-service/:id" element={<EditService></EditService>} />
+                <Route path="edit-address/:id" element={<EditCompanyAddress></EditCompanyAddress>} />
                 <Route path="order-list" element={<ListOrder></ListOrder>} />
                 <Route path="add-order" element={<OrderAdd></OrderAdd>} />
                 {/* <Route path="test" element={<Test></Test>} /> */}
