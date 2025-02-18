@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { useSelector, useDispatch } from 'react-redux'
+// import { getToken, setToken } from '../../Redux/TokenSlice'
 import "./LoginPage.css";
+
 
 const LoginPage = () => {
   const [username, setUsername] = useState(""); // State for username
@@ -8,6 +11,9 @@ const LoginPage = () => {
   const [message, setMessage] = useState(""); // State for messages
   const [isSuccess, setIsSuccess] = useState(false); // State for success or failure
   const navigate = useNavigate(); // For navigation
+  // const dispatch = useDispatch();
+  // const token = useSelector((state) => state.token.value);
+
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
@@ -27,6 +33,7 @@ const LoginPage = () => {
       if (response.ok && data.success) {
         // Save user data and token in localStorage
         localStorage.setItem("office_token", data.data.token);
+        // dispatch(setToken(data.data.token))
         setMessage("Login successful!");
         setIsSuccess(true);
 

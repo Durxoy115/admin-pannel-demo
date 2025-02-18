@@ -8,18 +8,21 @@ import { CgNotes } from "react-icons/cg";
 import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const Dashboard = () => {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage()
+  console.log(token)
   // Fetch client data from API
   const fetchClients = () => {
-    fetch("https://admin.zgs.co.com/client/", {
+    fetch(`${url}/client/`, {
       headers: {
-        Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+        Authorization: `Token ${token}`,
       },
     })
       .then((response) => response.json())
