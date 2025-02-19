@@ -2,18 +2,21 @@ import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const SubAdmin = () => {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const navigate = useNavigate();
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("https://admin.zgs.co.com/auth/user/", {
+      const response = await fetch(`${url}/auth/user/`, {
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
       const data = await response.json();
@@ -26,6 +29,7 @@ const SubAdmin = () => {
       console.error("Error fetching users:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchUsers();
@@ -43,10 +47,10 @@ const SubAdmin = () => {
     if (!selectedUserId) return;
     
     try {
-      const response = await fetch(`https://admin.zgs.co.com/auth/user/?user_id=${selectedUserId}`, {
+      const response = await fetch(`${url}/auth/user/?user_id=${selectedUserId}`, {
         method: "DELETE",
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
 

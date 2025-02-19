@@ -2,18 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CiEdit } from "react-icons/ci";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import useToken from "../hooks/useToken";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const navigate = useNavigate();
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("https://admin.zgs.co.com/service/", {
+      const response = await fetch(`${url}/service/`, {
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
       const data = await response.json();
@@ -54,11 +57,11 @@ const Products = () => {
 
     try {
       const response = await fetch(
-        `https://admin.zgs.co.com/service/?service_id=${selectedProductId}`,
+        `${url}/service/?service_id=${selectedProductId}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
         }
       );

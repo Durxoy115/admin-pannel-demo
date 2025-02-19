@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TfiPlus } from 'react-icons/tfi';
 import { IoArrowBack } from "react-icons/io5";
-
+import useToken from "../hooks/useToken";
 
 
 const EditUserProfile = () => {
@@ -11,17 +11,19 @@ const EditUserProfile = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [imagePreview, setImagePreview] = useState(null);
+    const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
     // const [message, setMessage] = useState("");
     // const [open, setOpen] = useState(true)
     
     useEffect(() => {
         const fetchClientDetails = async () => {
             try {
-                const response = await fetch(`https://admin.zgs.co.com/auth/user/?user_id=${id}`, {
+                const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: 'Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466',
+                        Authorization: `Token ${token}`,
                     },
                 });
                 const data = await response.json();
@@ -79,10 +81,10 @@ const EditUserProfile = () => {
         }
 
         try {
-            const response = await fetch(`https://admin.zgs.co.com/auth/user/?user_id=${id}`, {
+            const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
                 method: 'PUT',
                 headers: {
-                    Authorization: 'Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466',
+                    Authorization: `Token ${token}`,
                 },
                 body: formData,
             });

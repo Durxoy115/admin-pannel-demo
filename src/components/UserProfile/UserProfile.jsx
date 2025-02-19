@@ -5,21 +5,24 @@ import SubAdmin from "../SubAdmin/SubAdmin";
 import Products from "../Products/Products";
 import AddressBook from "../AddressBook/AddressBook";
 import SupportContactList from "../SupportContactList/SupportContactList";
-import LogOut from "../LogOut/LogOut";
+
+import useToken from "../hooks/useToken";
 
 const MyProfile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("https://admin.zgs.co.com/auth/profile/", {
+        const response = await fetch(`${url}/auth/profile/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
         });
 
@@ -133,7 +136,7 @@ const MyProfile = () => {
       <Products></Products>
       <AddressBook></AddressBook>
       <SupportContactList></SupportContactList>
-      <LogOut></LogOut>
+    
     </div>
   );
 };

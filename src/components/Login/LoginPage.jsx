@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import { useSelector, useDispatch } from 'react-redux'
 // import { getToken, setToken } from '../../Redux/TokenSlice'
 import "./LoginPage.css";
+import useToken from "../hooks/useToken";
 
 
 const LoginPage = () => {
@@ -11,6 +12,8 @@ const LoginPage = () => {
   const [message, setMessage] = useState(""); // State for messages
   const [isSuccess, setIsSuccess] = useState(false); // State for success or failure
   const navigate = useNavigate(); // For navigation
+  const [url,getTokenLocalStorage] = useToken();
+  // const token = getTokenLocalStorage()
   // const dispatch = useDispatch();
   // const token = useSelector((state) => state.token.value);
 
@@ -19,7 +22,7 @@ const LoginPage = () => {
     e.preventDefault(); // Prevent default form submission
 
     try {
-      const response = await fetch("https://admin.zgs.co.com/auth/user/login/", {
+      const response = await fetch(`${url}/auth/user/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

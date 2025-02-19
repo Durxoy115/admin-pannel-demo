@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const EditCompanyAddress = () => {
   const [formData, setFormData] = useState({
@@ -13,14 +14,16 @@ const EditCompanyAddress = () => {
   
   const { id } = useParams(); 
   const navigate = useNavigate();
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
     // Fetch existing company address data based on the id
     const fetchAddress = async () => {
       try {
-        const response = await fetch(`https://admin.zgs.co.com/company/billing-address/?billing_address_id=${id}`, {
+        const response = await fetch(`${url}/company/billing-address/?billing_address_id=${id}`, {
           headers: {
-            "Authorization": "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            "Authorization": `Token ${token}`,
           },
         });
         const data = await response.json();
@@ -46,12 +49,12 @@ const EditCompanyAddress = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `https://admin.zgs.co.com/company/billing-address/?billing_address_id=${id}`,
+        `${url}/company/billing-address/?billing_address_id=${id}`,
         {
           method: "PUT", // Change to PUT for updating
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            "Authorization": `${token}`,
           },
           body: JSON.stringify(formData),
         }

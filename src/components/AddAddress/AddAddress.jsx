@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const AddAddress = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ const AddAddress = () => {
     company_address: "",
   });
   const navigate = useNavigate();
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,12 +23,12 @@ const AddAddress = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        "https://admin.zgs.co.com/company/billing-address/",
+        `${url}/company/billing-address/`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
           body: JSON.stringify(formData),
         }

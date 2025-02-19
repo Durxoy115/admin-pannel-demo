@@ -16,7 +16,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [url,getTokenLocalStorage] = useToken();
-  const token = getTokenLocalStorage()
+  const token = getTokenLocalStorage();
   console.log(token)
   // Fetch client data from API
   const fetchClients = () => {

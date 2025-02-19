@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import useToken from "../hooks/useToken";
 
 const AddressBook = () => {
   const [addresses, setAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();;
 
   const fetchAddress = async () => {
     try {
       const response = await fetch(
-        "https://admin.zgs.co.com/company/billing-address/",
+        `${url}/company/billing-address/`,
         {
           headers: {
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
         }
       );
@@ -45,10 +48,10 @@ const AddressBook = () => {
     if(!selectedAddressId)
       return;
     try{
-      const response = await fetch (`https://admin.zgs.co.com/company/billing-address/?billing_address_id=${selectedAddressId}`,{
+      const response = await fetch (`${url}/company/billing-address/?billing_address_id=${selectedAddressId}`,{
         method: "DELETE",
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
       if(response.ok) {

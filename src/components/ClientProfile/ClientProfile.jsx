@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const ClientProfile = () => {
   const { Id } = useParams(); 
   const navigate = useNavigate();
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const [clientData, setClientData] = useState({
     name: "",
@@ -20,9 +23,9 @@ const ClientProfile = () => {
   useEffect(() => {
     const fetchClientDetails = async () => {
       try {
-        const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${Id}`, {
+        const response = await fetch(`${url}/client/?client_id=${Id}`, {
           headers: {
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
         });
 
@@ -51,11 +54,11 @@ const ClientProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://admin.zgs.co.com/client/?client_id=${Id}`, {
+      const response = await fetch(`${url}/client/?client_id=${Id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
         body: JSON.stringify(clientData),
       });

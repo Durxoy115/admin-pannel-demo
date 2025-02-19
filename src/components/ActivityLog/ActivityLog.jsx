@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
+import useToken from "../hooks/useToken";
 
 const ActivityLog = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
-    fetch("https://admin.zgs.co.com/activity/log/", {
+    fetch(`${url}/activity/log/`, {
       headers: {
-        Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+        Authorization: `Token ${token}`,
       },
     })
       .then((response) => {

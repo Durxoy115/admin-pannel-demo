@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import useToken from "../hooks/useToken";
 
 const SupportContactList = () => {
     const [contacts, setContact] = useState([]);
   const navigate = useNavigate();
-
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
   const fetchAddress = async () => {
     try {
       const response = await fetch(
-        "https://admin.zgs.co.com/company/support-contact/",
+        `${url}/company/support-contact/`,
         {
           headers: {
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
         }
       );

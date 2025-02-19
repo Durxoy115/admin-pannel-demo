@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import useToken from "../hooks/useToken";
 
 const OrderAdd = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const OrderAdd = () => {
     client_id: "",
     product_information: "",
   });
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const navigate = useNavigate();
 
@@ -27,11 +30,11 @@ const OrderAdd = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://admin.zgs.co.com/service/order/", {
+      const response = await fetch(`${url}/service/order/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
         body: JSON.stringify(formData),
       });

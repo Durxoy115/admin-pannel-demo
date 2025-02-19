@@ -8,6 +8,7 @@ import { HiOutlineDocumentCurrencyDollar } from "react-icons/hi2";
 import { CiViewList } from "react-icons/ci";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { CiLogout } from "react-icons/ci";
+import useToken from "../hooks/useToken";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -15,16 +16,37 @@ const Header = () => {
     username: "",
     userType: "",
   });
+  const [url, getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData?.data?.user) {
-      setUserDetails({
-        username: userData.data.user.username,
-        userType: userData.data.user.user_type.name,
-      });
-    }
-  }, []);
+    // Fetch user details from the API endpoint
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch("https://admin.zgs.co.com/auth/profile/", {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+          
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserDetails({
+            username: data?.data?.username, 
+            userType: data?.data?.user_type?.name, 
+          });
+        } else {
+          console.error("Failed to fetch user details");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [token]); 
+
   const handleProfile = () => {
     navigate("/profile");
   };
@@ -32,30 +54,27 @@ const Header = () => {
     navigate("/activity-log");
   };
   const handleHomePage = () => {
-    navigate("/dashboard")
+    navigate("/dashboard");
   };
   const handleMessage = () => {
-    navigate("/message")
+    navigate("/message");
   };
   const handlePaymentHistory = () => {
-    navigate("/payment-history")
+    navigate("/payment-history");
   };
   const handleOrderList = () => {
-    navigate("/order-list")
+    navigate("/order-list");
   };
   const handleChangePassword = () => {
-    navigate("/change-password")
+    navigate("/change-password");
   };
   const handleLogOut = async () => {
     try {
-      const response = await fetch(
-        "https://admin.zgs.co.com/auth/user/logout/",
-        {
-          headers: {
-            Authorization: "Token e004bb719dfa12460e620cca2985f1ae6e8b23eb",
-          },
-        }
-      );
+      const response = await fetch(`${url}/auth/user/logout/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -76,7 +95,7 @@ const Header = () => {
       {/* Logo Section */}
       <div className="w-20">
         <img
-        onClick={handleHomePage}
+          onClick={handleHomePage}
           src="/src/assets/Images/Images-nav/logo-image.jpg"
           alt="Company Logo"
           className="h-12 w-full  ml-24"
@@ -104,7 +123,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                  onClick={handleActivityLog}
+                    onClick={handleActivityLog}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -113,14 +132,14 @@ const Header = () => {
                   </button>
                 )}
               </MenuItem>
-              <span className=" items-center ml-4 font-bold">
+              <span className="items-center ml-4 font-bold">
                 {userDetails.username}
               </span>
               <hr className="border-t border-gray-200 my-1" />
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={ handleProfile}
+                    onClick={handleProfile}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -133,7 +152,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                  onClick={handleMessage}
+                    onClick={handleMessage}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -145,7 +164,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                  onClick={handlePaymentHistory}
+                    onClick={handlePaymentHistory}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -158,7 +177,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                  onClick={handleOrderList}
+                    onClick={handleOrderList}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -170,7 +189,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                  onClick={handleChangePassword}
+                    onClick={handleChangePassword}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}

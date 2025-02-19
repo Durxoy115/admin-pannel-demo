@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useParams, useNavigate } from "react-router-dom";
+import useToken from ".././components/hooks/useToken"
 
 const EditService = () => {
   const { id } = useParams();
@@ -16,17 +17,19 @@ const EditService = () => {
     image: null,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   // Fetch existing service data
   useEffect(() => {
     const fetchServiceData = async () => {
       try {
         const response = await fetch(
-          `https://admin.zgs.co.com/service/?service_id=${id}`,
+          `${url}/service/?service_id=${id}`,
           {
             method: "GET",
             headers: {
-              Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+              Authorization: `Token ${token}`,
             },
           }
         );
@@ -87,11 +90,11 @@ const EditService = () => {
 
     try {
       const response = await fetch(
-        `https://admin.zgs.co.com/service/?service_id=${id}`,
+        `${url}/service/?service_id=${id}`,
         {
           method: "PUT",
           headers: {
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization:  `Token ${token}`,
           },
           body: formData,
         }

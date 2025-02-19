@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
+import useToken from "../hooks/useToken";
 
 const AddNewClient = () => {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState(null);
   const [image, setImage] = useState(null);
   const [document, setDocument] = useState(null);
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   // const handleSave = async (formData) => {
   //   formData.image = image;
@@ -52,11 +55,11 @@ const AddNewClient = () => {
     formData.append("contact_doc", document);
 
     try {
-      const response = await fetch("https://admin.zgs.co.com/client/", {
+      const response = await fetch(`${url}/client/`, {
         method: "POST",
         headers: {
           // "Content-Type": "application/json",
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
         body: formData,
       });

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const EditSubAdmin = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
   const [userData, setUserData] = useState({
     first_name: "",
     last_name: "",
@@ -20,10 +22,10 @@ const EditSubAdmin = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await fetch(
-          `https://admin.zgs.co.com/auth/user/?user_id=${id}`,
+          `${url}/auth/user/?user_id=${id}`,
           {
             headers: {
-              Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+              Authorization: `Token ${token}`,
             },
           }
         );
@@ -53,12 +55,12 @@ const EditSubAdmin = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `https://admin.zgs.co.com/auth/user/?user_id=${id}`,
+        `${url}/auth/user/?user_id=${id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+            Authorization: `Token ${token}`,
           },
           body: JSON.stringify(userData),
         }

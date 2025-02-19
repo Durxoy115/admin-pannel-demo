@@ -3,10 +3,13 @@ import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const AddProductCard = () => {
   const [services, setServices] = useState([]);
   const navigate = useNavigate()
+  const [url,getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
   const [formData, setFormData] = useState({
     name: "",
     short_description: "",
@@ -17,14 +20,14 @@ const AddProductCard = () => {
     image: null,
   });
   console.log(services)
-  const apiUrl = "https://admin.zgs.co.com/service/";
+  const apiUrl = `${url}/service/`;
 
   // Fetch service data from API
   const fetchServices = async () => {
     try {
       const response = await axios.get(apiUrl, {
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
       setServices(response.data);
@@ -51,7 +54,7 @@ const AddProductCard = () => {
       const response = await axios.post(apiUrl, formdata, {
         headers: {
           //   "Content-Type": "multipart/form-data",
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       });
       setServices((prev) => [response.data, ...prev]); // Add new service to list
