@@ -33,7 +33,7 @@ const LoginPage = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
+      if (response.ok && data.success ) {
         // Save user data and token in localStorage
         localStorage.setItem("office_token", data.data.token);
         // dispatch(setToken(data.data.token))
@@ -44,7 +44,14 @@ const LoginPage = () => {
         setTimeout(() => {
           navigate("/dashboard");
         }, 1000);
-      } else {
+        
+      } 
+    //  else if(data.data.user_type.name !== "Admin"){
+    //     setMessage("Only Admin Can Login!!")
+    //  }
+      
+      
+      else {
         setIsSuccess(false);
         setMessage(data.message || "Login failed. Please try again.");
       }

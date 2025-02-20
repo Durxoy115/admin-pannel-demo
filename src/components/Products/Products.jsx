@@ -144,7 +144,7 @@ const Products = () => {
                 Delete
               </button>
               <button
-                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                className="bg-green-300 px-4 py-2 rounded-md hover:bg-green-400"
                 onClick={closeDeleteModal}
               >
                 Cancel
