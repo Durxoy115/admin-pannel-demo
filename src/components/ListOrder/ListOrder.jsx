@@ -2,22 +2,25 @@ import React, { useState, useEffect } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import useToken from "../hooks/useToken";
 
 const ListOrder = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState(null); // Store the order ID to delete
+  const [orderToDelete, setOrderToDelete] = useState(null);
   const navigate = useNavigate();
+  const [url, getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   const fetchOrders = () => {
-    fetch("https://admin.zgs.co.com/service/order/", {
+    fetch(`${url}/service/order/`, {
       headers: {
-        Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+        Authorization: `Token ${token}`,
       },
     })
       .then((response) => response.json())
@@ -40,7 +43,6 @@ const ListOrder = () => {
   };
 
   const handleDeleteOrder = (orderId) => {
-    // Open the modal and set the order ID to delete
     setOrderToDelete(orderId);
     setIsModalOpen(true);
   };
@@ -50,54 +52,60 @@ const ListOrder = () => {
       fetch(`https://admin.zgs.co.com/service/order/?order_id=${orderToDelete}`, {
         method: "DELETE",
         headers: {
-          Authorization: "Token 4bc2a75c04006d4e540a8b38f86612dc0b1da466",
+          Authorization: `Token ${token}`,
         },
       })
         .then((response) => {
           if (response.ok) {
-            // If the deletion is successful, fetch the updated list of orders
-            fetchOrders();
+            console.log("Order deleted successfully");
+            fetchOrders(); // Refresh the order list after deletion
           } else {
-            console.error("Error deleting order");
+            response.json().then((data) => {
+              console.error("Error deleting order:", data);
+            });
           }
         })
         .catch((error) => {
           console.error("Error deleting order:", error);
         })
         .finally(() => {
-          // Close the modal and reset the order to delete
           setIsModalOpen(false);
           setOrderToDelete(null);
         });
     }
   };
+  
+  
 
   const cancelDelete = () => {
-    // Close the modal and reset the order to delete
     setIsModalOpen(false);
     setOrderToDelete(null);
   };
+  const handleOrderDetails = (order_id) => {
+    navigate(`/order-details/${order_id}`)
+  }
 
   return (
     <div className="m-10">
       {/* Header Section */}
       <div className="bg-gray-900 text-white p-2 flex items-center justify-between rounded-t-lg">
         <h2 className="text-lg font-semibold">Order List</h2>
-        <div className="flex space-x-2 ml-60 ">
+        <div className="flex space-x-2 ml-60">
           <input
-            type=""
+            type="date"
             className="bg-white text-black px-2 py-1 rounded-md"
             placeholder="Start Date"
           />
           <input
-            type=""
+            type="date"
             className="bg-white text-black px-2 py-1 rounded-md"
             placeholder="End date"
           />
         </div>
-        <IoMdAddCircleOutline className="text-white text-xl mr-6" onClick={handleAddOrder}>
-          
-        </IoMdAddCircleOutline>
+        <IoMdAddCircleOutline
+          className="text-white text-2xl mr-6 cursor-pointer"
+          onClick={handleAddOrder}
+        />
       </div>
 
       {/* Table Section */}
@@ -106,7 +114,7 @@ const ListOrder = () => {
       ) : orders.length > 0 ? (
         <div className="overflow-x-auto rounded-lg shadow-md mt-6">
           <table className="table-auto w-full border-collapse">
-            <thead className=" text-black">
+            <thead className="text-black">
               <tr>
                 <th className="text-left px-4 py-2">Service Name</th>
                 <th className="text-left px-4 py-2">Order ID</th>
@@ -129,15 +137,14 @@ const ListOrder = () => {
                   <td className="text-left px-4 py-2">
                     {order.price} {order.currency}
                   </td>
-                  <td className="text-left px-4 py-2 ">
-                    {new Date(
-                      order.estimate_delivery_date
-                    ).toLocaleDateString()}
+                  <td className="text-left px-4 py-2">
+                    {new Date(order.estimate_delivery_date).toLocaleDateString()}
                   </td>
                   <td className="text-left px-4 py-2">{order.status}</td>
                   <td className="text-center px-4 py-2">
                     <div className="flex justify-center space-x-2">
-                      <FiEdit className="text-purple-500 hover:text-purple-700" />
+                      <FiEdit className="text-purple-500 hover:text-purple-700 cursor-pointer"
+                      onClick={() => handleOrderDetails(order.order_id)} />
                       <FiTrash2
                         className="text-red-500 hover:text-red-700 cursor-pointer"
                         onClick={() => handleDeleteOrder(order.order_id)}
@@ -160,7 +167,7 @@ const ListOrder = () => {
             <h3 className="text-lg font-semibold mb-4">
               Do you want to delete this order?
             </h3>
-            <div className="flex gap-4 justify-center items-center space-x-4">
+            <div className="flex gap-4 justify-center">
               <button
                 className="px-4 py-2 bg-green-300 rounded hover:bg-green-400"
                 onClick={cancelDelete}

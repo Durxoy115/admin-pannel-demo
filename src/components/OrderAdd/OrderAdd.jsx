@@ -11,6 +11,7 @@ const OrderAdd = () => {
     price: "",
     order_date: "",
     estimate_delivery_date: "",
+    delivery_date: "",
     client_id: "",
     product_information: "",
   });
@@ -118,6 +119,18 @@ const OrderAdd = () => {
               type="date"
               name="estimate_delivery_date"
               value={formData.estimate_delivery_date}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+               Delivery Date
+            </label>
+            <input
+              type="date"
+              name="delivery_date"
+              value={formData.delivery_date}
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-md"
             />

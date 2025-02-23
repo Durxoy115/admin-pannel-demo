@@ -55,8 +55,8 @@ const Dashboard = () => {
   const handleOpenModal = () => {
     navigate("/addnewclient");
   };
-  const handleOrderList = () => {
-    navigate("/order-list");
+  const handleInvoiceList = () => {
+    navigate("/invoice-list");
   };
   const handleClientProfile = (Id) => {
     navigate(`/client-profile/${Id}`)
@@ -82,7 +82,7 @@ const Dashboard = () => {
           <button className="text-xl text-white px-4 py-2 rounded-lg mr-2" onClick={handleOpenModal}>
             <LuCirclePlus />
           </button>
-          <button className="text-xl text-white px-4 py-2 rounded-lg mr-2" onClick={handleOrderList}>
+          <button className="text-xl text-white px-4 py-2 rounded-lg mr-2" onClick={handleInvoiceList}>
             <CgNotes  />
           </button>
           <button className="text-xl text-white px-4 py-2 rounded-lg">

@@ -11,7 +11,7 @@ import UserProfile from "./components/UserProfile/UserProfile";
 import ActivityLog from "./components/ActivityLog/ActivityLog";
 import Message from "./components/Message/Message";
 import PaymentHistory from "./components/PaymentHistory/PaymentHistory";
-import OrderList from "./components/OrderList/OrderList";
+// import OrderList from "./components/OrderList/OrderList";
 import ChangePassword from "./components/ChangePassword/ChangePassword";
 import EditUserProfile from "./components/EditUserProfile/EditUserProfile";
 import EditSubAdmin from "./components/EditSubAdmin/EditSubAdmin";
@@ -22,6 +22,10 @@ import EditService from "./EditService/EditService";
 import EditCompanyAddress from "./components/EditCompanyAddress/EditCompanyAddress";
 import ListOrder from "./components/ListOrder/ListOrder";
 import OrderAdd from "./components/OrderAdd/OrderAdd";
+import OrderDetails from "./components/OrderDetails/OrderDetails";
+import InvoiceList from "./components/InvoiceList/InvoiceList";
+// import InvoiceEdit from "./components/InvoiceEdit/InvoiceEdit";
+
 // import Test from "./components/Test";
 
 const App = () => {
@@ -46,7 +50,7 @@ const App = () => {
                 <Route path="activity-log" element={<ActivityLog></ActivityLog>} />
                 <Route path="message" element={<Message></Message>} />
                 <Route path="payment-history" element={<PaymentHistory></PaymentHistory>} />
-                <Route path="orderlist" element={<OrderList></OrderList>} />
+                {/* <Route path="orderlist" element={<OrderList></OrderList>} /> */}
                 <Route path="change-password" element={<ChangePassword></ChangePassword>} />
                 <Route path="edit-user-profile/:id" element={<EditUserProfile></EditUserProfile>} />
                 <Route path="edit-user/:id" element={<EditSubAdmin></EditSubAdmin>} />
@@ -57,6 +61,9 @@ const App = () => {
                 <Route path="edit-address/:id" element={<EditCompanyAddress></EditCompanyAddress>} />
                 <Route path="order-list" element={<ListOrder></ListOrder>} />
                 <Route path="add-order" element={<OrderAdd></OrderAdd>} />
+                <Route path="order-details/:orderId" element={<OrderDetails></OrderDetails>} />
+                <Route path="invoice-list" element={<InvoiceList></InvoiceList>} />
+                {/* <Route path="edit-invoice" element={<InvoiceEdit></InvoiceEdit>} /> */}
                 
 
                 {/* <Route path="test" element={<Test></Test>} /> */}
