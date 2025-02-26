@@ -24,7 +24,8 @@ import ListOrder from "./components/ListOrder/ListOrder";
 import OrderAdd from "./components/OrderAdd/OrderAdd";
 import OrderDetails from "./components/OrderDetails/OrderDetails";
 import InvoiceList from "./components/InvoiceList/InvoiceList";
-// import InvoiceEdit from "./components/InvoiceEdit/InvoiceEdit";
+import InvoiceEdit from "./components/InvoiceEdit/InvoiceEdit";
+import CreateInvoice from "./components/CreateInvoice/CreateInvoice";
 
 // import Test from "./components/Test";
 
@@ -63,7 +64,8 @@ const App = () => {
                 <Route path="add-order" element={<OrderAdd></OrderAdd>} />
                 <Route path="order-details/:orderId" element={<OrderDetails></OrderDetails>} />
                 <Route path="invoice-list" element={<InvoiceList></InvoiceList>} />
-                {/* <Route path="edit-invoice" element={<InvoiceEdit></InvoiceEdit>} /> */}
+                <Route path="edit-invoice" element={<InvoiceEdit></InvoiceEdit>} />
+                <Route path="create-invoice" element={<CreateInvoice></CreateInvoice>} />
                 
 
                 {/* <Route path="test" element={<Test></Test>} /> */}

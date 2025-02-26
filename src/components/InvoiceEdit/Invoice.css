@@ -1,0 +1,147 @@
+.invoiceContainer {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .invoiceHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+  }
+  
+  .invoiceTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+    margin: 0;
+  }
+  
+  .invoiceNumber {
+    font-size: 16px;
+    color: #000;
+  }
+  
+  .invoiceContent {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .leftSection, .rightSection {
+    width: 48%;
+  }
+  
+  .companyLogo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  
+  .sectionTitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    color: #000;
+  }
+  
+  .text {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #333;
+  }
+  
+  .servicesTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .tableHeader {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .tableRow {
+    border: 1px solid #ccc;
+  }
+  
+  .tableCell {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .totals {
+    margin-top: 20px;
+    text-align: right;
+  }
+  
+  .totalText, .discountText {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #333;
+  }
+  
+  .totalAmountText, .discountAmount, .vatAmount {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    font-size: 14px;
+    margin: 5px 0;
+  }
+  
+  .discountAmount, .vatAmount {
+    color: #ff0000;
+  }
+  
+  .totalLabel {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #000;
+  }
+  
+  .finalTotal {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px dashed #ccc;
+    padding-top: 10px;
+  }
+  
+  .signatureText {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+  }
+  
+  .footer {
+    margin-top: 20px;
+    text-align: right;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .footerText {
+    margin: 5px 0;
+  }
