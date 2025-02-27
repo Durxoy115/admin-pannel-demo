@@ -2,10 +2,17 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import useToken from "../hooks/useToken";
+import { useNavigate } from "react-router-dom";
 
 const CreateInvoice = () => {
   const [services, setServices] = useState();
-  const [pdf, setPdf] = useState();
+  const [defaultService, setdefaultService] = useState();
+  const [vat, setVat] = useState();
+  const [discount, setDiscount] = useState();
+  const navigate = useNavigate()
+  // const [item, setItem] = useState(1);
+  // const [pdf, setPdf] = useState();
+
   const [formData, setFormData] = useState({
     service_name: "",
     company_logo: null,
@@ -19,17 +26,9 @@ const CreateInvoice = () => {
     payment_status: "",
     client_email: "",
     client_phone: "",
+    sub_total: 0,
     total_amount: 0,
-    services: [
-      {
-        service_name: "",
-        quantity: 1,
-        currency: "USD",
-        rate: "Monthly",
-        duration: 1,
-        total_amount: 0,
-      },
-    ],
+    services: [],
     discount: 0,
     vat: 0,
   });
@@ -48,6 +47,24 @@ const CreateInvoice = () => {
         if (response.ok) {
           const data = await response.json();
           setServices(data?.data);
+          if (data.data.length>0){
+            setFormData((prev) => ({ ...prev, 'service_name': data?.data[0]?.name }));
+            setFormData((prev) => ({ ...prev, 
+              services : [
+                {
+                  service_name: data?.data[0]?.name,
+                  quantity: 0,
+                  currency: "USD",
+                  rate: "Monthly",
+                  duration: 0,
+                  price: 0,
+                  total_amount: 0,
+                },
+              ],
+              
+             }));
+             setdefaultService(data.data[0].name)
+          }
         } else {
           console.error("Failed to fetch user data");
         }
@@ -58,26 +75,40 @@ const CreateInvoice = () => {
     fetchServiceData();
   }, []);
 
-  const [url, getTokenLocalStorage] = useToken();
-  const token = getTokenLocalStorage();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
-       
-    console.log(name, formData)
-  };
+    const [url, getTokenLocalStorage] = useToken();
+    const token = getTokenLocalStorage();
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+
+      setFormData((prev) => ({ ...prev, [name]: value }));
+
+      console.log(name, formData);
+    };
 
   const handleServiceChange = (index, field, value) => {
     const updatedServices = [...formData.services];
     updatedServices[index][field] = value;
-    updatedServices[index].totalAmount =
-      updatedServices[index].quantity * updatedServices[index].duration * 200; // Sample calculation
+    updatedServices[index].total_amount = updatedServices[index].quantity * updatedServices[index].price;
+    const sub_total=formData.services.reduce(
+      (sum, service) => sum + service.total_amount,
+      0
+    );
     setFormData((prev) => ({
       ...prev,
       services: updatedServices,
     }));
+    setFormData((prev) => ({ ...prev, 'sub_total': sub_total }));
+    console.log("object", formData)
+    setFormData((prev) => ({ ...prev, 'vat': vat }));
+    console.log("object", formData)
+    setFormData((prev) => ({ ...prev, 'discount': discount }));
+    console.log("object", formData)
+    setFormData((prev) => ({ ...prev, 'total_amount': sub_total }));
+    console.log("object", formData)
+   
   };
 
   const addServiceItem = () => {
@@ -86,12 +117,13 @@ const CreateInvoice = () => {
       services: [
         ...prev.services,
         {
-          serviceName: "",
-          quantity: 1,
+          service_name: defaultService,
+          quantity: 0,
           currency: "USD",
           rate: "Monthly",
-          duration: 1,
-          totalAmount: 0,
+          duration: 0,
+          price: 0,
+          total_amount: 0,
         },
       ],
     }));
@@ -104,7 +136,7 @@ const CreateInvoice = () => {
 
   const calculateTotals = () => {
     const subTotal = formData.services.reduce(
-      (sum, service) => sum + service.totalAmount,
+      (sum, service) => sum + service.total_amount,
       0
     );
     const total =
@@ -136,7 +168,6 @@ const CreateInvoice = () => {
     // formDataPayload.append("discount", formData.discount);
     // formDataPayload.append("vat", formData.vat);
 
-
     // Append services (you might need to serialize this as JSON or handle it differently based on server expectations)
     formDataPayload.append("services", JSON.stringify(formData.services));
 
@@ -146,15 +177,19 @@ const CreateInvoice = () => {
     }
 
     try {
-      await axios.post(`${url}/service/invoice/`, formData, {
+      const response = await axios.post(`${url}/service/invoice/`, formData, {
         headers: {
           Authorization: `Token ${token}`,
           "Content-Type": "multipart/form-data", // Change to multipart/form-data for file uploads
         },
       });
-   
-      alert("Invoice created successfully!");
-     
+      if (response.data.success){
+        alert("Invoice created successfully!");
+      }
+      else{
+        alert(response.data.message);
+      }
+      console.log("response", response.data.success)
     } catch (error) {
       console.error(
         "Error creating invoice:",
@@ -169,53 +204,61 @@ const CreateInvoice = () => {
 
   const { subTotal, total } = calculateTotals();
 
-//  const handlePDFView = () =>{
-//   useEffect(() => {
-//     const fetchPdfPreview = async () => {
-//       try {
-//         const response = await fetch("http://192.168.0.131:8001/service/invoice/14/", {
-//           method: "GET",
-//           headers: {
-//             "Content-Type": "application/json",
-//             // Authorization: `Token ${token}`,
-//           },
-//         });
+  //  const handlePDFView = () =>{
+  //   useEffect(() => {
+  //     const fetchPdfPreview = async () => {
+  //       try {
+  //         const response = await fetch("http://192.168.0.131:8001/service/invoice/14/", {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             // Authorization: `Token ${token}`,
+  //           },
+  //         });
 
-//         if (response.ok) {
-//           const data = await response.json();
-//           setPdf(data?.data);
-//         } else {
-//           console.error("Failed to fetch user data");
-//         }
-//       } catch (error) {
-//         console.error("Error fetching user data:", error);
-//       }
-//     };
-//     fetchPdfPreview();
-//   }, []);
-//  }
+  //         if (response.ok) {
+  //           const data = await response.json();
+  //           setPdf(data?.data);
+  //         } else {
+  //           console.error("Failed to fetch user data");
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching user data:", error);
+  //       }
+  //     };
+  //     fetchPdfPreview();
+  //   }, []);
+  //  }
 
- const previewInvoice = async (invoiceId) => {
-  try {
-      const response = await fetch("http://192.168.0.131:8002/service/invoice/14/", {
+  const previewInvoice = async (invoiceId) => {
+    try {
+      const response = await fetch(
+        "http://192.168.0.131:8002/service/invoice/14/",
+        {
           method: "GET",
           headers: {
-              // "Accept": "application/pdf",
+            // "Accept": "application/pdf",
           },
-      });
+        }
+      );
 
       if (!response.ok) {
-          throw new Error("Failed to load the invoice.");
+        throw new Error("Failed to load the invoice.");
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank"); // Opens in a new tab
-  } catch (error) {
+    } catch (error) {
       console.error("Error previewing invoice:", error);
-  }
-};
- 
+    }
+  };
+
+
+  // const handleCreateInvoice = () => {
+  //   navigate("/invoice-list")
+  // }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -227,11 +270,13 @@ const CreateInvoice = () => {
 
       <div className="grid grid-cols-3 gap-6">
         <select
+          
           type="text"
           id="service_name"
           name="service_name"
           className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
+          required
         >
           {services?.map((e, key) => {
             return (
@@ -252,6 +297,7 @@ const CreateInvoice = () => {
               }))
             }
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+            required
           />
         </div>
         <div>
@@ -261,6 +307,7 @@ const CreateInvoice = () => {
             value={formData.company_name}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+            required
           />
         </div>
         <div>
@@ -270,6 +317,7 @@ const CreateInvoice = () => {
             value={formData.billing_address}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -279,6 +327,7 @@ const CreateInvoice = () => {
             value={formData.client_id}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -288,6 +337,7 @@ const CreateInvoice = () => {
             value={formData.website_url}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div className="col-span-3">
@@ -297,6 +347,7 @@ const CreateInvoice = () => {
             value={formData.address}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -306,6 +357,7 @@ const CreateInvoice = () => {
             value={formData.client_name}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -315,6 +367,7 @@ const CreateInvoice = () => {
             value={formData.date}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -324,6 +377,7 @@ const CreateInvoice = () => {
             value={formData.payment_status}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -333,6 +387,7 @@ const CreateInvoice = () => {
             value={formData.client_email}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
         <div>
@@ -342,6 +397,7 @@ const CreateInvoice = () => {
             value={formData.client_phone}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
           />
         </div>
       </div>
@@ -355,7 +411,9 @@ const CreateInvoice = () => {
               <th className="py-2 px-4">Quantity</th>
               <th className="py-2 px-4">Currency</th>
               <th className="py-2 px-4">Rate</th>
+
               <th className="py-2 px-4">Time Duration</th>
+              <th className="py-2 px-4">Price</th>
               <th className="py-2 px-4">Total Amount</th>
               <th className="py-2 px-4">Action</th>
             </tr>
@@ -370,10 +428,14 @@ const CreateInvoice = () => {
                     id="service_name"
                     name="service_name"
                     className="w-full px-4 py-2 border rounded-lg"
+                    onChange={(e) =>
+                      handleServiceChange(index, "service_name", e.target.value)
+                    }
+                    required
                   >
                     {services?.map((e, key) => {
                       return (
-                        <option key={key} value={e.id}>
+                        <option key={key} value={e.name}>
                           {e.name}
                         </option>
                       );
@@ -392,6 +454,7 @@ const CreateInvoice = () => {
                       )
                     }
                     className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
                   />
                 </td>
                 <td className="py-2 px-4">
@@ -401,6 +464,7 @@ const CreateInvoice = () => {
                       handleServiceChange(index, "currency", e.target.value)
                     }
                     className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
                   >
                     {["USD", "Dollar", "Rupee", "Euro", "BDT"].map(
                       (currency) => (
@@ -418,6 +482,7 @@ const CreateInvoice = () => {
                       handleServiceChange(index, "rate", e.target.value)
                     }
                     className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
                   >
                     {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
                       (rate) => (
@@ -440,10 +505,27 @@ const CreateInvoice = () => {
                       )
                     }
                     className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
                   />
                 </td>
                 <td className="py-2 px-4">
-                  ${service.total_amount.toFixed(2)}
+                  <input
+                    type="number"
+                    value={service.price}
+                    onChange={(e) =>
+                      handleServiceChange(
+                        index,
+                        "price",
+                        parseInt(e.target.value, 10)
+                      )
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </td>
+
+                <td className="py-2 px-4">
+                  ${service?.total_amount?.toFixed(2)}
                 </td>
                 <td className="py-2 px-4">
                   <button
@@ -468,12 +550,12 @@ const CreateInvoice = () => {
       </div>
 
       <div className="text-right space-y-2 border-t border-gray-200 pt-4">
-        <p>Sub Total: ${subTotal.toFixed(2)}</p>
+        <p>Sub Total: ${formData?.sub_total?.toFixed(2)}</p>
         <p className="text-red-500">
-          Discount: - ${formData.discount.toFixed(2)}
+          Discount: - ${formData?.discount?.toFixed(2)}
         </p>
         <p>VAT: {formData.vat}%</p>
-        <p className="text-xl font-semibold">TOTAL: ${total.toFixed(2)}</p>
+        <p className="text-xl font-semibold">TOTAL: ${formData?.total_amount?.toFixed(2)}</p>
       </div>
 
       <div className="flex justify-end space-x-4">
@@ -487,7 +569,9 @@ const CreateInvoice = () => {
         <button
           type="submit"
           className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          // onClick={handleCreateInvoice}
         >
+          
           Save
         </button>
         <button
