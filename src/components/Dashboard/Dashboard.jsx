@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { LuCirclePlus } from "react-icons/lu";
-import { AiOutlineEye } from "react-icons/ai";
-import { AiOutlineEdit } from "react-icons/ai";
-import { TbNotes } from "react-icons/tb";
+import { AiOutlineEye, AiOutlineEdit } from "react-icons/ai";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { CgNotes } from "react-icons/cg";
 import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
+import { GrNotes } from "react-icons/gr";
+import { FaTrash } from "react-icons/fa";
+
+
 import { useNavigate, useLocation } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
 const Dashboard = () => {
   const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteMode, setDeleteMode] = useState("");
+  const [clientToDelete, setClientToDelete] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
-  const [url,getTokenLocalStorage] = useToken();
+  const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
-  console.log(token)
-  // Fetch client data from API
+
   const fetchClients = () => {
     fetch(`${url}/client/`, {
       headers: {
@@ -28,7 +36,8 @@ const Dashboard = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          setClients(data.data); // Update the client list
+          setClients(data.data);
+          setFilteredClients(data.data); // Initialize filteredClients
         } else {
           console.error("Error fetching clients: ", data.message);
         }
@@ -40,138 +49,226 @@ const Dashboard = () => {
       });
   };
 
-  // Fetch clients on load or when "reload" signal is passed from AddNewClient
   useEffect(() => {
     const shouldReload = location.state?.reload;
     if (shouldReload) {
-      fetchClients(); // Reload data
-      navigate(location.pathname, { replace: true, state: {} }); // Clear reload signal
+      fetchClients();
+      navigate(location.pathname, { replace: true, state: {} });
     } else {
       fetchClients();
     }
   }, [location.state]);
 
-  // Navigate to AddNewClient page
-  const handleOpenModal = () => {
-    navigate("/addnewclient");
+  const handleOpenModal = () => navigate("/addnewclient");
+  const handleInvoiceList = () => navigate("/invoice-list");
+  const handleClientProfile = (Id) => navigate(`/client-profile/${Id}`);
+
+  const toggleClientSelection = (clientId) => {
+    setSelectedClients((prev) =>
+      prev.includes(clientId)
+        ? prev.filter((id) => id !== clientId)
+        : [...prev, clientId]
+    );
   };
-  const handleInvoiceList = () => {
-    navigate("/invoice-list");
+
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    const filtered = clients.filter((client) =>
+      client.name?.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredClients(filtered);
   };
-  const handleClientProfile = (Id) => {
-    navigate(`/client-profile/${Id}`)
-  }
+
+  const openDeleteModal = (mode, clientId = null) => {
+    setDeleteMode(mode);
+    setClientToDelete(clientId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(false);
+
+    if (deleteMode === "single" && clientToDelete) {
+      deleteClient(clientToDelete);
+    } else if (deleteMode === "bulk") {
+      deleteMultipleClients();
+    }
+  };
+
+  const deleteClient = (clientId) => {
+    fetch(`${url}/client/?client_id=${clientId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Token ${token}` },
+    })
+      .then(() => fetchClients())
+      .catch((err) => console.error("Error deleting client:", err));
+  };
+
+  const deleteMultipleClients = () => {
+    const deletePromises = selectedClients.map((clientId) =>
+      fetch(`${url}/client/?client_id=${clientId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Token ${token}` },
+      })
+    );
+
+    Promise.all(deletePromises)
+      .then(() => {
+        setSelectedClients([]);
+        fetchClients();
+      })
+      .catch((err) => console.error("Error deleting clients:", err));
+  };
 
   return (
     <div>
-      {/* Header Section */}
       <div>
-        <h1 className="text-3xl font-semibold mt-6 ml-28">Clients Information</h1>
+        <h1 className="text-3xl font-semibold mt-6 ml-28">
+          Clients Information
+        </h1>
       </div>
 
-      {/* Toolbar Section */}
       <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center ml-28 mr-28 mt-4 h-16">
         <p>Clients Details</p>
         <input
           type="text"
           placeholder="Search..."
+          value={searchQuery}
+          onChange={handleSearch}
           className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 ml-4 mr-96"
         />
-
         <div className="ml-96">
-          <button className="text-xl text-white px-4 py-2 rounded-lg mr-2" onClick={handleOpenModal}>
+          <button
+            className="text-xl text-white px-4 py-2 rounded-lg mr-2"
+            onClick={handleOpenModal}
+          >
             <LuCirclePlus />
           </button>
-          <button className="text-xl text-white px-4 py-2 rounded-lg mr-2" onClick={handleInvoiceList}>
-            <CgNotes  />
+          <button
+            className="text-xl text-white px-4 py-2 rounded-lg mr-2"
+            onClick={handleInvoiceList}
+          >
+            <CgNotes />
           </button>
-          <button className="text-xl text-white px-4 py-2 rounded-lg">
+          <button
+            className="text-xl text-white px-4 py-2 rounded-lg"
+            onClick={fetchClients}
+          >
             <IoMdRefresh />
           </button>
         </div>
         <button className="text-xl text-white px-4 py-2 rounded-lg">
           <BsDownload />
         </button>
+
+        {selectedClients.length > 0 && (
+          <button
+            className="ml-4 text-white bg-red-600 px-2 py-2 rounded-lg"
+            onClick={() => openDeleteModal("bulk")}
+          >
+            <FaTrash />
+          </button>
+        )}
       </div>
 
-      {/* Content Section */}
       {isLoading ? (
         <p className="text-center mt-8">Loading...</p>
-      ) : clients.length > 0 ? (
+      ) : filteredClients.length > 0 ? (
         <div className="overflow-x-auto bg-white rounded-lg shadow-md mt-6 mx-28">
-  <table className="table-auto w-full border-collapse">
-    <thead className="bg-gray-800 text-white">
-      <tr>
-        <th className="text-left px-4 py-2">Client Name</th>
-        <th className="text-left px-4 py-2">Client ID</th>
-        <th className="text-left px-4 py-2">Mobile</th>
-        <th className="text-left px-4 py-2">Email</th>
-        <th className="text-left px-4 py-2">Company Name</th>
-        <th className="text-left px-4 py-2">Country</th>
-        <th className="text-center px-4 py-2">Status</th>
-        <th className="text-center px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {clients.map((client, index) => (
-        <tr
-          key={index}
-          className={`border-b ${
-            index % 2 === 0 ? "bg-gray-100" : "bg-white"
-          }`}
-        >
-          <td className="text-left px-4 py-2">
-            <img src={`https://admin.zgs.co.com${client?.photo}`} alt="client"
-            style={{
-              width:"20px",
-              height:"20px",
-              borderRadius: "50%",
-              display: "inline-flex",
-              marginRight: "5px", 
-            }}
-             />
-            {client.name || "N/A"}
-          </td>
-          <td className="text-left px-4 py-2">{client.client_id || "N/A"}</td>
-          <td className="text-left px-4 py-2">{client.contact || "N/A"}</td>
-          <td className="text-left px-4 py-2">{client.email || "N/A"}</td>
-          <td className="text-left px-4 py-2">{client.company_name || "N/A"}</td>
-          <td className="text-left px-4 py-2">{client.country || "N/A"}</td>
-          <td className="text-center px-4 py-2">
-            <span
-              className={`px-2 py-1 rounded-full text-sm ${
-                client.user_id.is_active
-                  ? "bg-green-200 text-green-800"
-                  : "bg-red-200 text-red-800"
-              }`}
-            >
-              {client.user_id.is_active ? "Active" : "Inactive"}
-            </span>
-          </td>
-          <td className="text-center px-4 py-2">
-            <div className="flex justify-center space-x-2">
-              <button className="p-2 bg-gray-50 text-black rounded-lg">
-                <AiOutlineEye />
-              </button>
-              <button className="p-2 bg-purple-100 text-black rounded-lg" onClick={() =>handleClientProfile(client.client_id)}>
-                <AiOutlineEdit />
-              </button>
-              <button className="p-2 bg-yellow-100 text-black rounded-lg">
-                <TbNotes />
-              </button>
-              <button className="p-2 bg-red-200 text-black rounded-lg">
-                <RiDeleteBin6Line />
-              </button>
-            </div>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+          <table className="table-auto w-full border-collapse">
+            <thead className="bg-gray-800 text-white">
+              <tr>
+                <th className="text-left px-4 py-2">Client Name</th>
+                <th className="text-left px-4 py-2">Client ID</th>
+                <th className="text-left px-4 py-2">Mobile</th>
+                <th className="text-left px-4 py-2">Email</th>
+                <th className="text-left px-4 py-2">Company Name</th>
+                <th className="text-left px-4 py-2">Country</th>
+                <th className="text-center px-4 py-2">Status</th>
+                <th className="text-center px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredClients.map((client, index) => (
+                <tr
+                  key={client.client_id}
+                  className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
+                >
+                  <td className="text-left px-4 py-2 flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedClients.includes(client.client_id)}
+                      onChange={() => toggleClientSelection(client.client_id)}
+                      className="mr-3"
+                    />
+                    <img
+                      src={`https://admin.zgs.co.com${client.photo}`}
+                      alt="client"
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        marginRight: "5px",
+                      }}
+                    />
+                    {client.name || "N/A"}
+                  </td>
+                  <td>{client.client_id}</td>
+                  <td>{client.contact}</td>
+                  <td>{client.email}</td>
+                  <td>{client.company_name}</td>
+                  <td>{client.country}</td>
+                  <td className="text-center">
+                    {client.user_id.is_active ? "Active" : "Inactive"}
+                  </td>
+                  <td>
+                    <div className="flex justify-center space-x-2 ">
+                      <button style={{ backgroundColor: "#EFEFEF", padding: "2px" }}>
+                        <AiOutlineEye />
+                      </button>
 
+                      <button
+                       style={{backgroundColor: "#EFE5FF", padding:"2px", borderRadius: "5px", color:"#5800FF"}}
+                        onClick={() => handleClientProfile(client.client_id)}
+                      >
+                        <AiOutlineEdit />
+                      </button>
+                      <button style={{backgroundColor: "#FEF9C2", padding:"2px", borderRadius: "5px", color:"#B9AB12"}}>
+                        <GrNotes />
+                      </button>
+                      <button
+                        style={{backgroundColor: "#FFC6B8", padding:"2px", borderRadius: "5px", color: "#FF4242"}}
+                        onClick={() =>
+                          openDeleteModal("single", client.client_id)
+                        }
+                      >
+                        <RiDeleteBin6Line />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <p className="text-center mt-8 text-gray-600">No clients available.</p>
+        <p className="text-center mt-8">No clients available.</p>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg">
+            <p>
+              Are you sure you want to delete{" "}
+              {deleteMode === "single" ? "this client" : "selected clients"}?
+            </p>
+            <div className="items-center justify-center flex mt-6">
+            <button className="bg-blue-600 text-black p-2 rounded-lg gap-3 " onClick={() => setShowDeleteModal(false)}>Cancel</button>
+            <button className="bg-red-600 text-black p-2 rounded-lg gap-3 ml-2" onClick={handleDelete}>Confirm</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
