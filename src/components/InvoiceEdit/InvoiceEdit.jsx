@@ -204,7 +204,7 @@ const InvoiceEdit = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-8 w-full max-w-4xl mx-auto space-y-6 bg-white rounded-2xl"
+      className="p-8 w-2/3 mx-auto space-y-6 bg-white rounded-2xl"
     >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Edit Invoice</h1>

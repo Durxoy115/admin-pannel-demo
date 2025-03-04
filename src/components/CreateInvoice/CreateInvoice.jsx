@@ -255,14 +255,14 @@ const CreateInvoice = () => {
   };
 
 
-  // const handleCreateInvoice = () => {
-  //   navigate("/invoice-list")
-  // }
+  const handleCreateInvoice = () => {
+    navigate("/invoice-list")
+  }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-8 w-full max-w-4xl mx-auto space-y-6 bg-white  rounded-2xl"
+      className="p-8 w-2/3 mx-auto space-y-6 bg-white  rounded-2xl"
     >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Create Invoice</h1>
@@ -577,6 +577,7 @@ const CreateInvoice = () => {
         <button
           type="button"
           className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
+          onClick={handleCreateInvoice}
         >
           Sent
         </button>
