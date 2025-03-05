@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 const CreateInvoice = () => {
   const [services, setServices] = useState();
   const [defaultService, setdefaultService] = useState();
-  const [vat, setVat] = useState();
-  const [discount, setDiscount] = useState();
+  const [vat, setVat] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const navigate = useNavigate()
   // const [item, setItem] = useState(1);
   // const [pdf, setPdf] = useState();
@@ -29,8 +29,8 @@ const CreateInvoice = () => {
     sub_total: 0,
     total_amount: 0,
     services: [],
-    discount: 0,
-    vat: 0,
+    discount: 0.00,
+    vat: 0.00,
   });
 
   useEffect(() => {
@@ -82,35 +82,32 @@ const CreateInvoice = () => {
 
     const handleChange = (e) => {
       const { name, value } = e.target;
-
       setFormData((prev) => ({ ...prev, [name]: value }));
-
-      console.log(name, formData);
+      
+      if (name === "vat") setVat(parseFloat(value) || 0);
+      if (name === "discount") setDiscount(parseFloat(value) || 0);
+      
+      // Recalculate totals when vat or discount changes
+      setFormData((prev) => {
+        const totals = calculateTotals({ ...prev, [name]: value });
+        return { ...prev, ...totals, [name]: value };
+      });
     };
 
-  const handleServiceChange = (index, field, value) => {
-    const updatedServices = [...formData.services];
-    updatedServices[index][field] = value;
-    updatedServices[index].total_amount = updatedServices[index].quantity * updatedServices[index].price;
-    const sub_total=formData.services.reduce(
-      (sum, service) => sum + service.total_amount,
-      0
-    );
-    setFormData((prev) => ({
-      ...prev,
-      services: updatedServices,
-    }));
-    setFormData((prev) => ({ ...prev, 'sub_total': sub_total }));
-    console.log("object", formData)
-    setFormData((prev) => ({ ...prev, 'vat': vat }));
-    console.log("object", formData)
-    setFormData((prev) => ({ ...prev, 'discount': discount }));
-    console.log("object", formData)
-    setFormData((prev) => ({ ...prev, 'total_amount': sub_total }));
-    console.log("object", formData)
-   
-  };
-
+    const handleServiceChange = (index, field, value) => {
+      const updatedServices = [...formData.services];
+      updatedServices[index][field] = value;
+      updatedServices[index].total_amount = updatedServices[index].quantity * updatedServices[index].price;
+      
+      setFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          services: updatedServices,
+        };
+        const totals = calculateTotals(newFormData);
+        return { ...newFormData, ...totals };
+      });
+    };
   const addServiceItem = () => {
     setFormData((prev) => ({
       ...prev,
@@ -128,20 +125,26 @@ const CreateInvoice = () => {
       ],
     }));
   };
-
   const removeServiceItem = (index) => {
     const updatedServices = formData.services.filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, services: updatedServices }));
+    setFormData((prev) => {
+      const newFormData = { ...prev, services: updatedServices };
+      const totals = calculateTotals(newFormData);
+      return { ...newFormData, ...totals };
+    });
   };
 
-  const calculateTotals = () => {
-    const subTotal = formData.services.reduce(
-      (sum, service) => sum + service.total_amount,
+  const calculateTotals = (data = formData) => {
+    const subTotal = data.services.reduce(
+      (sum, service) => sum + (service.total_amount || 0),
       0
     );
-    const total =
-      subTotal - formData.discount + (subTotal * formData.vat) / 100;
-    return { subTotal, total };
+    
+    const discountAmount = parseFloat(data.discount) || 0;
+    const vatAmount = ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
+    const total = subTotal + vatAmount - discountAmount;
+    
+    return { sub_total: subTotal, total_amount: total };
   };
 
   const handleSubmit = async (e) => {
@@ -165,8 +168,8 @@ const CreateInvoice = () => {
     // formDataPayload.append("client_phone", formData.client_phone);
     formDataPayload.append("total_amount", total); // Use the calculated total
     formDataPayload.append("sub_total", subTotal);
-    // formDataPayload.append("discount", formData.discount);
-    // formDataPayload.append("vat", formData.vat);
+    formDataPayload.append("discount", formData.discount);
+    formDataPayload.append("vat", formData.vat);
 
     // Append services (you might need to serialize this as JSON or handle it differently based on server expectations)
     formDataPayload.append("services", JSON.stringify(formData.services));
@@ -400,6 +403,26 @@ const CreateInvoice = () => {
             required
           />
         </div>
+        <div>
+          <input
+            name="vat"
+            placeholder="vat"
+            value={formData.vat}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            
+          />
+        </div>
+        <div>
+          <input
+            name="discount"
+            placeholder="Discount"
+            value={formData.discount}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            
+          />
+        </div>
       </div>
 
       <div className="bg-gray-100 p-4 rounded-2xl">
@@ -550,13 +573,13 @@ const CreateInvoice = () => {
       </div>
 
       <div className="text-right space-y-2 border-t border-gray-200 pt-4">
-        <p>Sub Total: ${formData?.sub_total?.toFixed(2)}</p>
-        <p className="text-red-500">
-          Discount: - ${formData?.discount?.toFixed(2)}
-        </p>
-        <p>VAT: {formData.vat}%</p>
-        <p className="text-xl font-semibold">TOTAL: ${formData?.total_amount?.toFixed(2)}</p>
-      </div>
+  <p>Sub Total: ${formData.sub_total.toFixed(2)}</p>
+  <p className="text-red-500">
+    Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
+  </p>
+  <p>VAT: {formData.vat}%</p>
+  <p className="text-xl font-semibold">TOTAL: ${formData.total_amount.toFixed(2)}</p>
+</div>
 
       <div className="flex justify-end space-x-4">
         <label className="flex items-center space-x-2 text-gray-600">

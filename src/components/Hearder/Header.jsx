@@ -47,27 +47,10 @@ const Header = () => {
     fetchUserProfile();
   }, [token]); 
 
-  const handleProfile = () => {
-    navigate("/profile");
+  const handleNavigation = (pageLink) => {
+    navigate(`/${pageLink}`);
   };
-  const handleActivityLog = () => {
-    navigate("/activity-log");
-  };
-  const handleHomePage = () => {
-    navigate("/dashboard");
-  };
-  const handleMessage = () => {
-    navigate("/message");
-  };
-  const handlePaymentHistory = () => {
-    navigate("/payment-history");
-  };
-  const handleOrderList = () => {
-    navigate("/order-list");
-  };
-  const handleChangePassword = () => {
-    navigate("/change-password");
-  };
+  
   const handleLogOut = async () => {
     try {
       const response = await fetch(`${url}/auth/user/logout/`, {
@@ -95,8 +78,8 @@ const Header = () => {
       {/* Logo Section */}
       <div className="w-20">
         <img
-          onClick={handleHomePage}
-          src="/src/assets/Images/Images-nav/logo-image.jpg"
+          onClick={()=>handleNavigation(`dashboard`)}
+          src="/assets/Images/Images-nav/logo-image.jpg"
           alt="Company Logo"
           className="h-12 w-full  ml-24"
         />
@@ -112,7 +95,7 @@ const Header = () => {
           <MenuButton className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <span>{userDetails.username}</span>
             <img
-              src="/src/assets/Images/Images-nav/images.png"
+              src="/assets/Images/Images-nav/images.png"
               className="h-8 w-8 rounded-full"
               alt="Profile"
             />
@@ -123,7 +106,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleActivityLog}
+                    onClick={()=>handleNavigation(`activity-log`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -139,7 +122,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleProfile}
+                    onClick={()=>handleNavigation(`profile`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -152,7 +135,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleMessage}
+                    onClick={()=>handleNavigation(`message`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -164,7 +147,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handlePaymentHistory}
+                    onClick={()=>handleNavigation(`payment-history`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -177,7 +160,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleOrderList}
+                    onClick={()=>handleNavigation(`order-list`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
@@ -189,7 +172,7 @@ const Header = () => {
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={handleChangePassword}
+                    onClick={()=>handleNavigation(`change-password`)}
                     className={`flex items-center px-4 py-2 text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
                     }`}
