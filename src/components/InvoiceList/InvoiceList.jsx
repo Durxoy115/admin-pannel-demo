@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {  AiOutlineEdit } from "react-icons/ai";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { PiUserListLight } from "react-icons/pi";
 import { CgNotes } from "react-icons/cg";
 import { IoMdRefresh } from "react-icons/io";
@@ -216,8 +217,8 @@ const InvoiceList = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 flex gap-3">
-                  <button onClick={() => handleEditInvoice(invoice.id)}><PencilIcon className="h-5 w-5 text-blue-500" /></button>
-                  <button onClick={() => openDeleteModal(invoice.id)}><TrashIcon className="h-5 w-5 text-red-500" /></button>
+                  <button onClick={() => handleEditInvoice(invoice.id)}><AiOutlineEdit className="h-5 w-5 text-blue-500" /></button>
+                  <button onClick={() => openDeleteModal(invoice.id)}><RiDeleteBin6Line className="h-5 w-5 text-red-500" /></button>
                 </td>
               </tr>
             ))}

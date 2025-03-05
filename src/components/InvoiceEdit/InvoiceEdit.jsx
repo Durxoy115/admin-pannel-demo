@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
 const InvoiceEdit = () => {
-  const { id } = useParams(); 
-  console.log("Invoice ID from params:", id); 
+  const { id } = useParams();
+  console.log("Invoice ID from params:", id);
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -34,17 +34,10 @@ const InvoiceEdit = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // const id = parseInt(id, 10); // Convert invoiceId to integer
-    // if (isNaN(id)) {
-    //   setError("Invalid Invoice ID. Please use a valid integer ID.");
-    //   setIsLoading(false);
-    //   return;
-    // }
-
     const fetchInvoiceData = async () => {
       try {
         const response = await fetch(
-          `${url}/service/invoice/?invoice_id=${id}`, // Use integer id
+          `${url}/service/invoice/?invoice_id=${id}`,
           {
             method: "GET",
             headers: {
@@ -55,21 +48,21 @@ const InvoiceEdit = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched data:", data); // Debug log for response
+          console.log("Fetched data:", data);
           const services = data.data.services.map((service) => ({
             service_name: service.service_name,
             quantity: service.quantity,
-            currency: "USD", // Default from image
+            currency: "USD",
             rate: service.rate,
             duration: service.duration,
-            price: parseFloat(service.amount) / service.quantity || 0, // Derive price, handle division by zero
+            price: parseFloat(service.amount) / service.quantity || 0,
             total_amount: parseFloat(service.amount) || 0,
           }));
-          setFormData({
+          const fetchedData = {
             client_invoice_id: data.data.client_invoice_id || "",
             client_id: data.data.client_id || "",
             client_name: data.data.client_name || "",
-            date: data.data.date ? data.data.date.split("T")[0] : "", // Format date
+            date: data.data.date ? data.data.date.split("T")[0] : "",
             payment_status: data.data.payment_status || "",
             company_name: data.data.company_name || "",
             company_logo: data.data.company_logo || null,
@@ -84,7 +77,8 @@ const InvoiceEdit = () => {
             vat: parseFloat(data.data.vat) || 0,
             total_amount: parseFloat(data.data.total_amount) || 0,
             services: services,
-          });
+          };
+          setFormData(fetchedData);
         } else {
           throw new Error(`Failed to fetch invoice data. Status: ${response.status}`);
         }
@@ -101,7 +95,11 @@ const InvoiceEdit = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updatedData = { ...prev, [name]: value };
+      const totals = calculateTotals(updatedData);
+      return { ...updatedData, ...totals };
+    });
   };
 
   const handleServiceChange = (index, field, value) => {
@@ -112,48 +110,55 @@ const InvoiceEdit = () => {
         : value;
     updatedServices[index].total_amount =
       (updatedServices[index].quantity || 0) * (updatedServices[index].price || 0);
-    const sub_total = updatedServices.reduce(
-      (sum, service) => sum + (service.total_amount || 0),
-      0
-    );
-    setFormData((prev) => ({
-      ...prev,
-      services: updatedServices,
-      sub_total: sub_total,
-      total_amount: sub_total - prev.discount + (sub_total * prev.vat) / 100,
-    }));
+
+    setFormData((prev) => {
+      const newFormData = { ...prev, services: updatedServices };
+      const totals = calculateTotals(newFormData);
+      return { ...newFormData, ...totals };
+    });
   };
 
   const addServiceItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      services: [
-        ...prev.services,
-        {
-          service_name: "Ludo App",
-          quantity: 1,
-          currency: "USD",
-          rate: "Monthly",
-          duration: 0,
-          price: 0,
-          total_amount: 0,
-        },
-      ],
-    }));
+    setFormData((prev) => {
+      const newFormData = {
+        ...prev,
+        services: [
+          ...prev.services,
+          {
+            service_name: "Ludo App",
+            quantity: 1,
+            currency: "USD",
+            rate: "Monthly",
+            duration: 0,
+            price: 0,
+            total_amount: 0,
+          },
+        ],
+      };
+      const totals = calculateTotals(newFormData);
+      return { ...newFormData, ...totals };
+    });
   };
 
   const removeServiceItem = (index) => {
     const updatedServices = formData.services.filter((_, i) => i !== index);
-    const sub_total = updatedServices.reduce(
+    setFormData((prev) => {
+      const newFormData = { ...prev, services: updatedServices };
+      const totals = calculateTotals(newFormData);
+      return { ...newFormData, ...totals };
+    });
+  };
+
+  const calculateTotals = (data = formData) => {
+    const subTotal = data.services.reduce(
       (sum, service) => sum + (service.total_amount || 0),
       0
     );
-    setFormData((prev) => ({
-      ...prev,
-      services: updatedServices,
-      sub_total: sub_total,
-      total_amount: sub_total - prev.discount + (sub_total * prev.vat) / 100,
-    }));
+    
+    const discountAmount = parseFloat(data.discount) || 0;
+    const vatAmount = ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
+    const total = subTotal + vatAmount - discountAmount;
+    return { sub_total: subTotal, total_amount: total };
   };
 
   const handleSubmit = async (e) => {
@@ -177,6 +182,10 @@ const InvoiceEdit = () => {
               duration: service.duration,
               amount: service.total_amount,
             })),
+            sub_total: formData.sub_total,
+            total_amount: formData.total_amount,
+            discount: formData.discount,
+            vat: formData.vat,
           }),
         }
       );
@@ -184,7 +193,7 @@ const InvoiceEdit = () => {
       if (response.ok) {
         const data = await response.json();
         alert(data.message);
-        navigate("/invoices"); // Redirect to invoice list
+        navigate("/invoices");
       } else {
         throw new Error(`Failed to update invoice. Status: ${response.status}`);
       }
@@ -217,9 +226,9 @@ const InvoiceEdit = () => {
           name="service_name"
           className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
+          value={formData.service_name}
           required
         >
-          {/* Placeholder for services; replace with actual data if available */}
           <option value="React">React</option>
           <option value="Ludo App">Ludo App</option>
         </select>
@@ -231,7 +240,6 @@ const InvoiceEdit = () => {
               setFormData((prev) => ({ ...prev, company_logo: e.target.files[0] }))
             }
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
-            required
           />
         </div>
         <div>
@@ -334,6 +342,24 @@ const InvoiceEdit = () => {
             required
           />
         </div>
+        <div>
+          <input
+            name="vat"
+            placeholder="VAT (%)"
+            value={formData.vat}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
+        <div>
+          <input
+            name="discount"
+            placeholder="Discount"
+            value={formData.discount}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
       </div>
 
       <div className="bg-gray-100 p-4 rounded-2xl">
@@ -364,9 +390,9 @@ const InvoiceEdit = () => {
                     onChange={(e) =>
                       handleServiceChange(index, "service_name", e.target.value)
                     }
+                    value={service.service_name}
                     required
                   >
-                    {/* Placeholder for services; replace with actual data if available */}
                     <option value="React">React</option>
                     <option value="Ludo App">Ludo App</option>
                   </select>
@@ -483,12 +509,12 @@ const InvoiceEdit = () => {
       </div>
 
       <div className="text-right space-y-2 border-t border-gray-200 pt-4">
-        <p>Sub Total: ${formData?.sub_total?.toFixed(2)}</p>
+        <p>Sub Total: ${formData.sub_total.toFixed(2)}</p>
         <p className="text-red-500">
-          Discount: - ${formData?.discount?.toFixed(2)}
+          Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
         </p>
         <p>VAT: {formData.vat}%</p>
-        <p className="text-xl font-semibold">TOTAL: ${formData?.total_amount?.toFixed(2)}</p>
+        <p className="text-xl font-semibold">TOTAL: ${formData.total_amount.toFixed(2)}</p>
       </div>
 
       <div className="flex justify-end space-x-4">
@@ -511,7 +537,6 @@ const InvoiceEdit = () => {
         >
           Sent
         </button>
-      
       </div>
     </form>
   );
