@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .invoice-container {
+            width: 100%;
+            max-width: 896px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px dashed #000;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: bold;
+            color: #000;
+        }
+        .header span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+        }
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .details div {
+            width: 48%;
+        }
+        .details h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 0 8px;
+            color: #000;
+        }
+        .details p {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 4px 0;
+        }
+        .details img {
+            width: 100px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px dashed #d1d5db;
+            text-align: center;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        table th {
+            background-color: #f1f1f1;
+            color: #000;
+            font-weight: bold;
+        }
+        .summary {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .summary p {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 4px 0;
+        }
+        .summary .discount {
+            color: #ef4444;
+        }
+        .summary .total {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .summary .total-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+        }
+        .sub-border {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 10px;
+            border-top: 1px dashed #000;
+        }
+        .signatures p {
+            font-size: 14px;
+            color: #4b5563;
+            text-align: center;
+            width: 45%;
+            border-top: 1px dashed #d1d5db;
+            padding-top: 6px;
+            margin-top: 40px;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .footer div {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>INVOICE</h1>
+            <span>#{{ invoice.client_invoice_id }}</span>
+        </div>
+
+        <div class="details">
+            <div>
+                <img src="{% static invoice.company_logo %}" alt="Company Logo">
+                <h2>{{ invoice.client_name }}</h2>
+                <p><strong>ID:</strong> {{ invoice.client_id }}</p>
+                <p><strong>Date:</strong> {{ invoice.date }}</p>
+                <p><strong>Company Name:</strong> {{ invoice.company_name }}</p>
+                <p><strong>Company Address:</strong> {{ invoice.address }}</p>
+                <p><strong>Services:</strong> {{ invoice.service_name }}</p>
+            </div>
+            <div>
+                <h2>Billing Address</h2>
+                <p><strong>Bank Name:</strong> IFIC Bank</p>
+                <p><strong>Branch:</strong> Mohammadpur Bus Stand</p>
+                <p><strong>Account Name:</strong> Zay Global Solutions</p>
+                <p><strong>Account No.:</strong> 352627283872</p>
+                <p><strong>Routing No.:</strong> 352627</p>
+                <p><strong>Company Address:</strong> 207, Prem Sagar Appt., Near Income Tax Office, Ashram Road, Ahmedabad - 380005</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Services Name</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Time Duration</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <td>{{ service.service_name }}</td>
+                    <td>X {{ service.quantity }}</td>
+                    <td>{{ service.rate }}</td>
+                    <td>{{ service.duration }} Months</td>
+                    <td>${{ service.amount }}.00</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary" style="border-top: 1px dashed #000; padding-top: 10px; margin-top: 20px;">
+            <div class="sub-border">
+                <p>Sub Total</p>
+                <p>${{ invoice.sub_total }}.00</p>
+            </div>
+            <div class="sub-border">
+                <p class="discount">Discount</p>
+                <p class="discount">- ${{ invoice.discount }}.00</p>
+            </div>
+            <div class="sub-border">
+                <p>Vat</p>
+                <p>{{ invoice.vat }}%</p>
+            </div>
+            <div class="sub-border" style="border-top: 1px dashed #000; padding-top: 10px; ;">
+                <p class="total">TOTAL</p>
+                <p class="total-amount">${{ invoice.total_amount }}.00</p>
+            </div>
+        </div>
+
+        <div class="signatures">
+            <p>Client Signature</p>
+            <p>Authority Signature</p>
+        </div>
+
+        <div class="footer">
+            <p>Note: Payment is required within 7 days of invoice date.</p>
+            <div>
+                <p>Email: Z0S@gmail.com</p>
+                <p>Phone Number: +88013214335</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

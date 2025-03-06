@@ -54,7 +54,7 @@ const EditCompanyAddress = () => {
           method: "PUT", // Change to PUT for updating
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `${token}`,
+            "Authorization": `Token ${token}`,
           },
           body: JSON.stringify(formData),
         }
@@ -70,6 +70,10 @@ const EditCompanyAddress = () => {
       alert("An error occurred. Please try again.");
     }
   };
+
+  const handleUPdateAddress = () => {
+    navigate("/profile");
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-8 bg-white rounded-md ml-48">
@@ -138,13 +142,13 @@ const EditCompanyAddress = () => {
           </div>
         </div>
         <div>
-          <label className="block text-gray-700 font-medium mb-2">Company Address<span className="text-red-500">*</span></label>
+          <label className="block text-gray-700 font-medium mb-2">Company Address</label>
           <textarea
             name="company_address"
             value={formData.company_address}
             onChange={handleChange}
             placeholder="Enter your company address"
-            required
+            
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="4"
           ></textarea>
@@ -159,6 +163,8 @@ const EditCompanyAddress = () => {
         <button
           type="submit"
           className="w-48 bg-red-500 text-white py-3 rounded-full hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          onClick={handleUPdateAddress}
+          
         >
           Cancel
         </button>
