@@ -13,7 +13,7 @@ const OrderAdd = () => {
     estimate_delivery_date: "",
     delivery_date: "",
     client_id: "",
-    product_information: "",
+    details: "",
   });
   const [url,getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -25,7 +25,7 @@ const OrderAdd = () => {
   };
 
   const handleQuillChange = (value) => {
-    setFormData({ ...formData, product_information: value });
+    setFormData({ ...formData, details: value });
   };
 
   const handleSubmit = async (e) => {
@@ -154,7 +154,7 @@ const OrderAdd = () => {
             Product Information
           </label>
           <ReactQuill
-            value={formData.product_information}
+            value={formData.details}
             onChange={handleQuillChange}
             className="bg-white border border-gray-300 rounded-md"
           />

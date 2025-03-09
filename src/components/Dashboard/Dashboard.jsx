@@ -61,7 +61,7 @@ const Dashboard = () => {
 
   const handleOpenModal = () => navigate("/addnewclient");
   const handleInvoiceList = () => navigate("/invoice-list");
-  const handleClientProfile = (Id) => navigate(`/client-profile/${Id}`);
+  const handleClientProfile = (id) => navigate(`/client-info/${id}`);
 
   const toggleClientSelection = (clientId) => {
     setSelectedClients((prev) =>

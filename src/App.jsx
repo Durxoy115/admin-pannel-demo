@@ -6,7 +6,7 @@ import Login from "./components/Login/LoginPage";
 import ForgotPassword from "./components/ForgotPasswordPage/ForgotPasswordPage";
 import OTPPage from "./components/OTPPage/OTPPage";
 import AddNewClient from "./components/AddNewClient/AddNewClient";
-import ClientProfile from "./components/ClientProfile/ClientProfile";
+// import ClientProfile from "./components/ClientProfile/ClientProfile";
 import UserProfile from "./components/UserProfile/UserProfile";
 import ActivityLog from "./components/ActivityLog/ActivityLog";
 import Message from "./components/Message/Message";
@@ -26,6 +26,8 @@ import OrderDetails from "./components/OrderDetails/OrderDetails";
 import InvoiceList from "./components/InvoiceList/InvoiceList";
 import InvoiceEdit from "./components/InvoiceEdit/InvoiceEdit";
 import CreateInvoice from "./components/CreateInvoice/CreateInvoice";
+import CombineComponent from "./components/CombineComponent/CombineComponent";
+
 
 // import Test from "./components/Test";
 
@@ -46,7 +48,7 @@ const App = () => {
               <Routes>
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="addnewclient" element={<AddNewClient />} />
-                <Route path="client-profile/:Id" element={<ClientProfile></ClientProfile>} />
+                <Route path="client-info/:id" element={<CombineComponent></CombineComponent>} />
                 <Route path="profile/" element={<UserProfile></UserProfile>} />
                 <Route path="activity-log" element={<ActivityLog></ActivityLog>} />
                 <Route path="message" element={<Message></Message>} />
@@ -66,6 +68,7 @@ const App = () => {
                 <Route path="invoice-list" element={<InvoiceList></InvoiceList>} />
                 <Route path="edit-invoice/:id" element={<InvoiceEdit></InvoiceEdit>} />
                 <Route path="create-invoice" element={<CreateInvoice></CreateInvoice>} />
+                
                 
 
                 {/* <Route path="test" element={<Test></Test>} /> */}

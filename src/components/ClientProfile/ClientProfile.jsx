@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
-const ClientProfile = () => {
-  const { Id } = useParams(); 
+
+
+const ClientProfile = ({id}) => {
+// console.log("THis is IS:---", id)
   const navigate = useNavigate();
   const [url,getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -23,7 +25,7 @@ const ClientProfile = () => {
   useEffect(() => {
     const fetchClientDetails = async () => {
       try {
-        const response = await fetch(`${url}/client/?client_id=${Id}`, {
+        const response = await fetch(`${url}/client/?client_id=${id}`, {
           headers: {
             Authorization: `Token ${token}`,
           },
@@ -43,7 +45,7 @@ const ClientProfile = () => {
     };
 
     fetchClientDetails();
-  }, [Id]);
+  }, [id]);
   console.log(clientData)
 
   const handleChange = (e) => {
@@ -54,7 +56,7 @@ const ClientProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${url}/client/?client_id=${Id}`, {
+      const response = await fetch(`${url}/client/?client_id=${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -82,9 +84,11 @@ const ClientProfile = () => {
   }
 
   return (
-    <div className="w-full flex items-center justify-center">
+    
+    <div>
+      <div className="w-full flex items-center justify-center">
       <div className="w-full max-w-4xl">
-        <h2 className="text-3xl font-semibold mb-8">Edit Client</h2>
+        <h2 className="text-3xl font-semibold mb-8">Client Profile</h2>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-6">
             {[
@@ -155,6 +159,12 @@ const ClientProfile = () => {
           </div>
         </form>
       </div>
+      
+    </div>
+    <div className="w-full flex justify-between mt-40">
+   
+    </div>
+ 
     </div>
   );
 };
