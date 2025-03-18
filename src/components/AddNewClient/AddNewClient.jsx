@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
 import useToken from "../hooks/useToken";
+import Footer from "../Footer/Footer";
 
 const AddNewClient = () => {
   const navigate = useNavigate();
@@ -119,9 +120,10 @@ const AddNewClient = () => {
   };
 
   return (
-    <div className="w-full  flex items-center justify-center">
-      <div className="w-full ">
-        <h2 className="text-3xl font-semibold mb-8 ml-64 ">Add New Client</h2>
+    <div>
+      <div className=" flex items-center justify-center bg-gray-50">
+      <div className="w-5/6 ">
+        <h2 className="text-3xl font-semibold mb-8  ">Add New Client</h2>
         {/* <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -141,8 +143,8 @@ const AddNewClient = () => {
           }}
         > */}
         <form onSubmit={handleSave}>
-          <div className="grid grid-cols-3 gap-6 ">
-            <div className="flex flex-col items-center col-span-1 ms-auto">
+          <div className="flex space-x-4">
+            <div className="flex flex-col items-center col-span-1">
               <label
                 htmlFor="imageUpload"
                 className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300 "
@@ -165,7 +167,7 @@ const AddNewClient = () => {
                 className="hidden"
               />
             </div>
-            <div className="col-span-2 grid grid-cols-2 gap-6">
+            <div className="col-span-2 grid grid-cols-2 gap-6 w-5/6">
               <div>
                 <label htmlFor="clientName" className="block mb-2 font-medium">
                   Client Name <span className="text-red-500">*</span>
@@ -334,7 +336,7 @@ const AddNewClient = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-end space-x-4 mt-6 mb-10">
+          <div className="flex justify-center space-x-4 mt-6 mb-20">
             <button
               type="button"
               className="px-6 py-2 bg-red-600 text-white rounded-lg"
@@ -351,6 +353,9 @@ const AddNewClient = () => {
           </div>
         </form>
       </div>
+     
+    </div>
+   
     </div>
   );
 };

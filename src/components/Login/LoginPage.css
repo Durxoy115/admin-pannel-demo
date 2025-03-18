@@ -1,4 +1,15 @@
-form{
+/* form{
+width: 1186px;
+
+top: 158px;
+left: 367px;
+gap: 0px;
+border-radius: 10px 0px 0px 0px;
+opacity: 0px;
+
+} */
+
+.login_form{
 width: 1186px;
 height: 562px;
 top: 158px;
@@ -6,5 +17,4 @@ left: 367px;
 gap: 0px;
 border-radius: 10px 0px 0px 0px;
 opacity: 0px;
-
 }

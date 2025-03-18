@@ -83,8 +83,8 @@ const Products = () => {
   };
 
   return (
-    <div className="mt-16">
-      <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
+    <div className="mt-16 ">
+      <div className="flex justify-between items-center pl-4 pr-4 ">
         <h1 className="text-3xl font-bold mb-4">
           Our Products and Services List
         </h1>
@@ -96,7 +96,7 @@ const Products = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-8 p-4 ml-10 mr-10">
+      <div className="grid grid-cols-4 gap-8 p-4 ">
         {products &&
           products.map((product, index) => (
             <div

@@ -83,11 +83,11 @@ const OrderDetails = () => {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <div className="w-full max-w-4xl">
+    <div className="w-full flex items-center justify-center bg-gray-100 ">
+      <div className="w-full mx-auto p-10">
         <h2 className="text-3xl font-semibold mb-8">Order Details</h2>
-        <form>
-          <div className="grid grid-cols-3 gap-6">
+        <form >
+          <div className="grid grid-cols-3 gap-8">
             {[
               { label: "Service Name", name: "name", type: "text" },
               { label: "Duration", name: "duration", type: "text" },
@@ -132,22 +132,23 @@ const OrderDetails = () => {
               </div>
             ))}
 
-            <div className="col-span-3">
-              <label htmlFor="details" className="block mb-2 font-medium">
-                Details
-              </label>
-              <textarea
-                id="details"
-                name="details"
-                value={formData.details || ""}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg"
-                placeholder="Enter order details here..."
-              />
-            </div>
+         <div className="col-span-3">
+  <label htmlFor="details" className="block mb-2 font-medium my-auto">
+    Details
+  </label>
+  <textarea
+    id="details"
+    name="details"
+    value={formData.details || ""}
+    onChange={handleInputChange}
+    className="w-full px-4 py-4 border rounded-lg h-48" // Increased height with h-48
+    placeholder="Enter order details here..."
+    rows={6} // Optional: Sets the number of visible rows
+  />
+</div>
           </div>
 
-          <div className="flex justify-center items-center space-x-4 mt-6">
+          <div className="flex relative justify-center items-center space-x-4 mt-6">
             <button
               type="button"
               className="px-6 py-2 bg-red-600 text-white rounded-lg"

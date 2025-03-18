@@ -5,14 +5,13 @@ import SubAdmin from "../SubAdmin/SubAdmin";
 import Products from "../Products/Products";
 import AddressBook from "../AddressBook/AddressBook";
 import SupportContactList from "../SupportContactList/SupportContactList";
-
 import useToken from "../hooks/useToken";
 
 const MyProfile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [url,getTokenLocalStorage] = useToken();
+  const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
   useEffect(() => {
@@ -29,6 +28,10 @@ const MyProfile = () => {
         if (response.ok) {
           const data = await response.json();
           setUserData(data.data);
+          // Set the initial image preview using the photo from the API response
+          if (data.data?.photo) {
+            setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
+          }
         } else {
           console.error("Failed to fetch user data");
         }
@@ -37,7 +40,7 @@ const MyProfile = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [url, token]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -49,8 +52,9 @@ const MyProfile = () => {
       reader.readAsDataURL(file);
     }
   };
+
   const handleEditUserProfile = (id) => {
-    console.log(id)
+    console.log(id);
     if (userData?.id) {
       navigate(`/edit-user-profile/${id}`);
     } else {
@@ -59,16 +63,21 @@ const MyProfile = () => {
   };
 
   return (
-    <div className="p-6  bg-white shadow-md ">
-      <div className="flex items-start justify-around mb-4">
+    <div className="p-6 bg-gray-100 shadow-md">
+      <div className="flex items-start justify-between mb-4">
         <h2 className="text-3xl font-semibold">My Profile</h2>
-        <button className="bg-blue-700 text-lg p-2 text-white rounded" onClick={() => handleEditUserProfile(userData.id)}>Edit</button>
+        <button
+          className="bg-blue-700 text-lg p-2 text-white rounded"
+          onClick={() => handleEditUserProfile(userData?.id)}
+        >
+          Edit
+        </button>
       </div>
 
-      <div className="w-full flex flex-col items-center justify-center">
-        <div className="w-full max-w-6xl p-6 rounded-lg  relative">
-          <div className="grid grid-cols-3 gap-6 items-start">
-            <div className="flex flex-col items-center col-span-1">
+      <div className="w-full flex flex-col bg-white rounded-md">
+        <div className="w-full mx-auto p-6">
+          <div className="flex gap-10">
+            <div className="flex flex-col">
               <label
                 htmlFor="imageUpload"
                 className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300"
@@ -91,7 +100,7 @@ const MyProfile = () => {
                 className="hidden"
               />
             </div>
-            <div className="col-span-2 grid grid-cols-2 gap-6">
+            <div className="col-span-3 w-full grid grid-cols-3 gap-6">
               <div>
                 <label className="block mb-2 font-medium">First Name</label>
                 <input
@@ -132,11 +141,12 @@ const MyProfile = () => {
           </div>
         </div>
       </div>
-      <SubAdmin></SubAdmin>
-      <Products></Products>
-      <AddressBook></AddressBook>
-      <SupportContactList></SupportContactList>
-    
+      <div className="bg-white rounded-md p-2 mt-4">
+        <SubAdmin />
+        <Products />
+        <AddressBook />
+        <SupportContactList />
+      </div>
     </div>
   );
 };

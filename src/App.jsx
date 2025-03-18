@@ -27,6 +27,9 @@ import InvoiceList from "./components/InvoiceList/InvoiceList";
 import InvoiceEdit from "./components/InvoiceEdit/InvoiceEdit";
 import CreateInvoice from "./components/CreateInvoice/CreateInvoice";
 import CombineComponent from "./components/CombineComponent/CombineComponent";
+import PaymentAdd from "./components/PaymentAdd/PaymentAdd";
+import Footer from "./components/Footer/Footer";
+import AddContact from "./components/AddContact/AddContact";
 
 
 // import Test from "./components/Test";
@@ -68,6 +71,8 @@ const App = () => {
                 <Route path="invoice-list" element={<InvoiceList></InvoiceList>} />
                 <Route path="edit-invoice/:id" element={<InvoiceEdit></InvoiceEdit>} />
                 <Route path="create-invoice" element={<CreateInvoice></CreateInvoice>} />
+                <Route path="add-payment" element={<PaymentAdd></PaymentAdd>} />
+                <Route path="add-support-contact" element={<AddContact></AddContact>} />
                 
                 
 
@@ -84,11 +89,18 @@ const App = () => {
 // Layout with Header
 const WithHeader = ({ children }) => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
       <Header />
-      <main className="p-4">{children}</main>
-    </>
+
+      {/* Main Content (flex-grow ensures it expands) */}
+      <main className="flex-grow">{children}</main>
+
+      {/* Footer (Sticks to Bottom) */}
+      <Footer />
+    </div>
   );
 };
+
 
 export default App;

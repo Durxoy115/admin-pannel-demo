@@ -23,7 +23,7 @@ const Header = () => {
     // Fetch user details from the API endpoint
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch("https://admin.zgs.co.com/auth/profile/", {
+        const response = await fetch(`${url}/auth/profile/`, {
           headers: {
             Authorization: `Token ${token}`,
           },

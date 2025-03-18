@@ -33,15 +33,18 @@ const AddUser = () => {
       }
     };
     fetchUserData();
-  }, []);
-
-  const formData = new FormData();
-
-  console.log(userType);
+  }, [url, token]);
 
   const handleSave = async (e) => {
     e.preventDefault();
 
+    // Create a new FormData instance inside the function
+    const formData = new FormData();
+
+    // Log the image to debug
+    console.log("Image before submission:", image);
+
+    // Append form data
     formData.append("first_name", e.target.first_name.value);
     formData.append("last_name", e.target.last_name.value);
     formData.append("email", e.target.userEmail.value);
@@ -49,11 +52,16 @@ const AddUser = () => {
     formData.append("contact", e.target.userContact.value);
     formData.append("user_type", e.target.user_type.value);
     formData.append("password", e.target.password.value);
-    formData.append("dateOfBirth", e.target.userDateOfBirth.value);
+    formData.append("dob", e.target.dob.value);
 
-    // If image is uploaded, append it to the form data
+    // Append the image only if it exists
     if (image) {
-      formData.append("image", image);
+      formData.append("photo", image);
+    }
+
+    // Log FormData contents for debugging
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
     }
 
     try {
@@ -78,17 +86,19 @@ const AddUser = () => {
       console.error("Error:", error);
       alert("An error occurred. Please try again.");
     }
-
-    // For debugging purposes (remove in production)
-    for (let [key, value] of formData) {
-      console.log(`${key}: ${value}`);
-    }
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    setImagePreview(URL.createObjectURL(file));
-    setImage(file);
+    if (file && file.type.startsWith("image/")) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      console.log("Selected file:", file); // Debug the selected file
+    } else {
+      alert("Please upload a valid image file (e.g., .jpg, .png)");
+      setImage(null);
+      setImagePreview(null);
+    }
   };
 
   const handleClose = () => {
@@ -96,16 +106,16 @@ const AddUser = () => {
   };
 
   return (
-    <div className="w-full flex items-center justify-center">
-      <div className="w-full ">
-        <h2 className="text-3xl font-semibold mb-8 ml-64 ">Add New Member</h2>
+    <div className="w-full flex items-center justify-center bg-gray-100">
+      <div className="w-full mx-auto min-h-screen px-60">
+        <h2 className="text-3xl font-semibold mb-8 mt-2">Add New Member</h2>
 
         <form onSubmit={handleSave}>
-          <div className="grid grid-cols-3 gap-6 ">
-            <div className="flex flex-col items-center col-span-1 ms-auto">
+          <div className="flex gap-10 bg-white p-10 rounded-md">
+            <div className="flex flex-col items-center col-span-1">
               <label
                 htmlFor="imageUpload"
-                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300 "
+                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300"
               >
                 {imagePreview ? (
                   <img
@@ -125,7 +135,7 @@ const AddUser = () => {
                 className="hidden"
               />
             </div>
-            <div className="col-span-2 grid grid-cols-2 gap-6">
+            <div className="col-span-3 grid grid-cols-3 gap-6 w-full">
               <div>
                 <label
                   htmlFor="userFirstName"
@@ -212,45 +222,46 @@ const AddUser = () => {
                 >
                   Member Type
                 </label>
-                <select 
+                <select
                   type="text"
                   id="user_type"
                   name="user_type"
                   className="w-full px-4 py-2 border rounded-lg"
                 >
-                    {userType?.map((e, key) => {
-                        return <option key={key} value={e.id}>{e.name}</option>;
-                    })}
+                  {userType?.map((e, key) => {
+                    return (
+                      <option key={key} value={e.id}>
+                        {e.name}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div>
-                <label
-                  htmlFor="userDateOfBirth"
-                  className="block mb-2 font-medium"
-                >
+                <label htmlFor="dob" className="block mb-2 font-medium">
                   Date of Birth <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
-                  id="userDateOfBirth"
-                  name="userDateOfBirth"
+                  id="dob"
+                  name="dob"
                   required
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
             </div>
           </div>
-          <div className="flex justify-end space-x-4 mt-6 mb-10">
+          <div className="flex justify-center space-x-4 mt-20 mb-10">
             <button
               type="button"
-              className="px-6 py-2 bg-red-600 text-white rounded-lg"
+              className="px-28 py-2 bg-red-600 text-white rounded-lg"
               onClick={handleClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg"
+              className="px-28 py-2 bg-blue-500 text-white rounded-lg"
             >
               Save
             </button>

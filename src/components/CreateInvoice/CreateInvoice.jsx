@@ -9,7 +9,7 @@ const CreateInvoice = () => {
   const [defaultService, setdefaultService] = useState();
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // const [item, setItem] = useState(1);
   // const [pdf, setPdf] = useState();
 
@@ -29,8 +29,8 @@ const CreateInvoice = () => {
     sub_total: 0,
     total_amount: 0,
     services: [],
-    discount: 0.00,
-    vat: 0.00,
+    discount: 0.0,
+    vat: 0.0,
   });
 
   useEffect(() => {
@@ -47,10 +47,14 @@ const CreateInvoice = () => {
         if (response.ok) {
           const data = await response.json();
           setServices(data?.data);
-          if (data.data.length>0){
-            setFormData((prev) => ({ ...prev, 'service_name': data?.data[0]?.name }));
-            setFormData((prev) => ({ ...prev, 
-              services : [
+          if (data.data.length > 0) {
+            setFormData((prev) => ({
+              ...prev,
+              service_name: data?.data[0]?.name,
+            }));
+            setFormData((prev) => ({
+              ...prev,
+              services: [
                 {
                   service_name: data?.data[0]?.name,
                   quantity: 0,
@@ -58,12 +62,11 @@ const CreateInvoice = () => {
                   rate: "Monthly",
                   duration: 0,
                   price: 0,
-                  total_amount: 0,
+                  amount: 0,
                 },
               ],
-              
-             }));
-             setdefaultService(data.data[0].name)
+            }));
+            setdefaultService(data.data[0].name);
           }
         } else {
           console.error("Failed to fetch user data");
@@ -75,39 +78,38 @@ const CreateInvoice = () => {
     fetchServiceData();
   }, []);
 
+  const [url, getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
+  // const token_new = "0d76e9ba2f36fc5637e12ded4f5cb95393c50cb3";
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    const [url, getTokenLocalStorage] = useToken();
-    const token = getTokenLocalStorage();
+    if (name === "vat") setVat(parseFloat(value) || 0);
+    if (name === "discount") setDiscount(parseFloat(value) || 0);
 
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      
-      if (name === "vat") setVat(parseFloat(value) || 0);
-      if (name === "discount") setDiscount(parseFloat(value) || 0);
-      
-      // Recalculate totals when vat or discount changes
-      setFormData((prev) => {
-        const totals = calculateTotals({ ...prev, [name]: value });
-        return { ...prev, ...totals, [name]: value };
-      });
-    };
+    // Recalculate totals when vat or discount changes
+    setFormData((prev) => {
+      const totals = calculateTotals({ ...prev, [name]: value });
+      return { ...prev, ...totals, [name]: value };
+    });
+  };
 
-    const handleServiceChange = (index, field, value) => {
-      const updatedServices = [...formData.services];
-      updatedServices[index][field] = value;
-      updatedServices[index].total_amount = updatedServices[index].quantity * updatedServices[index].price;
-      
-      setFormData((prev) => {
-        const newFormData = {
-          ...prev,
-          services: updatedServices,
-        };
-        const totals = calculateTotals(newFormData);
-        return { ...newFormData, ...totals };
-      });
-    };
+  const handleServiceChange = (index, field, value) => {
+    const updatedServices = [...formData.services];
+    updatedServices[index][field] = value;
+    updatedServices[index].amount = updatedServices[index].quantity * updatedServices[index].price;
+
+    setFormData((prev) => {
+      const newFormData = {
+        ...prev,
+        services: updatedServices,
+      };
+      const totals = calculateTotals(newFormData);
+      return { ...newFormData, ...totals };
+    });
+  };
   const addServiceItem = () => {
     setFormData((prev) => ({
       ...prev,
@@ -120,7 +122,7 @@ const CreateInvoice = () => {
           rate: "Monthly",
           duration: 0,
           price: 0,
-          total_amount: 0,
+          amount: 0,
         },
       ],
     }));
@@ -136,136 +138,108 @@ const CreateInvoice = () => {
 
   const calculateTotals = (data = formData) => {
     const subTotal = data.services.reduce(
-      (sum, service) => sum + (service.total_amount || 0),
+      (sum, service) => sum + (service.amount || 0),
       0
     );
-    
+
     const discountAmount = parseFloat(data.discount) || 0;
-    const vatAmount = ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
+    const vatAmount =
+      ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
     const total = subTotal + vatAmount - discountAmount;
-    
+
     return { sub_total: subTotal, total_amount: total };
   };
 
-  const handleSubmit = async (e) => {
+  const local_url = "http://192.168.0.131:8002";
+
+
+// SUBMIT B________
+
+  const handleSubmit = async (e, action) => {
+    
     e.preventDefault();
-    const { subTotal, total } = calculateTotals();
 
-    // Create a FormData object to handle both JSON data and files
-    const formDataPayload = new FormData();
+    try {
+      const formDataPayload = new FormData();
 
-    // // Append all form fields to FormData
-    // formDataPayload.append("service_name", formData.service_name);
-    // formDataPayload.append("company_name", formData.company_name);
-    // formDataPayload.append("billing_address", formData.billing_address);
-    // formDataPayload.append("client_id", formData.client_id);
-    // formDataPayload.append("website_url", formData.website_url);
-    // formDataPayload.append("address", formData.address);
-    // formDataPayload.append("client_name", formData.client_name);
-    // formDataPayload.append("date", formData.date);
-    // formDataPayload.append("payment_status", formData.payment_status);
-    // formDataPayload.append("client_email", formData.client_email);
-    // formDataPayload.append("client_phone", formData.client_phone);
-    formDataPayload.append("total_amount", total); // Use the calculated total
-    formDataPayload.append("sub_total", subTotal);
-    formDataPayload.append("discount", formData.discount);
-    formDataPayload.append("vat", formData.vat);
-
-    // Append services (you might need to serialize this as JSON or handle it differently based on server expectations)
-    formDataPayload.append("services", JSON.stringify(formData.services));
-
-    // Append the file if it exists
-    if (formData.companyLogo) {
+      // Append all form fields to FormData
+      formDataPayload.append("service_name", formData.service_name);
+      formDataPayload.append("company_name", formData.company_name);
+      formDataPayload.append("billing_address", formData.billing_address);
+      formDataPayload.append("client_id", formData.client_id);
+      formDataPayload.append("website_url", formData.website_url);
+      formDataPayload.append("address", formData.address);
+      formDataPayload.append("client_name", formData.client_name);
+      formDataPayload.append("date", formData.date);
+      formDataPayload.append("payment_status", formData.payment_status);
+      formDataPayload.append("client_email", formData.client_email);
+      formDataPayload.append("client_phone", formData.client_phone);
+      formDataPayload.append("total_amount", formData.total_amount); // Use the calculated total
+      formDataPayload.append("sub_total", formData.sub_total);
+      formDataPayload.append("discount", formData.discount);
+      formDataPayload.append("vat", formData.vat);
       formDataPayload.append("company_logo", formData.company_logo);
-    }
 
-    try {
-      const response = await axios.post(`${url}/service/invoice/`, formData, {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data", // Change to multipart/form-data for file uploads
-        },
-      });
-      if (response.data.success){
-        alert("Invoice created successfully!");
-      }
-      else{
-        alert(response.data.message);
-      }
-      console.log("response", response.data.success)
-    } catch (error) {
-      console.error(
-        "Error creating invoice:",
-        error.response ? error.response.data : error.message
-      );
-      alert(
-        "Failed to create invoice: " +
-          (error.response ? error.response.data : error.message)
-      );
-    }
-  };
-
-  const { subTotal, total } = calculateTotals();
-
-  //  const handlePDFView = () =>{
-  //   useEffect(() => {
-  //     const fetchPdfPreview = async () => {
-  //       try {
-  //         const response = await fetch("http://192.168.0.131:8001/service/invoice/14/", {
-  //           method: "GET",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             // Authorization: `Token ${token}`,
-  //           },
-  //         });
-
-  //         if (response.ok) {
-  //           const data = await response.json();
-  //           setPdf(data?.data);
-  //         } else {
-  //           console.error("Failed to fetch user data");
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching user data:", error);
-  //       }
-  //     };
-  //     fetchPdfPreview();
-  //   }, []);
-  //  }
-
-  const previewInvoice = async (invoiceId) => {
-    try {
-      const response = await fetch(
-        "http://192.168.0.131:8002/service/invoice/14/",
-        {
-          method: "GET",
+      // if (formData?.companyLogo) {
+      //   formDataPayload.append("company_logo", formData.company_logo);
+      // }
+      // Append services (you might need to serialize this as JSON or handle it differently based on server expectations)
+      formDataPayload.append("services", JSON.stringify(formData.services));
+      if (action==="save"){
+        const response = await fetch(`${local_url}/service/invoice/`, {
+          method: "POST",
           headers: {
-            // "Accept": "application/pdf",
+            Authorization: `Token ${token_new}`, // Do NOT manually set Content-Type
           },
+          body: formDataPayload, // FormData automatically sets the right Content-Type
+        });
+
+        if (!response.status) {
+          const errorData = await response.json(); // Read error response only once
+          throw new Error(errorData.message || "Failed to create invoice.");
+        } else {
+          // If c, assume response is a file (PDF)
+          alert("success")
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to load the invoice.");
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank"); // Opens in a new tab
+      else if (action==="preview") {
+        {
+          const response = await fetch(`${url}/service/invoice-pdf/`, {
+            method: "POST",
+            headers: {
+              Authorization: `Token ${token}`, // Do NOT manually set Content-Type
+            },
+            body: formDataPayload, // FormData automatically sets the right Content-Type
+          });
+  
+          if (!response.status) {
+            const errorData = await response.json(); // Read error response only once
+            alert(errorData.message || "Failed to create invoice.");
+          } else {
+            // If successful, assume response is a file (PDF)
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, "_blank");
+          }
+        }
+      }
+      // alert("Invoice created successfully!");
     } catch (error) {
-      console.error("Error previewing invoice:", error);
+      console.error("Error creating invoice:", error.message);
+      alert("Failed to create invoice: " + error.message);
     }
   };
+
 
 
   const handleCreateInvoice = () => {
-    navigate("/invoice-list")
-  }
+    navigate("/invoice-list");
+  };
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className="p-8 w-2/3 mx-auto space-y-6 bg-white  rounded-2xl"
+      onSubmit={(e)=> handleSubmit(e , "save")}
+      className="p-8 w-2/3 mx-auto space-y-6 bg-white  rounded-2xl mt-2"
     >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Create Invoice</h1>
@@ -273,7 +247,6 @@ const CreateInvoice = () => {
 
       <div className="grid grid-cols-3 gap-6">
         <select
-          
           type="text"
           id="service_name"
           name="service_name"
@@ -410,7 +383,6 @@ const CreateInvoice = () => {
             value={formData.vat}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            
           />
         </div>
         <div>
@@ -420,7 +392,6 @@ const CreateInvoice = () => {
             value={formData.discount}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            
           />
         </div>
       </div>
@@ -454,6 +425,7 @@ const CreateInvoice = () => {
                     onChange={(e) =>
                       handleServiceChange(index, "service_name", e.target.value)
                     }
+
                     required
                   >
                     {services?.map((e, key) => {
@@ -548,7 +520,7 @@ const CreateInvoice = () => {
                 </td>
 
                 <td className="py-2 px-4">
-                  ${service?.total_amount?.toFixed(2)}
+                  ${service?.amount?.toFixed(2)}
                 </td>
                 <td className="py-2 px-4">
                   <button
@@ -573,13 +545,15 @@ const CreateInvoice = () => {
       </div>
 
       <div className="text-right space-y-2 border-t border-gray-200 pt-4">
-  <p>Sub Total: ${formData.sub_total.toFixed(2)}</p>
-  <p className="text-red-500">
-    Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
-  </p>
-  <p>VAT: {formData.vat}%</p>
-  <p className="text-xl font-semibold">TOTAL: ${formData.total_amount.toFixed(2)}</p>
-</div>
+        <p>Sub Total: ${formData.sub_total.toFixed(2)}</p>
+        <p className="text-red-500">
+          Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
+        </p>
+        <p>VAT: {formData.vat}%</p>
+        <p className="text-xl font-semibold">
+          TOTAL: ${formData.total_amount.toFixed(2)}
+        </p>
+      </div>
 
       <div className="flex justify-end space-x-4">
         <label className="flex items-center space-x-2 text-gray-600">
@@ -592,9 +566,8 @@ const CreateInvoice = () => {
         <button
           type="submit"
           className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-          // onClick={handleCreateInvoice}
+          // onClick={handleCreateInvoice}//
         >
-          
           Save
         </button>
         <button
@@ -607,7 +580,7 @@ const CreateInvoice = () => {
         <button
           type="button"
           className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-          onClick={() => previewInvoice(1)}
+          onClick={(e)=> handleSubmit(e , "preview")}
         >
           Preview
         </button>

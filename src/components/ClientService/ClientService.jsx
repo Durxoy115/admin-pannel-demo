@@ -35,9 +35,10 @@ const ClientService = ({ clientId }) => {
   };
 
   return (
-    <div className="mt-16">
-      <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
-        <h1 className="text-3xl font-bold mb-4">Client Services List</h1>
+    <div className="mt-16 w-full ">
+  <div className="w-5/6 mx-auto">
+  <div className="flex justify-between items-center  ">
+        <h1 className="text-3xl font-bold mb-4">Current Services</h1>
         <button
           className="bg-blue-700 w-20 text-white p-2 rounded-md hover:bg-blue-800"
           onClick={handleAddService}
@@ -46,7 +47,7 @@ const ClientService = ({ clientId }) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-8 p-4 ml-10 mr-10">
+      <div className="grid grid-cols-4 gap-8 p-4">
         {services &&
           services.map((service, index) => (
             <div
@@ -72,6 +73,7 @@ const ClientService = ({ clientId }) => {
             </div>
           ))}
       </div>
+  </div>
     </div>
   );
 };

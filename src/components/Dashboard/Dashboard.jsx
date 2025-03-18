@@ -7,7 +7,8 @@ import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
 import { GrNotes } from "react-icons/gr";
 import { FaTrash } from "react-icons/fa";
-
+import { IoIosCall } from "react-icons/io";
+import { MdOutlineMail } from "react-icons/md";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import useToken from "../hooks/useToken";
@@ -175,27 +176,27 @@ const Dashboard = () => {
       {isLoading ? (
         <p className="text-center mt-8">Loading...</p>
       ) : filteredClients.length > 0 ? (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-md mt-6 mx-28">
+        <div className="overflow-x-auto bg-white rounded-lg shadow-md  mx-28">
           <table className="table-auto w-full border-collapse">
-            <thead className="bg-gray-800 text-white">
+            <thead className="bg-gray-50 text-black">
               <tr>
-                <th className="text-left px-4 py-2">Client Name</th>
-                <th className="text-left px-4 py-2">Client ID</th>
-                <th className="text-left px-4 py-2">Mobile</th>
-                <th className="text-left px-4 py-2">Email</th>
-                <th className="text-left px-4 py-2">Company Name</th>
-                <th className="text-left px-4 py-2">Country</th>
-                <th className="text-center px-4 py-2">Status</th>
-                <th className="text-center px-4 py-2">Actions</th>
+                <th className="text-left px-4 py-2 border-b">Client Name</th>
+                <th className="text-left px-4 py-2 border-b">Client ID</th>
+                <th className="text-left px-4 py-2 border-b">Mobile</th>
+                <th className="text-left px-4 py-2 border-b">Email</th>
+                <th className="text-left px-4 py-2 border-b">Company Name</th>
+                <th className="text-left px-4 py-2 border-b">Country</th>
+                <th className="text-center px-4 py-2 border-b">Status</th>
+                <th className="text-center px-4 py-2 border-b">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody >
               {filteredClients.map((client, index) => (
                 <tr
                   key={client.client_id}
                   className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
                 >
-                  <td className="text-left px-4 py-2 flex items-center">
+                  <td className="text-left px-4 py-2 flex items-center ">
                     <input
                       type="checkbox"
                       checked={selectedClients.includes(client.client_id)}
@@ -215,8 +216,18 @@ const Dashboard = () => {
                     {client.name || "N/A"}
                   </td>
                   <td>{client.client_id}</td>
-                  <td>{client.contact}</td>
-                  <td>{client.email}</td>
+                  <td className="flex items-center gap-2">
+                    <IoIosCall className="text-green-500" />
+                    {client.contact}
+                  </td>
+
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <MdOutlineMail className="text-red-500" />
+                      {client.email}
+                    </div>
+                  </td>
+
                   <td>{client.company_name}</td>
                   <td>{client.country}</td>
                   <td className="text-center">
@@ -224,21 +235,40 @@ const Dashboard = () => {
                   </td>
                   <td>
                     <div className="flex justify-center space-x-2 ">
-                      <button style={{ backgroundColor: "#EFEFEF", padding: "2px" }}>
+                      <button
+                        style={{ backgroundColor: "#EFEFEF", padding: "2px" }}
+                      >
                         <AiOutlineEye />
                       </button>
 
                       <button
-                       style={{backgroundColor: "#EFE5FF", padding:"2px", borderRadius: "5px", color:"#5800FF"}}
+                        style={{
+                          backgroundColor: "#EFE5FF",
+                          padding: "2px",
+                          borderRadius: "5px",
+                          color: "#5800FF",
+                        }}
                         onClick={() => handleClientProfile(client.client_id)}
                       >
                         <AiOutlineEdit />
                       </button>
-                      <button style={{backgroundColor: "#FEF9C2", padding:"2px", borderRadius: "5px", color:"#B9AB12"}}>
+                      <button
+                        style={{
+                          backgroundColor: "#FEF9C2",
+                          padding: "2px",
+                          borderRadius: "5px",
+                          color: "#B9AB12",
+                        }}
+                      >
                         <GrNotes />
                       </button>
                       <button
-                        style={{backgroundColor: "#FFC6B8", padding:"2px", borderRadius: "5px", color: "#FF4242"}}
+                        style={{
+                          backgroundColor: "#FFC6B8",
+                          padding: "2px",
+                          borderRadius: "5px",
+                          color: "#FF4242",
+                        }}
                         onClick={() =>
                           openDeleteModal("single", client.client_id)
                         }
@@ -264,8 +294,18 @@ const Dashboard = () => {
               {deleteMode === "single" ? "this client" : "selected clients"}?
             </p>
             <div className="items-center justify-center flex mt-6">
-            <button className="bg-blue-600 text-black p-2 rounded-lg gap-3 " onClick={() => setShowDeleteModal(false)}>Cancel</button>
-            <button className="bg-red-600 text-black p-2 rounded-lg gap-3 ml-2" onClick={handleDelete}>Confirm</button>
+              <button
+                className="bg-blue-600 text-black p-2 rounded-lg gap-3 "
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-600 text-black p-2 rounded-lg gap-3 ml-2"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>

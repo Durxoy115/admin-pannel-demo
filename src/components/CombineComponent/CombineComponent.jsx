@@ -8,7 +8,7 @@ const CombineComponent = () => {
 
     console.log("This is mnain id", id.id)
     return (
-        <div>
+        <div className='bg-gray-100'>
             <ClientProfile id = {id?.id}></ClientProfile>
             <ClientService clientId = {id?.id}></ClientService>
         </div>

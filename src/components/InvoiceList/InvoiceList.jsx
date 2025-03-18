@@ -23,6 +23,8 @@ const InvoiceList = () => {
   const token = getTokenLocalStorage();
   const navigate = useNavigate();
 
+
+
   const fetchInvoices = async () => {
     try {
       const response = await axios.get(`${url}/service/invoice/`, {
