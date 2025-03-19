@@ -24,17 +24,15 @@ const OTPPage = () => {
     }
 
     try {
-      // Send OTP, email, and password to the server for verification and password reset
       const response = await axios.post(`${url}/auth/user/set-password/`, {
         otp: otp.trim(),
         email: email.trim(),
         password,
       });
 
-      // Check if the OTP verification and password reset were successful
       if (response.data.success) {
         alert("Password reset successful!");
-        navigate("/login"); // Navigate to the login page
+        navigate("/login");
       } else {
         setError("Invalid OTP or email. Please try again.");
       }
@@ -47,16 +45,18 @@ const OTPPage = () => {
     }
   };
 
-  console.log(otp, email, password)
+  console.log(otp, email, password);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
       <form
-        className="bg-white shadow-md pl-80 pr-80 rounded-md pt-20"
+        className="bg-white shadow-md rounded-md p-6 sm:p-10 md:p-16 w-full max-w-lg"
         onSubmit={handleVerifyOTP}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Verify OTP and Reset Password</h2>
-        
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">
+          Verify OTP and Reset Password
+        </h2>
+
         {/* Email Field */}
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium mb-1">
@@ -108,7 +108,7 @@ const OTPPage = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
           disabled={loading}
         >
           {loading ? "Resetting Password..." : "Reset Password"}
@@ -117,7 +117,7 @@ const OTPPage = () => {
         {/* Back to Forgot Password Link */}
         <p
           className="text-blue-500 text-sm mt-4 text-right cursor-pointer"
-          onClick={() => navigate("/forgotPassword")}
+          onClick={() => navigate("/forgot-password")} // Fixed the path to "/forgot-password"
         >
           Back to Forgot Password
         </p>

@@ -163,8 +163,7 @@ const PaymentAdd = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <Footer />
+    
     </div>
   );
 };

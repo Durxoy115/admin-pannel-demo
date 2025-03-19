@@ -1,25 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { useSelector, useDispatch } from 'react-redux'
-// import { getToken, setToken } from '../../Redux/TokenSlice'
 import "./LoginPage.css";
 import useToken from "../hooks/useToken";
 
-
 const LoginPage = () => {
-  const [username, setUsername] = useState(""); // State for username
-  const [password, setPassword] = useState(""); // State for password
-  const [message, setMessage] = useState(""); // State for messages
-  const [isSuccess, setIsSuccess] = useState(false); // State for success or failure
-  const navigate = useNavigate(); // For navigation
-  const [url,getTokenLocalStorage] = useToken();
-  // const token = getTokenLocalStorage()
-  // const dispatch = useDispatch();
-  // const token = useSelector((state) => state.token.value);
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
+  const [url, getTokenLocalStorage] = useToken();
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
     try {
       const response = await fetch(`${url}/auth/user/login/`, {
@@ -28,30 +21,20 @@ const LoginPage = () => {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ username, password }), // Send username and password
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.success ) {
-        // Save user data and token in localStorage
+      if (response.ok && data.success) {
         localStorage.setItem("office_token", data.data.token);
-        // dispatch(setToken(data.data.token))
         setMessage("Login successful!");
         setIsSuccess(true);
 
-        // Redirect to the dashboard after a short delay
         setTimeout(() => {
           navigate("/dashboard");
         }, 1000);
-        
-      } 
-    //  else if(data.data.user_type.name !== "Admin"){
-    //     setMessage("Only Admin Can Login!!")
-    //  }
-      
-      
-      else {
+      } else {
         setIsSuccess(false);
         setMessage(data.message || "Login failed. Please try again.");
       }
@@ -63,12 +46,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
-      <form 
-        className="bg-white shadow-md pl-60 pr-56 rounded-md pt-20 login_form"
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+      <form
+        className="bg-white shadow-md rounded-md p-6 sm:p-10 md:p-16 w-full login_form"
         onSubmit={handleLogin}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center pt-16">Login</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
         <div className="mb-4">
           <label htmlFor="username" className="block text-sm font-medium mb-1">
             Username
@@ -124,4 +107,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-  

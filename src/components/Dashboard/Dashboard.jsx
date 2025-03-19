@@ -123,23 +123,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
+    <div className=" mx-auto p-10">
       <div>
-        <h1 className="text-3xl font-semibold mt-6 ml-28">
-          Clients Information
-        </h1>
+        <h1 className="text-3xl font-semibold ">Clients Information</h1>
       </div>
 
-      <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center ml-28 mr-28 mt-4 h-16">
-        <p>Clients Details</p>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={handleSearch}
-          className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 ml-4 mr-96"
-        />
-        <div className="ml-96">
+      <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center mt-4 h-16 justify-between">
+      <div className="flex gap-4">
+      <div >
+          <p>Clients Details</p>
+        </div>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 w-3/4 "
+          />
+        </div>
+      </div>
+        <div>
           <button
             className="text-xl text-white px-4 py-2 rounded-lg mr-2"
             onClick={handleOpenModal}
@@ -158,10 +163,10 @@ const Dashboard = () => {
           >
             <IoMdRefresh />
           </button>
+          <button className="text-xl text-white px-4 py-2 rounded-lg">
+            <BsDownload />
+          </button>
         </div>
-        <button className="text-xl text-white px-4 py-2 rounded-lg">
-          <BsDownload />
-        </button>
 
         {selectedClients.length > 0 && (
           <button
@@ -176,7 +181,7 @@ const Dashboard = () => {
       {isLoading ? (
         <p className="text-center mt-8">Loading...</p>
       ) : filteredClients.length > 0 ? (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-md  mx-28">
+        <div className="overflow-x-auto bg-white rounded-lg shadow-md  mx-auto">
           <table className="table-auto w-full border-collapse">
             <thead className="bg-gray-50 text-black">
               <tr>
@@ -190,7 +195,7 @@ const Dashboard = () => {
                 <th className="text-center px-4 py-2 border-b">Actions</th>
               </tr>
             </thead>
-            <tbody >
+            <tbody>
               {filteredClients.map((client, index) => (
                 <tr
                   key={client.client_id}

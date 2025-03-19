@@ -20,21 +20,19 @@ const Header = () => {
   const token = getTokenLocalStorage();
 
   useEffect(() => {
-    // Fetch user details from the API endpoint
     const fetchUserProfile = async () => {
       try {
         const response = await fetch(`${url}/auth/profile/`, {
           headers: {
             Authorization: `Token ${token}`,
           },
-          
         });
 
         if (response.ok) {
           const data = await response.json();
           setUserDetails({
-            username: data?.data?.username, 
-            userType: data?.data?.user_type?.name, 
+            username: data?.data?.username || "User",
+            userType: data?.data?.user_type?.name || "Role",
           });
         } else {
           console.error("Failed to fetch user details");
@@ -45,12 +43,12 @@ const Header = () => {
     };
 
     fetchUserProfile();
-  }, [token]); 
+  }, [token, url]);
 
   const handleNavigation = (pageLink) => {
     navigate(`/${pageLink}`);
   };
-  
+
   const handleLogOut = async () => {
     try {
       const response = await fetch(`${url}/auth/user/logout/`, {
@@ -74,110 +72,113 @@ const Header = () => {
   };
 
   return (
-    <nav className="top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-6 py-3">
+    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-4 sm:px-6 md:px-8 py-3">
       {/* Logo Section */}
-      <div className="w-20">
+      <div className="flex-shrink-0">
         <img
-          onClick={()=>handleNavigation(`dashboard`)}
+          onClick={() => handleNavigation("dashboard")}
           src="/assets/Images/Images-nav/logo-image.jpg"
           alt="Company Logo"
-          className="h-12 w-full  ml-24"
+          className="h-10 sm:h-12 w-auto ml-4 sm:ml-8 md:ml-24 cursor-pointer"
         />
       </div>
 
       {/* User Info & Menu */}
-      <div className="flex items-center space-x-3">
-        <p className="text-gray-600 text-sm underline">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        <p className="text-gray-600 text-xs sm:text-sm underline truncate max-w-[100px] sm:max-w-[150px]">
           {userDetails.userType}
         </p>
 
         <Menu as="div" className="relative inline-block text-left">
-          <MenuButton className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <span>{userDetails.username}</span>
+          <MenuButton className="flex items-center gap-1 sm:gap-2 rounded-full bg-gray-100 px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span className="truncate max-w-[80px] sm:max-w-[120px]">
+              {userDetails.username}
+            </span>
             <img
               src="/assets/Images/Images-nav/images.png"
-              className="h-8 w-8 rounded-full"
+              className="h-6 w-6 sm:h-8 sm:w-8 rounded-full"
               alt="Profile"
+              onError={(e) => (e.target.src = "/default-profile.jpg")} // Fallback image
             />
           </MenuButton>
 
-          <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+          <MenuItems className="absolute right-0 z-10 mt-2 w-48 sm:w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
             <div className="py-1">
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={()=>handleNavigation(`activity-log`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    onClick={() => handleNavigation("activity-log")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <RxActivityLog className="mr-2" /> Activity Log
+                    <RxActivityLog className="mr-2 text-sm sm:text-base" /> Activity Log
                   </button>
                 )}
               </MenuItem>
-              <span className="items-center ml-4 font-bold">
-                {userDetails.username}
-              </span>
+              <div className="flex items-center px-3 sm:px-4 py-2">
+                <span className="font-bold text-xs sm:text-sm truncate">
+                  {userDetails.username}
+                </span>
+              </div>
               <hr className="border-t border-gray-200 my-1" />
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={()=>handleNavigation(`profile`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    onClick={() => handleNavigation("profile")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <FaUser className="mr-2" /> My Profile
-                  </button>
-                )}
-              </MenuItem>
-
-              <MenuItem>
-                {({ active }) => (
-                  <button
-                    onClick={()=>handleNavigation(`message`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
-                      active ? "bg-gray-100" : "text-gray-700"
-                    }`}
-                  >
-                    <LuMessageSquareText className="mr-2" /> Message
+                    <FaUser className="mr-2 text-sm sm:text-base" /> My Profile
                   </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={()=>handleNavigation(`payment-history`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    onClick={() => handleNavigation("message")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <HiOutlineDocumentCurrencyDollar className="mr-2" /> Payment
-                    History
+                    <LuMessageSquareText className="mr-2 text-sm sm:text-base" /> Message
                   </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={()=>handleNavigation(`order-list`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    onClick={() => handleNavigation("payment-history")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <CiViewList className="mr-2" /> Order List
+                    <HiOutlineDocumentCurrencyDollar className="mr-2 text-sm sm:text-base" /> Payment History
                   </button>
                 )}
               </MenuItem>
               <MenuItem>
                 {({ active }) => (
                   <button
-                    onClick={()=>handleNavigation(`change-password`)}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    onClick={() => handleNavigation("order-list")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <RiLockPasswordFill className="mr-2" /> Change Password
+                    <CiViewList className="mr-2 text-sm sm:text-base" /> Order List
+                  </button>
+                )}
+              </MenuItem>
+              <MenuItem>
+                {({ active }) => (
+                  <button
+                    onClick={() => handleNavigation("change-password")}
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
+                      active ? "bg-gray-100" : "text-gray-700"
+                    } w-full text-left`}
+                  >
+                    <RiLockPasswordFill className="mr-2 text-sm sm:text-base" /> Change Password
                   </button>
                 )}
               </MenuItem>
@@ -187,11 +188,11 @@ const Header = () => {
                 {({ active }) => (
                   <button
                     onClick={handleLogOut}
-                    className={`flex items-center px-4 py-2 text-sm ${
+                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
                       active ? "bg-gray-100" : "text-gray-700"
-                    }`}
+                    } w-full text-left`}
                   >
-                    <CiLogout className="mr-2" /> Log Out
+                    <CiLogout className="mr-2 text-sm sm:text-base" /> Log Out
                   </button>
                 )}
               </MenuItem>

@@ -9,7 +9,6 @@ const ForgotPasswordPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [url] = useToken();
-  console.log(url);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -27,10 +26,9 @@ const ForgotPasswordPage = () => {
         email,
       });
 
-      // Check if the request was successful based on the response data
       if (response.data.success) {
         alert("OTP sent to your email!");
-        navigate("/otp"); // Navigate to the OTP page
+        navigate("/otp");
       } else {
         setError("Failed to send OTP. Please try again.");
       }
@@ -44,12 +42,14 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 overflow-hidden">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
       <form
-        className="bg-white shadow-md pl-80 pr-80 rounded-md pt-20"
+        className="bg-white shadow-md rounded-md p-6 sm:p-10 md:p-16 w-full max-w-lg"
         onSubmit={handleSendOTP}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center pt-16">Forgot Password</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">
+          Forgot Password
+        </h2>
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium mb-1">
             Enter Your Email
@@ -63,17 +63,17 @@ const ForgotPasswordPage = () => {
             required
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
           disabled={loading}
         >
           {loading ? "Sending..." : "Send OTP"}
         </button>
         <p
           className="text-blue-500 text-sm mt-4 text-right cursor-pointer"
-          onClick={() => navigate("login")}
+          onClick={() => navigate("/login")} // Fixed the path to "/login"
         >
           Back to Login
         </p>

@@ -56,10 +56,10 @@ const OrderAdd = () => {
   };
 
   return (
-    <div className="max-w-4xl  mt-10 p-8 bg-white rounded-md  ml-20">
+    <div className="  p-10 bg-gray-100 rounded-md  ">
       <h2 className="text-3xl font-bold mb-8">Create New Order</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-3 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-6 min-h-screen">
+        <div className="grid grid-cols-3 gap-6 ">
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Service/Product Name<span className="text-red-500">*</span>

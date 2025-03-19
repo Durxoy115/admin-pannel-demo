@@ -9,12 +9,55 @@ opacity: 0px;
 
 } */
 
-.login_form{
-width: 1186px;
-height: 562px;
-top: 158px;
-left: 367px;
-gap: 0px;
-border-radius: 10px 0px 0px 0px;
-opacity: 0px;
-}
+/* Base styles for the login form */
+.login_form {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 10px;
+    opacity: 1;
+    box-sizing: border-box;
+  }
+  
+  /* Small screens (mobile, < 640px) */
+  @media (max-width: 639px) {
+    .login_form {
+      padding: 1.5rem; /* Reduced padding for mobile */
+      margin: 1rem;
+    }
+  
+    .login_form h2 {
+      font-size: 1.5rem; /* Smaller heading */
+    }
+  
+    .login_form input {
+      font-size: 0.9rem; /* Smaller input text */
+    }
+  
+    .login_form button {
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* Medium screens (tablet, 640px - 1023px) */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .login_form {
+      padding: 2.5rem;
+      max-width: 500px;
+    }
+  
+    .login_form h2 {
+      font-size: 1.75rem;
+    }
+  }
+  
+  /* Large screens (desktop, >= 1024px) */
+  @media (min-width: 1024px) {
+    .login_form {
+      padding: 4rem 5rem; /* Larger padding for desktop */
+      max-width: 600px; /* Slightly larger form width */
+    }
+  
+    .login_form h2 {
+      font-size: 2rem;
+    }
+  }
