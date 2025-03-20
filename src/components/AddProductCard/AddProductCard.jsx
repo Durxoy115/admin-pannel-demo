@@ -7,8 +7,8 @@ import useToken from "../hooks/useToken";
 
 const AddProductCard = () => {
   const [services, setServices] = useState([]);
-  const navigate = useNavigate()
-  const [url,getTokenLocalStorage] = useToken();
+  const navigate = useNavigate();
+  const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,7 +19,7 @@ const AddProductCard = () => {
     type: "",
     image: null,
   });
-  console.log(services)
+
   const apiUrl = `${url}/service/`;
 
   // Fetch service data from API
@@ -53,7 +53,6 @@ const AddProductCard = () => {
     try {
       const response = await axios.post(apiUrl, formdata, {
         headers: {
-          //   "Content-Type": "multipart/form-data",
           Authorization: `Token ${token}`,
         },
       });
@@ -67,6 +66,7 @@ const AddProductCard = () => {
         type: "",
         image: null,
       });
+      navigate("/profile"); // Navigate after successful submission
     } catch (error) {
       console.error("Error adding service:", error);
     }
@@ -74,124 +74,125 @@ const AddProductCard = () => {
 
   const handleAddservicepath = () => {
     navigate("/profile");
-  }
+  };
 
   // Fetch services on load
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [token, url]);
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-semibold mt-6 ml-28 ">
+    <div className="bg-gray-50 min-h-screen mt-20">
+      <h1 className="text-2xl sm:text-3xl font-semibold mt-6 sm:mt-8 md:mt-10 ml-4 sm:ml-8 md:ml-44">
         Add Our Products & Services
       </h1>
-
-      {/* Form Section */}
-      <form
-        className="bg-white p-6 rounded-lg shadow-md mt-6 w-3/4 space-y-4 "
-        onSubmit={handleAddService}
-      >
-        <div className="grid grid-cols-4 gap-6">
-          <div>
-            <label className="block font-medium mb-1">Name*</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter service name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Short Description*</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter short description"
-              value={formData.short_description}
-              onChange={(e) =>
-                setFormData({ ...formData, short_description: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Price*</label>
-            <input
-              type="number"
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter service price"
-              value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">Type*</label>
-            <select
-              className="w-full border rounded-lg px-3 py-2"
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
-              required
+      <div className="flex flex-col items-center justify-start">
+        {/* Form Section */}
+        <div className="mt-4 sm:mt-6 sm:w-full md:w-5/6  px-4 sm:px-6 md:px-8">
+          <form
+            className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4 sm:space-y-5"
+            onSubmit={handleAddService}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Name*</label>
+                <input
+                  type="text"
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+                  placeholder="Enter service name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Short Description*</label>
+                <input
+                  type="text"
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+                  placeholder="Enter short description"
+                  value={formData.short_description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, short_description: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Price*</label>
+                <input
+                  type="number"
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+                  placeholder="Enter service price"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Type*</label>
+                <select
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+                  value={formData.type}
+                  onChange={(e) =>
+                    setFormData({ ...formData, type: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="Product">Product</option>
+                  <option value="Service">Service</option>
+                </select>
+              </div>
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Currency*</label>
+                <input
+                  type="text"
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"
+                  placeholder="Enter currency"
+                  value={formData.currency}
+                  onChange={(e) =>
+                    setFormData({ ...formData, currency: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium mb-1 text-sm sm:text-base">Image*</label>
+                <input
+                  type="file"
+                  className="w-full border rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  onChange={(e) =>
+                    setFormData({ ...formData, image: e.target.files[0] })
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-4 w-full lg:w-3/4">
+              <label className="block font-medium mb-1 text-sm sm:text-base">Project Information*</label>
+              <ReactQuill
+                className="w-full"
+                theme="snow"
+                value={formData.description}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 sm:px-6 py-1 sm:py-2 mt-4 sm:mt-6 rounded-lg w-full sm:w-60 mx-auto shadow-md flex items-center justify-center text-sm sm:text-base"
             >
-              <option value="">Select</option>
-              <option value="Product">Product</option>
-              <option value="Service">Service</option>
-            </select>
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Currency*</label>
-            <input
-              type="text"
-              className="w-full border rounded-lg px-3 py-2"
-              placeholder="Enter currency"
-              value={formData.currency}
-              onChange={(e) =>
-                setFormData({ ...formData, currency: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Image*</label>
-            <input
-              type="file"
-              className="w-full border rounded-lg px-3 py-2"
-              onChange={(e) =>
-                setFormData({ ...formData, image: e.target.files[0] })
-              }
-              required
-            />
-          </div>
+              Save
+            </button>
+          </form>
         </div>
-        <div className="mt-4 w-3/4">
-          <label className="block font-medium mb-1">Project Information*</label>
-          <ReactQuill
-            className="w-full "
-            theme="snow"
-            value={formData.description}
-            onChange={(value) =>
-              setFormData({ ...formData, description: value })
-            }
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 mt-6 rounded-lg w-60 mx-auto shadow-md flex items-center justify-center mt-auto"
-          onClick={handleAddservicepath}
-        >
-          Save
-        </button>
-      </form>
+      </div>
     </div>
   );
 };
