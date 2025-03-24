@@ -61,7 +61,7 @@ const MyProfile = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 bg-gray-100 shadow-md mt-14">
+    <div className="p-1 sm:p-6 md:p-8 bg-gray-100 shadow-md mt-14">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-2xl sm:text-3xl font-semibold">My Profile</h2>
         <button
@@ -73,7 +73,7 @@ const MyProfile = () => {
       </div>
 
       <div className="w-full flex flex-col bg-white rounded-md">
-        <div className="w-full mx-auto p-4 sm:p-6">
+        <div className="w-full mx-auto p-2 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10">
             <div className="flex flex-col">
               <label

@@ -8,6 +8,7 @@ const SupportContactList = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+
   const fetchAddress = async () => {
     try {
       const response = await fetch(`${url}/company/support-contact/`, {
@@ -35,53 +36,53 @@ const SupportContactList = () => {
   };
 
   return (
-    <div>
-      <div className="mt-16">
-        <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
-          <h1 className="text-3xl font-bold mb-4">Support Contact List</h1>
+    <div className=" sm:p-2 lg:p-1 min-h-screen bg-white">
+      <div className="mt-12 sm:mt-16">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mx-4 sm:mx-4 lg:mx-10 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
+            Support Contact List
+          </h1>
           <button
-            className="bg-blue-700 w-20 text-white p-2 rounded-md hover:bg-blue-800"
+            className="bg-blue-700 w-full sm:w-20 text-white py-2 px-4 rounded-md hover:bg-blue-800 transition-colors duration-200 text-sm sm:text-base"
             onClick={handleContact}
           >
             Add
           </button>
         </div>
 
-        <div className="mt-6 ml-10 mr-10 overflow-x-auto">
+        <div className="overflow-x-auto mx-4 sm:mx-6 lg:mx-10">
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-3 px-6 text-left border-b">
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Social Media Type
                 </th>
-                <th className="py-3 px-6 text-left border-b">
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Social Media No/Link
                 </th>
-                <th className="py-3 px-6 text-center border-b">Actions</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-center border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-6 border-b">
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <img
-                      src={`https://admin.zgs.co.com${contact.logo}`} // Use contact.logo instead of client.photo
+                      src={`https://admin.zgs.co.com${contact.logo}`}
                       alt="logo"
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "50%",
-                        marginRight: "5px",
-                      }}
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 sm:mr-3 object-cover"
                     />
                   </td>
-                  <td className="py-3 px-6 border-b">{contact.account}</td>
-                  <td className=" py-3 px-6   border-b">
-                    <div className="flex justify-center gap-2">
-                    <FiEdit className="text-purple-500 hover:text-purple-700" />
-                    <FiTrash2 className="text-red-500 hover:text-red-700" />
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.account}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                    <div className="flex justify-center gap-2 sm:gap-3">
+                      <FiEdit className="text-purple-500 hover:text-purple-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer" />
+                      <FiTrash2 className="text-red-500 hover:text-red-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer" />
                     </div>
-                    
                   </td>
                 </tr>
               ))}

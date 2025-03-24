@@ -156,6 +156,7 @@ const CreateInvoice = () => {
 
   const handleSubmit = async (e, action) => {
     e.preventDefault();
+    console.log("action------",action);
 
     try {
       const formDataPayload = new FormData();
@@ -180,8 +181,14 @@ const CreateInvoice = () => {
 
       formDataPayload.append("services", JSON.stringify(formData.services));
 
-      if (action === "save") {
-        const response = await fetch(`${local_url}/service/invoice/`, {
+      if (action === "save" || action==='sent') {
+        let req_url = `${url}/service/invoice/`;
+
+        // Append query parameter if the action is "sent"
+        if (action === "sent") {
+          req_url += "?sent=true";
+        }
+        const response = await fetch(`${req_url}/`, {
           method: "POST",
           headers: {
             Authorization: `Token ${token}`,
@@ -227,7 +234,7 @@ const CreateInvoice = () => {
     <div className="bg-gray-100 p-6 mt-4">
        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-16 pl-24">Create Invoice</h1>
       <form
-      onSubmit={(e) => handleSubmit(e, "save")}
+
       className="p-4 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4  sm:space-y-6 bg-white rounded-2xl  sm:mt-8 md:mt-8"
     >
       
@@ -570,6 +577,7 @@ const CreateInvoice = () => {
        <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
   <button
     type="submit"
+    onClick={(e) => handleSubmit(e, "save")}
     className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
     style={{ backgroundColor: "#D8FCCC" }}
   >
@@ -578,6 +586,7 @@ const CreateInvoice = () => {
   </button>
   <button
     type="submit"
+    onClick={(e) => handleSubmit(e, "sent")}
     className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
     style={{ backgroundColor: "#EEE5FF" }}
   >
@@ -587,6 +596,7 @@ const CreateInvoice = () => {
   <button
     type="submit"
     className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
+    onClick={(e) => handleSubmit(e, "preview")}
     style={{ backgroundColor: "#CEDBFF" }}
   >
     <IoPlayOutline className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />

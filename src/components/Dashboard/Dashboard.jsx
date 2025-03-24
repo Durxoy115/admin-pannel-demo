@@ -129,42 +129,54 @@ const Dashboard = () => {
       </div>
 
       <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center mt-4 h-16 justify-between">
-      <div className="flex gap-4">
-      <div >
-          <p>Clients Details</p>
-        </div>
+        <div className="flex gap-4">
+          <div>
+            <p>Clients Details</p>
+          </div>
 
-        <div>
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 w-3/4 "
-          />
+          <div>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 w-full "
+            />
+          </div>
         </div>
-      </div>
         <div>
           <button
-            className="text-xl text-white px-4 py-2 rounded-lg mr-2"
+            className="text-xl text-white px-4 py-2 rounded-lg mr-2 relative group"
             onClick={handleOpenModal}
           >
-            <LuCirclePlus />
+            <LuCirclePlus className="h-6 w-6" />
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+              Add New Client
+            </span>
           </button>
           <button
-            className="text-xl text-white px-4 py-2 rounded-lg mr-2"
+            className="text-xl text-white px-4 py-2 rounded-lg mr-2 relative group"
             onClick={handleInvoiceList}
           >
-            <CgNotes />
+            <CgNotes className="h-6 w-6" />
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+              Invoice List
+            </span>
           </button>
           <button
-            className="text-xl text-white px-4 py-2 rounded-lg"
+            className="text-xl text-white px-4 py-2 rounded-lg relative group"
             onClick={fetchClients}
           >
-            <IoMdRefresh />
+            <IoMdRefresh className="h-6 w-6" />
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+              Refresh
+            </span>
           </button>
-          <button className="text-xl text-white px-4 py-2 rounded-lg">
-            <BsDownload />
+          <button className="text-xl text-white px-4 py-2 rounded-lg relative group">
+            <BsDownload className="h-6 w-6" />
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+              Download
+            </span>
           </button>
         </div>
 

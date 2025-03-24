@@ -7,6 +7,7 @@ const AddContact = () => {
   const [formData, setFormData] = useState({
     name: "",
     account: "",
+    link: "",
     logo: null,
   });
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const AddContact = () => {
         formDataToSend,
         {
           headers: {
-            "Authorization": `Token ${token}`,
+            Authorization: `Token ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -52,82 +53,85 @@ const AddContact = () => {
   };
 
   return (
-    <div className="mx-auto mt-10 p-8 bg-white rounded-md ml-48 bg-gray-100">
-      <h2 className="text-3xl font-bold mb-8">Add Support Contact</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-4 gap-6 bg-white rounded-md p-4">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Social Media Type<span className="text-red-500">*</span>
-            </label>
-            <select
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select type
-              </option>
-              {socialMediaOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
+    <div className="p-1 sm:p-6 lg:p-8 min-h-screen bg-gray-100 flex ">
+      <div className="w-full  mt-8 sm:mt-10 rounded-md">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 px-4 sm:px-8 pt-6 sm:pt-8">
+          Add Support Contact
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6 px-4 sm:px-8 pb-6 sm:pb-8  bg-white p-10 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                Social Media Type<span className="text-red-500">*</span>
+              </label>
+              <select
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+              >
+                <option value="" disabled>
+                  Select type
                 </option>
-              ))}
-            </select>
+                {socialMediaOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                Social Media Number<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="account"
+                value={formData.account}
+                onChange={handleChange}
+                placeholder="Enter your social media number"
+                required
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                Social Media Logo<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                Social Media Link<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                name="link"
+                value={formData.link}
+                onChange={handleChange}
+                placeholder="Enter your social media link"
+                required
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Social Media Number<span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="account"
-              value={formData.account}
-              onChange={handleChange}
-              placeholder="Enter your social media number"
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Social Media Logo<span className="text-red-500">*</span>
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Social Media Link<span className="text-red-500">*</span>
-            </label>
-            <input
-              type="url"
-              name="link"
-              value={formData.link}
-              onChange={handleChange}
-              placeholder="Enter your social media link"
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
 
-        {/* Wrap the button in a div with Flexbox to center it */}
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            className="w-48 bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
-          >
-            Save
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="w-full sm:w-48 bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 text-sm sm:text-base transition-colors duration-200"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
