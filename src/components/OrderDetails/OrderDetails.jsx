@@ -14,7 +14,7 @@ const OrderDetails = () => {
     if (orderId) {
       fetchOrderDetails();
     }
-  }, [orderId]);
+  }, [orderId, url, token]);
 
   const fetchOrderDetails = () => {
     fetch(`${url}/service/order/?order_id=${orderId}`, {
@@ -25,7 +25,6 @@ const OrderDetails = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Convert the date fields to the format YYYY-MM-DD
           const { order_date, estimate_delivery_date, delivery_date } = data.data;
 
           const formatDate = (date) => {
@@ -80,23 +79,26 @@ const OrderDetails = () => {
     }));
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p className="text-center mt-10 text-gray-600">Loading...</p>;
 
   return (
-    <div className="w-full flex items-center justify-center bg-gray-100 ">
-      <div className="w-full mx-auto p-10">
-        <h2 className="text-3xl font-semibold mb-8">Order Details</h2>
-        <form >
-          <div className="grid grid-cols-3 gap-8">
+    <div className="w-full flex justify-center min-h-screen bg-gray-100">
+      <div className="w-full l px-4 sm:px-6 md:px-20 py-6 sm:py-8 md:py-10">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 mt-16">Order Details</h2>
+        <form>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[
               { label: "Service Name", name: "name", type: "text" },
               { label: "Duration", name: "duration", type: "text" },
               { label: "Price", name: "price", type: "text" },
               { label: "Client ID", name: "client_id", type: "text", disabled: true },
               { label: "Order ID", name: "order_id", type: "text", disabled: true },
+              { label: "Order Date", name: "order_date", type: "date" },
+              { label: "Estimated Delivery Date", name: "estimate_delivery_date", type: "date" },
+              { label: "Delivery Date", name: "delivery_date", type: "date" },
             ].map(({ label, name, type, disabled }) => (
               <div key={name}>
-                <label htmlFor={name} className="block mb-2 font-medium">
+                <label htmlFor={name} className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
                   {label}
                 </label>
                 <input
@@ -105,60 +107,39 @@ const OrderDetails = () => {
                   name={name}
                   value={formData[name] || ""}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                   disabled={disabled}
                 />
               </div>
             ))}
-            
-            {/* Add Date Fields */}
-            {[
-              { label: "Order Date", name: "order_date", type: "date" },
-              { label: "Estimated Delivery Date", name: "estimate_delivery_date", type: "date" },
-              { label: "Delivery Date", name: "delivery_date", type: "date" },
-            ].map(({ label, name, type }) => (
-              <div key={name}>
-                <label htmlFor={name} className="block mb-2 font-medium">
-                  {label}
-                </label>
-                <input
-                  type={type}
-                  id={name}
-                  name={name}
-                  value={formData[name] || ""}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg"
-                />
-              </div>
-            ))}
 
-         <div className="col-span-3">
-  <label htmlFor="details" className="block mb-2 font-medium my-auto">
-    Details
-  </label>
-  <textarea
-    id="details"
-    name="details"
-    value={formData.details || ""}
-    onChange={handleInputChange}
-    className="w-full px-4 py-4 border rounded-lg h-48" // Increased height with h-48
-    placeholder="Enter order details here..."
-    rows={6} // Optional: Sets the number of visible rows
-  />
-</div>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+              <label htmlFor="details" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                Details
+              </label>
+              <textarea
+                id="details"
+                name="details"
+                value={formData.details || ""}
+                onChange={handleInputChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-4 border rounded-lg h-32 sm:h-48 text-sm sm:text-base"
+                placeholder="Enter order details here..."
+                rows={4}
+              />
+            </div>
           </div>
 
-          <div className="flex relative justify-center items-center space-x-4 mt-6">
+          <div className="flex flex-col sm:flex-row relative justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6">
             <button
               type="button"
-              className="px-6 py-2 bg-red-600 text-white rounded-lg"
+              className="w-full sm:w-64 px-4 sm:px-6 py-1 sm:py-2 bg-red-600 text-white rounded-lg text-sm sm:text-base"
               onClick={() => navigate("/order-list")}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg"
+              className="w-full sm:w-64 px-4 sm:px-6 py-1 sm:py-2 bg-blue-500 text-white rounded-lg text-sm sm:text-base"
               onClick={handleUpdateOrder}
             >
               Save

@@ -10,7 +10,7 @@ const EditUserProfile = () => {
     last_name: '',
     email: '',
     contact: '',
-    photo: null, // This will only hold a File object for uploading
+    photo: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const { id } = useParams();
@@ -35,7 +35,7 @@ const EditUserProfile = () => {
             last_name: data?.data?.last_name || '',
             email: data?.data?.email || '',
             contact: data?.data?.contact || '',
-            photo: null, // Keep as null; we use imagePreview for display
+            photo: null,
           });
           if (data?.data?.photo) {
             setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
@@ -60,7 +60,7 @@ const EditUserProfile = () => {
     const file = e.target.files[0];
     if (file) {
       setEditProfile({ ...editProfile, photo: file });
-      setImagePreview(URL.createObjectURL(file)); // Create a preview URL for the new file
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -99,85 +99,111 @@ const EditUserProfile = () => {
   };
 
   return (
-    <div className="p-6 relative bg-gray-100 min-h-screen">
-      <button className="absolute top-0 left-0 p-2 text-3xl text-black" onClick={() => navigate(-1)}>
-        <IoArrowBack />
-      </button>
-      <h2 className="text-3xl font-semibold text-center mb-4">Edit Profile</h2>
-      <form onSubmit={handleSubmit} className="w-full flex flex-col">
-        <div className="w-full  bg-white p-6 rounded-lg shadow-md relative">
-          <div className="flex gap-20 items-start">
-            <div className="flex flex-col">
-              <label
-                htmlFor="imageUpload"
-                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover rounded-md"
+    <div className="px-4 sm:px-6 md:px-24 py-6 bg-gray-100 min-h-screen">
+      <div className="relative  mx-auto">
+        {/* <button
+          className="absolute top-0 left-0 p-2 text-2xl sm:text-3xl text-black"
+          onClick={() => navigate(-1)}
+        >
+          <IoArrowBack />
+        </button> */}
+        <h2 className="text-2xl sm:text-3xl font-semibold  mb-4 sm:mb-6 mt-20">Edit Profile</h2>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col">
+          <div className="w-full bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-md">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 items-start">
+              <div className="flex flex-col items-center">
+                <label
+                  htmlFor="imageUpload"
+                  className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-24 sm:w-28 h-24 sm:h-28 border-dashed border-2 border-gray-300"
+                >
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Profile Preview"
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  ) : (
+                    <TfiPlus className="text-3xl sm:text-4xl" />
+                  )}
+                </label>
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div>
+                  <label htmlFor="first_name" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                    First Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    id="first_name"
+                    value={editProfile.first_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-1 sm:py-2 border bg-gray-200 rounded-lg text-sm sm:text-base"
                   />
-                ) : (
-                  <TfiPlus className="text-4xl" />
-                )}
-              </label>
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-            <div className="col-span-3 w-full b grid grid-cols-3 gap-6">
-              <div>
-                <label className="block mb-2  font-medium">First Name</label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={editProfile.first_name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border bg-gray-200 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-medium">Last Name</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={editProfile.last_name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border bg-gray-200 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-medium">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={editProfile.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border bg-gray-200 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-medium">Phone Number</label>
-                <input
-                  type="text"
-                  name="contact"
-                  value={editProfile.contact}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border bg-gray-200 rounded-lg"
-                />
+                </div>
+                <div>
+                  <label htmlFor="last_name" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    id="last_name"
+                    value={editProfile.last_name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-1 sm:py-2 border bg-gray-200 rounded-lg text-sm sm:text-base"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={editProfile.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-1 sm:py-2 border bg-gray-200 rounded-lg text-sm sm:text-base"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="contact"
+                    id="contact"
+                    value={editProfile.contact}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 sm:px-4 py-1 sm:py-2 border bg-gray-200 rounded-lg text-sm sm:text-base"
+                  />
+                </div>
               </div>
             </div>
+            <div className="flex justify-center mt-4 sm:mt-6">
+              <button
+                type="submit"
+                className="bg-blue-700 w-full sm:w-72 text-sm sm:text-lg p-2 sm:px-6 sm:py-3 rounded-lg text-white"
+              >
+                Save
+              </button>
+            </div>
           </div>
-          <div className="flex justify-center mt-4">
-            <button type="submit" className="bg-blue-700 w-72 text-lg p-2 px-6 text-white rounded-lg">Save</button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

@@ -15,11 +15,11 @@ const EditSubAdmin = () => {
     username: "",
     contact: "",
     password: "",
-    dob:"",
+    dob: "",
     user_type: { name: "" },
   });
-  const [imagePreview, setImagePreview] = useState(null); // For image preview
-  const [image, setImage] = useState(null); // For new image file
+  const [imagePreview, setImagePreview] = useState(null);
+  const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +34,6 @@ const EditSubAdmin = () => {
         if (response.ok) {
           const data = await response.json();
           setUserData(data?.data);
-          // Set the initial image preview if photo exists
           if (data?.data?.photo) {
             setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
           }
@@ -77,19 +76,17 @@ const EditSubAdmin = () => {
       formData.append("last_name", userData.last_name);
       formData.append("email", userData.email);
       formData.append("username", userData.username);
-      formData.append("username", userData.user_key);
-      formData.append("username", userData.dob);
       formData.append("contact", userData.contact);
-      formData.append("user_type", userData.user_type.id); // Send user_type ID
+      formData.append("dob", userData.dob);
+      formData.append("user_type", userData.user_type.id);
 
-      // Append the image only if a new one was uploaded
-      if (image) {
-        formData.append("photo", image);
+      // Fix duplicate username entries in FormData
+      if (userData.password) {
+        formData.append("password", userData.password);
       }
 
-      // Log FormData contents for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
+      if (image) {
+        formData.append("photo", image);
       }
 
       const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
@@ -115,29 +112,29 @@ const EditSubAdmin = () => {
   };
 
   if (isLoading) {
-    return <p>Loading user details...</p>;
+    return <p className="text-center mt-10 text-gray-600">Loading user details...</p>;
   }
 
   return (
-    <div className="w-full flex items-center justify-center bg-gray-100">
-      <div className="w-5/6 min-h-screen">
-        <h2 className="text-3xl font-semibold mb-8">Member Profile</h2>
-        <form onSubmit={handleSubmit} className="bg-white p-4 rounded-md">
-          <div className="flex gap-10 mb-6">
-            {/* Image Previewer and Uploader (Top-Left) */}
+    <div className="w-full flex justify-center bg-gray-100 min-h-screen">
+      <div className="w-full   sm:px-6 md:px-24  sm:pt-6">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 md:mt-20 sm:mt-4 ">Member Profile</h2>
+        <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-6 md:p-8 rounded-md">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 mb-4 sm:mb-6">
+            {/* Image Previewer and Uploader */}
             <div className="flex flex-col items-center">
               <label
                 htmlFor="imageUpload"
-                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300"
+                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-24 sm:w-28 h-24 sm:h-28 border-dashed border-2 border-gray-300"
               >
                 {imagePreview ? (
                   <img
                     src={imagePreview}
-                    alt="Preview"
+                    alt="Profile Preview"
                     className="w-full h-full object-cover rounded-md"
                   />
                 ) : (
-                  <TfiPlus className="text-4xl" />
+                  <TfiPlus className="text-3xl sm:text-4xl" />
                 )}
               </label>
               <input
@@ -150,7 +147,7 @@ const EditSubAdmin = () => {
             </div>
 
             {/* Form Fields */}
-            <div className="grid grid-cols-3 gap-6 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
               {[
                 { label: "First Name", name: "first_name", type: "text" },
                 { label: "Last Name", name: "last_name", type: "text" },
@@ -162,8 +159,8 @@ const EditSubAdmin = () => {
                 { label: "Member Type", name: "user_type", type: "text", readOnly: true },
               ].map(({ label, name, type, readOnly }) => (
                 <div key={name}>
-                  <label htmlFor={name} className="block mb-2 font-medium">
-                    {label}
+                  <label htmlFor={name} className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                    {label} {name !== "user_type" && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     type={type}
@@ -174,7 +171,8 @@ const EditSubAdmin = () => {
                     }
                     onChange={name === "user_type" ? undefined : handleChange}
                     readOnly={readOnly}
-                    className={`w-full px-4 py-2 border rounded-lg ${
+                    required={name !== "user_type"}
+                    className={`w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base ${
                       readOnly ? "bg-gray-100 cursor-not-allowed" : ""
                     }`}
                   />
@@ -184,17 +182,17 @@ const EditSubAdmin = () => {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-center items-center space-x-4 mt-16 mb-10">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-8 sm:mt-12 mb-6 sm:mb-10">
             <button
               type="button"
-              className="px-24 py-2 bg-red-600 text-white rounded-lg"
+              className="w-full sm:w-48 px-4 sm:px-6 py-1 sm:py-2 bg-red-600 text-white rounded-lg text-sm sm:text-base"
               onClick={() => navigate("/profile")}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-24 py-2 bg-blue-500 text-white rounded-lg"
+              className="w-full sm:w-48 px-4 sm:px-6 py-1 sm:py-2 bg-blue-500 text-white rounded-lg text-sm sm:text-base"
             >
               Save
             </button>

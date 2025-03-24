@@ -15,7 +15,7 @@ const ListOrder = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [url, token]);
 
   const fetchOrders = () => {
     fetch(`${url}/service/order/`, {
@@ -58,7 +58,7 @@ const ListOrder = () => {
         .then((response) => {
           if (response.ok) {
             console.log("Order deleted successfully");
-            fetchOrders(); // Refresh the order list after deletion
+            fetchOrders();
           } else {
             response.json().then((data) => {
               console.error("Error deleting order:", data);
@@ -74,79 +74,78 @@ const ListOrder = () => {
         });
     }
   };
-  
-  
 
   const cancelDelete = () => {
     setIsModalOpen(false);
     setOrderToDelete(null);
   };
+
   const handleOrderDetails = (order_id) => {
-    navigate(`/order-details/${order_id}`)
-  }
+    navigate(`/order-details/${order_id}`);
+  };
 
   return (
-    <div className="m-10">
+    <div className="mx-4 sm:mx-6 md:mx-10 mt-4 sm:mt-6 md:mt-10">
       {/* Header Section */}
-      <div className="bg-gray-900 text-white p-2 flex items-center justify-between rounded-t-lg">
-        <h2 className="text-lg font-semibold">Order List</h2>
-        <div className="flex space-x-2 ml-60">
+      <div className="bg-gray-900 text-white p-2 sm:p-3 md:p-2 flex flex-col sm:flex-row sm:items-center justify-between rounded-t-md gap-2 sm:gap-4 mt-28">
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold ">Order List</h2>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <input
             type="date"
-            className="bg-white text-black px-2 py-1 rounded-md"
+            className="bg-white text-black px-2 sm:px-3 py-1 sm:py-2 rounded-md text-sm sm:text-base w-full sm:w-auto"
             placeholder="Start Date"
           />
           <input
             type="date"
-            className="bg-white text-black px-2 py-1 rounded-md"
+            className="bg-white text-black px-2 sm:px-3 py-1 sm:py-2 rounded-md text-sm sm:text-base w-full sm:w-auto"
             placeholder="End date"
           />
         </div>
         <IoMdAddCircleOutline
-          className="text-white text-2xl mr-6 cursor-pointer"
+          className="text-white text-xl sm:text-2xl md:text-3xl cursor-pointer"
           onClick={handleAddOrder}
         />
       </div>
 
       {/* Table Section */}
       {isLoading ? (
-        <p className="text-center mt-8">Loading...</p>
+        <p className="text-center mt-6 sm:mt-8 text-gray-600 text-sm sm:text-base">Loading...</p>
       ) : orders.length > 0 ? (
-        <div className="overflow-x-auto rounded-lg shadow-md mt-6">
-          <table className="table-auto w-full border-collapse">
-            <thead className="text-black">
+        <div className="overflow-x-auto rounded-md shadow-md ">
+          <table className="table-auto w-full border-collapse min-w-[800px]">
+            <thead className="text-black bg-gray-200">
               <tr>
-                <th className="text-left px-4 py-2">Service Name</th>
-                <th className="text-left px-4 py-2">Order ID</th>
-                <th className="text-left px-4 py-2">Price</th>
-                <th className="text-left px-4 py-2">Est. Delivery</th>
-                <th className="text-left px-4 py-2">Status</th>
-                <th className="text-center px-4 py-2">Actions</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Service Name</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Order ID</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Price</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Est. Delivery</th>
+                <th className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Status</th>
+                <th className="text-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order, index) => (
                 <tr
                   key={index}
-                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} hover:bg-gray-50`}
                 >
-                  <td className="text-left px-4 py-2">{order.name || "N/A"}</td>
-                  <td className="text-left px-4 py-2">
-                    {order.order_id || "N/A"}
+                  <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">{order.name || "N/A"}</td>
+                  <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">{order.order_id || "N/A"}</td>
+                  <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">{order.price} {order.currency}</td>
+                  <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
+                    {order.estimate_delivery_date
+                      ? new Date(order.estimate_delivery_date).toLocaleDateString()
+                      : "N/A"}
                   </td>
-                  <td className="text-left px-4 py-2">
-                    {order.price} {order.currency}
-                  </td>
-                  <td className="text-left px-4 py-2">
-                    {new Date(order.estimate_delivery_date).toLocaleDateString()}
-                  </td>
-                  <td className="text-left px-4 py-2">{order.status}</td>
-                  <td className="text-center px-4 py-2">
-                    <div className="flex justify-center space-x-2">
-                      <FiEdit className="text-purple-500 hover:text-purple-700 cursor-pointer"
-                      onClick={() => handleOrderDetails(order.order_id)} />
+                  <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">{order.status || "N/A"}</td>
+                  <td className="text-center px-3 sm:px-4 py-2 sm:py-3">
+                    <div className="flex justify-center space-x-2 sm:space-x-3">
+                      <FiEdit
+                        className="text-purple-500 hover:text-purple-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
+                        onClick={() => handleOrderDetails(order.order_id)}
+                      />
                       <FiTrash2
-                        className="text-red-500 hover:text-red-700 cursor-pointer"
+                        className="text-red-500 hover:text-red-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
                         onClick={() => handleDeleteOrder(order.order_id)}
                       />
                     </div>
@@ -157,25 +156,23 @@ const ListOrder = () => {
           </table>
         </div>
       ) : (
-        <p className="text-center mt-8 text-gray-600">No orders available.</p>
+        <p className="text-center mt-6 sm:mt-8 text-gray-600 text-sm sm:text-base">No orders available.</p>
       )}
 
       {/* Confirmation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">
-              Do you want to delete this order?
-            </h3>
-            <div className="flex gap-4 justify-center">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center w-full max-w-sm">
+            <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-3 sm:mb-4">Do you want to delete this order?</h3>
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4 sm:mt-6">
               <button
-                className="px-4 py-2 bg-green-300 rounded hover:bg-green-400"
+                className="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-green-300 rounded hover:bg-green-400 text-sm sm:text-base"
                 onClick={cancelDelete}
               >
                 No
               </button>
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm sm:text-base"
                 onClick={confirmDelete}
               >
                 Yes

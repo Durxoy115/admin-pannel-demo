@@ -38,13 +38,7 @@ const AddUser = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // Create a new FormData instance inside the function
     const formData = new FormData();
-
-    // Log the image to debug
-    console.log("Image before submission:", image);
-
-    // Append form data
     formData.append("first_name", e.target.first_name.value);
     formData.append("last_name", e.target.last_name.value);
     formData.append("email", e.target.userEmail.value);
@@ -54,14 +48,8 @@ const AddUser = () => {
     formData.append("password", e.target.password.value);
     formData.append("dob", e.target.dob.value);
 
-    // Append the image only if it exists
     if (image) {
       formData.append("photo", image);
-    }
-
-    // Log FormData contents for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
     }
 
     try {
@@ -93,7 +81,6 @@ const AddUser = () => {
     if (file && file.type.startsWith("image/")) {
       setImage(file);
       setImagePreview(URL.createObjectURL(file));
-      console.log("Selected file:", file); // Debug the selected file
     } else {
       alert("Please upload a valid image file (e.g., .jpg, .png)");
       setImage(null);
@@ -106,16 +93,17 @@ const AddUser = () => {
   };
 
   return (
-    <div className="w-full flex items-center justify-center bg-gray-100">
-      <div className="w-full mx-auto min-h-screen px-60">
-        <h2 className="text-3xl font-semibold mb-8 mt-2">Add New Member</h2>
+    <div className="">
+      <div className="w-full flex justify-center bg-gray-100 min-h-screen mt-12">
+      <div className="w-full px-4 sm:px-6 md:px-24 pt-4 sm:pt-6  ">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8  sm:mt-8">Add New Member</h2>
 
         <form onSubmit={handleSave}>
-          <div className="flex gap-10 bg-white p-10 rounded-md">
-            <div className="flex flex-col items-center col-span-1">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 bg-white p-6 sm:p-8 md:p-10 rounded-md">
+            <div className="flex flex-col items-center">
               <label
                 htmlFor="imageUpload"
-                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-28 h-28 border-dashed border-2 border-gray-300"
+                className="cursor-pointer flex flex-col items-center justify-center text-gray-300 bg-gray-100 rounded-md w-24 sm:w-28 h-24 sm:h-28 border-dashed border-2 border-gray-300"
               >
                 {imagePreview ? (
                   <img
@@ -124,7 +112,7 @@ const AddUser = () => {
                     className="w-full h-full object-cover rounded-md"
                   />
                 ) : (
-                  <TfiPlus className="text-4xl" />
+                  <TfiPlus className="text-3xl sm:text-4xl" />
                 )}
               </label>
               <input
@@ -135,11 +123,11 @@ const AddUser = () => {
                 className="hidden"
               />
             </div>
-            <div className="col-span-3 grid grid-cols-3 gap-6 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
               <div>
                 <label
-                  htmlFor="userFirstName"
-                  className="block mb-2 font-medium"
+                  htmlFor="first_name"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
                 >
                   First Name <span className="text-red-500">*</span>
                 </label>
@@ -148,13 +136,13 @@ const AddUser = () => {
                   id="first_name"
                   name="first_name"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
               <div>
                 <label
-                  htmlFor="userLastName"
-                  className="block mb-2 font-medium"
+                  htmlFor="last_name"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
                 >
                   Last Name <span className="text-red-500">*</span>
                 </label>
@@ -163,11 +151,14 @@ const AddUser = () => {
                   id="last_name"
                   name="last_name"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label htmlFor="userEmail" className="block mb-2 font-medium">
+                <label
+                  htmlFor="userEmail"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -175,23 +166,28 @@ const AddUser = () => {
                   id="userEmail"
                   name="userEmail"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
-
               <div>
-                <label htmlFor="userName" className="block mb-2 font-medium">
+                <label
+                  htmlFor="userName"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
                   User Name
                 </label>
                 <input
                   type="text"
                   id="userName"
                   name="userName"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label htmlFor="userContact" className="block mb-2 font-medium">
+                <label
+                  htmlFor="userContact"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
                   Contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -199,11 +195,14 @@ const AddUser = () => {
                   id="userContact"
                   name="userContact"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
               <div>
-                <label htmlFor="userContact" className="block mb-2 font-medium">
+                <label
+                  htmlFor="password"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
                   Password <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -211,34 +210,34 @@ const AddUser = () => {
                   id="password"
                   name="password"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
-
               <div>
                 <label
-                  htmlFor="userMemberType"
-                  className="block mb-2 font-medium"
+                  htmlFor="user_type"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
                 >
                   Member Type
                 </label>
                 <select
-                  type="text"
                   id="user_type"
                   name="user_type"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 >
-                  {userType?.map((e, key) => {
-                    return (
-                      <option key={key} value={e.id}>
-                        {e.name}
-                      </option>
-                    );
-                  })}
+                  <option value="">Select Member Type</option>
+                  {userType?.map((e, key) => (
+                    <option key={key} value={e.id}>
+                      {e.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="dob" className="block mb-2 font-medium">
+                <label
+                  htmlFor="dob"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
                   Date of Birth <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -246,22 +245,22 @@ const AddUser = () => {
                   id="dob"
                   name="dob"
                   required
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
                 />
               </div>
             </div>
           </div>
-          <div className="flex justify-center space-x-4 mt-20 mb-10">
+          <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-8 sm:mt-12 mb-6 sm:mb-10">
             <button
               type="button"
-              className="px-28 py-2 bg-red-600 text-white rounded-lg"
+              className="px-4 sm:px-6 md:px-28 py-1 sm:py-2 bg-red-600 text-white rounded-lg text-sm sm:text-base w-full sm:w-auto"
               onClick={handleClose}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-28 py-2 bg-blue-500 text-white rounded-lg"
+              className="px-4 sm:px-6 md:px-28 py-1 sm:py-2 bg-blue-500 text-white rounded-lg text-sm sm:text-base w-full sm:w-auto"
             >
               Save
             </button>
@@ -269,7 +268,8 @@ const AddUser = () => {
         </form>
       </div>
     </div>
+    </div>
   );
 };
 
-export default AddUser;
+export default AddUser; 

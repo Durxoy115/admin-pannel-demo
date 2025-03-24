@@ -6,21 +6,18 @@ import useToken from "../hooks/useToken";
 const AddressBook = () => {
   const [addresses, setAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const navigate = useNavigate()
-  const [url,getTokenLocalStorage] = useToken();
-  const token = getTokenLocalStorage();;
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const navigate = useNavigate();
+  const [url, getTokenLocalStorage] = useToken();
+  const token = getTokenLocalStorage();
 
   const fetchAddress = async () => {
     try {
-      const response = await fetch(
-        `${url}/company/billing-address/`,
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${url}/company/billing-address/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
       const data = await response.json();
       if (data.success) {
         setAddresses(data.data);
@@ -34,7 +31,7 @@ const AddressBook = () => {
 
   useEffect(() => {
     fetchAddress();
-  }, []);
+  }, [url, token]);
 
   const handleAddAddress = () => {
     navigate("/add-address");
@@ -44,32 +41,34 @@ const AddressBook = () => {
     navigate(`/edit-address/${id}`);
   };
 
-  const handleDeleteAddress = async () =>{
-    if(!selectedAddressId)
-      return;
-    try{
-      const response = await fetch (`${url}/company/billing-address/?billing_address_id=${selectedAddressId}`,{
-        method: "DELETE",
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
-      if(response.ok) {
+  const handleDeleteAddress = async () => {
+    if (!selectedAddressId) return;
+    try {
+      const response = await fetch(
+        `${url}/company/billing-address/?billing_address_id=${selectedAddressId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+      if (response.ok) {
         setAddresses(addresses.filter((address) => address.id !== selectedAddressId));
         setIsModalOpen(false);
+      } else {
+        console.error("Failed to delete address");
       }
-      else {
-        console.error("Failed to delete user");
-      }
-    }
-    catch (error) {
-      console.error("Error deleting user:", error);
+    } catch (error) {
+      console.error("Error deleting address:", error);
     }
   };
+
   const openDeleteModal = (id) => {
     setSelectedAddressId(id);
     setIsModalOpen(true);
   };
+
   const closeDeleteModal = () => {
     setIsModalOpen(false);
     setSelectedAddressId(null);
@@ -77,73 +76,79 @@ const AddressBook = () => {
 
   return (
     <div>
-      <div className="mt-16">
-        <div className="flex justify-between items-center pl-4 pr-4 ml-10 mr-10">
-          <h1 className="text-3xl font-bold mb-4">Company Address Book</h1>
+      <div className="mt-4 sm:mt-6 md:mt-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pl-3 sm:pl-4 pr-3 sm:pr-4 ml-4 sm:ml-6 md:ml-10 mr-4 sm:mr-6 md:mr-10 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Address Book</h1>
           <button
-            className="bg-blue-700 w-20 text-white p-2 rounded-md hover:bg-blue-800"
+            className="bg-blue-700 w-full sm:w-20 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
             onClick={handleAddAddress}
           >
             Add
           </button>
         </div>
 
-        <div className="mt-6 ml-10 mr-10 overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+        <div className="mt-4 sm:mt-6 ml-4 sm:ml-6 md:ml-10 mr-4 sm:mr-6 md:mr-10 overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md min-w-[800px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-3 px-6 text-left border-b">Bank Name</th>
-                <th className="py-3 px-6 text-left border-b">Branch Name</th>
-                <th className="py-3 px-6 text-left border-b">Account Name</th>
-                <th className="py-3 px-6 text-left border-b">Account Number</th>
-                <th className="py-3 px-6 text-left border-b">Routing Number</th>
-                <th className="py-3 px-6 text-center border-b">Actions</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Bank Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Branch Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Number</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Routing Number</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-center border-b text-xs sm:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {addresses.map((address) => (
                 <tr key={address.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-6 border-b">{address.bank_name}</td>
-                  <td className="py-3 px-6 border-b">{address.branch_name}</td>
-                  <td className="py-3 px-6 border-b">{address.account_name}</td>
-                  <td className="py-3 px-6 border-b">
-                    {address.account_number}
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.bank_name}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.branch_name}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_number}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                    <div className="flex justify-center gap-2 sm:gap-3">
+                      <FiEdit
+                        className="text-purple-500 hover:text-purple-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
+                        onClick={() => handleEditAddress(address.id)}
+                      />
+                      <FiTrash2
+                        className="text-red-500 hover:text-red-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
+                        onClick={() => openDeleteModal(address.id)}
+                      />
+                    </div>
                   </td>
-                  <td className="py-3 px-6 border-b">
-                    {address.routing_number}
-                  </td>
-                  <td className="py-3 px-6 border-b">
-                  <div className=" p-2 flex justify-center gap-2  ">
-                    
-                    <FiEdit className="text-purple-500 hover:text-purple-700"
-                    onClick={() => handleEditAddress(address.id)} />
-                  
-                  
-                    <FiTrash2 className="text-red-500 hover:text-red-700"
-                    onClick={() => openDeleteModal(address.id)}
-                    />
-                  
-                </div>
-                  </td>
-                
-                
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
-            <p className="text-gray-700">Are you sure you want to delete this Address?</p>
-            <div className="mt-6 flex justify-center gap-4">
-              <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700" onClick={handleDeleteAddress}>Delete</button>
-              <button className="bg-green-300 px-4 py-2 rounded-md hover:bg-green-400" onClick={closeDeleteModal}>Cancel</button>
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center w-full max-w-sm">
+              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Confirm Delete</h2>
+              <p className="text-gray-700 text-sm sm:text-base">
+                Are you sure you want to delete this Address?
+              </p>
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                <button
+                  className="bg-red-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-red-700 text-sm sm:text-base w-full sm:w-auto"
+                  onClick={handleDeleteAddress}
+                >
+                  Delete
+                </button>
+                <button
+                  className="bg-green-300 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-green-400 text-sm sm:text-base w-full sm:w-auto"
+                  onClick={closeDeleteModal}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );

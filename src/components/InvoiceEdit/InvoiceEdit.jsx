@@ -5,7 +5,6 @@ import Footer from "../Footer/Footer";
 
 const InvoiceEdit = () => {
   const { id } = useParams();
-  console.log("Invoice ID from params:", id);
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [defaultService, setDefaultService] = useState("");
@@ -31,8 +30,8 @@ const InvoiceEdit = () => {
     vat: 0,
     total_amount: 0,
     services: [],
-    company_logo: null, // Changed to store file object
-    company_logo_name: "", // To display file name
+    company_logo: null,
+    company_logo_name: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +89,6 @@ const InvoiceEdit = () => {
         const data = await response.json();
 
         if (data.success) {
-          console.log("Fetched data:", data);
           const services = data?.data?.services.map((service) => ({
             id: service.id,
             service_name: service.service_name,
@@ -120,10 +118,10 @@ const InvoiceEdit = () => {
             vat: parseFloat(data.data.vat) || 0,
             total_amount: parseFloat(data.data.total_amount) || 0,
             services: services,
-            company_logo: null, // File object will be set on upload
+            company_logo: null,
             company_logo_name: data.data.company_logo
               ? data.data.company_logo.split('/').slice(-1)[0]
-              : "", // Extract file name from URL
+              : "",
           };
           setFormData(fetchedData);
         } else {
@@ -156,8 +154,8 @@ const InvoiceEdit = () => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        company_logo: file, // Store the file object
-        company_logo_name: file.name, // Display the file name
+        company_logo: file,
+        company_logo_name: file.name,
       }));
     }
   };
@@ -276,38 +274,54 @@ const InvoiceEdit = () => {
   };
 
   if (isLoading || isServicesLoading) {
-    return <p>Loading data...</p>;
+    return <p className="text-center py-8">Loading data...</p>;
   }
 
   if (error) {
-    return <p className="text-red-500 p-5">{error}</p>;
+    return <p className="text-red-500 text-center py-8">{error}</p>;
   }
 
   if (servicesError) {
-    return <p className="text-red-500 p-5">{servicesError}</p>;
+    return <p className="text-red-500 text-center py-8">{servicesError}</p>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col mt-24 px-24">
       <form
         onSubmit={handleSubmit}
-        className="p-8 w-full max-w-4xl mx-auto space-y-6 bg-white rounded-2xl mt-2"
+        className="p-4 sm:p-6 lg:p-8 w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl mt-2 sm:mt-4"
       >
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Edit Invoice</h1>
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800">Edit Invoice</h1>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <input
-            name="client_invoice_id"
-            placeholder="Client Invoice ID*"
-            value={formData.client_invoice_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {[
+            { name: "client_invoice_id", placeholder: "Client Invoice ID*", required: true },
+            { name: "company_name", placeholder: "Company Name*", required: true },
+            { name: "billing_address", placeholder: "Company Billing Address*", required: true },
+            { name: "client_id", placeholder: "Client ID*", required: true },
+            { name: "website_url", placeholder: "Website URL" },
+            { name: "client_name", placeholder: "Client Name*", required: true },
+            { name: "date", type: "date", required: true },
+            { name: "payment_status", placeholder: "Payment Status*", required: true },
+            { name: "client_email", placeholder: "Client Email*", required: true },
+            { name: "client_phone", placeholder: "Client Phone No.*", required: true },
+            { name: "vat", type: "number", step: "0.01", placeholder: "VAT (%)" },
+            { name: "discount", type: "number", step: "0.01", placeholder: "Discount" },
+          ].map((field) => (
+            <input
+              key={field.name}
+              name={field.name}
+              type={field.type || "text"}
+              placeholder={field.placeholder}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              required={field.required}
+            />
+          ))}
 
-          {/* Custom File Input */}
           <div className="relative">
             <input
               type="file"
@@ -317,238 +331,151 @@ const InvoiceEdit = () => {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             <div
-              className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
               onClick={() => fileInputRef.current.click()}
             >
               {formData.company_logo_name || "Choose Company Logo"}
             </div>
           </div>
 
-          <input
-            name="company_name"
-            placeholder="Company Name*"
-            value={formData.company_name}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
-            required
-          />
-          <input
-            name="billing_address"
-            placeholder="Company Billing Address*"
-            value={formData.billing_address}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="client_id"
-            placeholder="Client ID*"
-            value={formData.client_id}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="website_url"
-            placeholder="Website URL"
-            value={formData.website_url}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
           <textarea
             name="address"
             placeholder="Address*"
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 col-span-3"
+            className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 col-span-1 sm:col-span-2 lg:col-span-3 text-sm sm:text-base"
             required
-          />
-          <input
-            name="client_name"
-            placeholder="Client Name*"
-            value={formData.client_name}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="date"
-            type="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="payment_status"
-            placeholder="Payment Status*"
-            value={formData.payment_status}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="client_email"
-            placeholder="Client Email*"
-            value={formData.client_email}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="client_phone"
-            placeholder="Client Phone No.*"
-            value={formData.client_phone}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <input
-            name="vat"
-            type="number"
-            step="0.01"
-            placeholder="VAT (%)"
-            value={formData.vat}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <input
-            name="discount"
-            type="number"
-            step="0.01"
-            placeholder="Discount"
-            value={formData.discount}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
 
-        <div className="bg-gray-100 p-4 rounded-2xl">
-          <table className="w-full text-sm text-left text-gray-700">
-            <thead>
-              <tr className="border-b border-gray-300">
-                <th className="py-2 px-4">#</th>
-                <th className="py-2 px-4">Item Name</th>
-                <th className="py-2 px-4">Quantity</th>
-                <th className="py-2 px-4">Currency</th>
-                <th className="py-2 px-4">Rate</th>
-                <th className="py-2 px-4">Time Duration</th>
-                <th className="py-2 px-4">Price</th>
-                <th className="py-2 px-4">Total Amount</th>
-                <th className="py-2 px-4">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {formData.services.map((service, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td className="py-2 px-4">{index + 1}</td>
-                  <td className="py-2 px-4">
-                    <select
-                      value={service.service_name}
-                      onChange={(e) =>
-                        handleServiceChange(index, "service_name", e.target.value, service.id)
-                      }
-                      className="w-full px-4 py-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      {services?.map((e, key) => (
-                        <option key={key} value={e.name}>
-                          {e.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="py-2 px-4">
-                    <input
-                      type="number"
-                      value={service.quantity}
-                      onChange={(e) =>
-                        handleServiceChange(index, "quantity", parseInt(e.target.value, 10), service.id)
-                      }
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </td>
-                  <td className="py-2 px-4">
-                    <select
-                      value={service.currency}
-                      onChange={(e) =>
-                        handleServiceChange(index, "currency", e.target.value, service.id)
-                      }
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    >
-                      {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
-                        <option key={currency} value={currency}>
-                          {currency}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="py-2 px-4">
-                    <select
-                      value={service.rate}
-                      onChange={(e) =>
-                        handleServiceChange(index, "rate", e.target.value, service.id)
-                      }
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    >
-                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((rate) => (
-                        <option key={rate} value={rate}>
-                          {rate}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="py-2 px-4">
-                    <input
-                      type="number"
-                      value={service.duration}
-                      onChange={(e) =>
-                        handleServiceChange(index, "duration", parseInt(e.target.value, 10), service.id)
-                      }
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </td>
-                  <td className="py-2 px-4">
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={service.price}
-                      onChange={(e) =>
-                        handleServiceChange(index, "price", e.target.value, service.id)
-                      }
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </td>
-                  <td className="py-2 px-4">${service.total_amount.toFixed(2)}</td>
-                  <td className="py-2 px-4">
-                    <button
-                      type="button"
-                      onClick={() => removeServiceItem(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </td>
+        <div className="bg-gray-100 p-4 sm:p-6 rounded-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs sm:text-sm text-left text-gray-700">
+              <thead>
+                <tr className="border-b border-gray-300">
+                  <th className="py-2 px-2 sm:px-4">#</th>
+                  <th className="py-2 px-2 sm:px-4">Item Name</th>
+                  <th className="py-2 px-2 sm:px-4">Quantity</th>
+                  <th className="py-2 px-2 sm:px-4">Currency</th>
+                  <th className="py-2 px-2 sm:px-4">Rate</th>
+                  <th className="py-2 px-2 sm:px-4">Time Duration</th>
+                  <th className="py-2 px-2 sm:px-4">Price</th>
+                  <th className="py-2 px-2 sm:px-4">Total Amount</th>
+                  <th className="py-2 px-2 sm:px-4">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {formData.services.map((service, index) => (
+                  <tr key={index} className="border-b border-gray-200">
+                    <td className="py-2 px-2 sm:px-4">{index + 1}</td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <select
+                        value={service.service_name}
+                        onChange={(e) =>
+                          handleServiceChange(index, "service_name", e.target.value, service.id)
+                        }
+                        className="w-full px-2 sm:px-4 py-1 sm:py-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      >
+                        {services?.map((e, key) => (
+                          <option key={key} value={e.name}>
+                            {e.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <input
+                        type="number"
+                        value={service.quantity}
+                        onChange={(e) =>
+                          handleServiceChange(index, "quantity", parseInt(e.target.value, 10), service.id)
+                        }
+                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                        required
+                      />
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <select
+                        value={service.currency}
+                        onChange={(e) =>
+                          handleServiceChange(index, "currency", e.target.value, service.id)
+                        }
+                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                        required
+                      >
+                        {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
+                          <option key={currency} value={currency}>
+                            {currency}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <select
+                        value={service.rate}
+                        onChange={(e) =>
+                          handleServiceChange(index, "rate", e.target.value, service.id)
+                        }
+                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                        required
+                      >
+                        {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((rate) => (
+                          <option key={rate} value={rate}>
+                            {rate}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <input
+                        type="number"
+                        value={service.duration}
+                        onChange={(e) =>
+                          handleServiceChange(index, "duration", parseInt(e.target.value, 10), service.id)
+                        }
+                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                        required
+                      />
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={service.price}
+                        onChange={(e) =>
+                          handleServiceChange(index, "price", e.target.value, service.id)
+                        }
+                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                        required
+                      />
+                    </td>
+                    <td className="py-2 px-2 sm:px-4">${service.total_amount.toFixed(2)}</td>
+                    <td className="py-2 px-2 sm:px-4">
+                      <button
+                        type="button"
+                        onClick={() => removeServiceItem(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <button
             type="button"
             onClick={addServiceItem}
-            className="mt-4 flex items-center text-purple-500 hover:text-purple-700"
+            className="mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
           >
-            <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -559,42 +486,54 @@ const InvoiceEdit = () => {
           </button>
         </div>
 
-        <div className="text-right space-y-2 border-t border-gray-200 pt-4">
-          <p>Sub Total: ${formData.sub_total.toFixed(2)}</p>
-          <p className="text-red-500">
-            Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
-          </p>
-          <p>VAT: ${parseFloat(formData.vat || 0)}%</p>
-          <p className="text-xl font-semibold">
-            TOTAL: ${formData.total_amount.toFixed(2)}
-          </p>
-        </div>
+        <div className="border-t border-gray-200 pt-4">
+  <div className="flex flex-col space-y-2">
+    <div className="flex justify-between items-center">
+      <span className="text-sm sm:text-base">Sub Total:</span>
+      <span className="text-sm sm:text-base">${formData.sub_total.toFixed(2)}</span>
+    </div>
+    <div className="flex justify-between items-center">
+      <span className="text-sm sm:text-base text-red-500">Discount:</span>
+      <span className="text-red-500 text-sm sm:text-base">
+        - ${parseFloat(formData.discount || 0).toFixed(2)}
+      </span>
+    </div>
+    <div className="flex justify-between items-center">
+      <span className="text-sm sm:text-base">VAT:</span>
+      <span className="text-sm sm:text-base">${parseFloat(formData.vat || 0)}%</span>
+    </div>
+    <div className="flex justify-between items-center">
+      <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
+      <span className="text-lg sm:text-xl font-semibold">
+        ${formData.total_amount.toFixed(2)}
+      </span>
+    </div>
+  </div>
+</div>
 
-        <div className="flex justify-end space-x-4 mb-6">
-          <label className="flex items-center space-x-2 text-gray-600">
+        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
+          <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
             <input
               type="checkbox"
               className="h-4 w-4 text-purple-600 focus:ring-purple-500"
             />
-            Do you want signature field
+            <span>Do you want signature field</span>
           </label>
           <button
             type="submit"
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm sm:text-base"
           >
             Save
           </button>
           <button
             type="button"
-            className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 text-sm sm:text-base"
           >
             Send
           </button>
         </div>
       </form>
-     
     </div>
-    
   );
 };
 

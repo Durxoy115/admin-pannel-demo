@@ -15,6 +15,7 @@ const Header = () => {
   const [userDetails, setUserDetails] = useState({
     username: "",
     userType: "",
+    photo: null,
   });
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -33,6 +34,7 @@ const Header = () => {
           setUserDetails({
             username: data?.data?.username || "User",
             userType: data?.data?.user_type?.name || "Role",
+            photo: data?.data?.photo || " ",
           });
         } else {
           console.error("Failed to fetch user details");
@@ -95,10 +97,16 @@ const Header = () => {
               {userDetails.username}
             </span>
             <img
-              src="/assets/Images/Images-nav/images.png"
-              className="h-6 w-6 sm:h-8 sm:w-8 rounded-full"
-              alt="Profile"
-              onError={(e) => (e.target.src = "/default-profile.jpg")} // Fallback image
+              src={
+                userDetails.photo && userDetails.photo !== " "
+                  ? `https://admin.zgs.co.com${userDetails.photo}` // Assuming the photo is a path that needs the base URL
+                  : "/assets/Images/default-user.jpg" // Fallback image
+              }
+              alt={`${userDetails.username}'s profile photo`}
+              onError={(e) =>
+                (e.target.src = "/assets/Images/default-user.jpg")
+              } // Fallback on error
+              className="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover ml-2 sm:ml-4"
             />
           </MenuButton>
 
@@ -112,7 +120,8 @@ const Header = () => {
                       active ? "bg-gray-100" : "text-gray-700"
                     } w-full text-left`}
                   >
-                    <RxActivityLog className="mr-2 text-sm sm:text-base" /> Activity Log
+                    <RxActivityLog className="mr-2 text-sm sm:text-base" />{" "}
+                    Activity Log
                   </button>
                 )}
               </MenuItem>
@@ -142,7 +151,8 @@ const Header = () => {
                       active ? "bg-gray-100" : "text-gray-700"
                     } w-full text-left`}
                   >
-                    <LuMessageSquareText className="mr-2 text-sm sm:text-base" /> Message
+                    <LuMessageSquareText className="mr-2 text-sm sm:text-base" />{" "}
+                    Message
                   </button>
                 )}
               </MenuItem>
@@ -154,7 +164,8 @@ const Header = () => {
                       active ? "bg-gray-100" : "text-gray-700"
                     } w-full text-left`}
                   >
-                    <HiOutlineDocumentCurrencyDollar className="mr-2 text-sm sm:text-base" /> Payment History
+                    <HiOutlineDocumentCurrencyDollar className="mr-2 text-sm sm:text-base" />{" "}
+                    Payment History
                   </button>
                 )}
               </MenuItem>
@@ -166,7 +177,8 @@ const Header = () => {
                       active ? "bg-gray-100" : "text-gray-700"
                     } w-full text-left`}
                   >
-                    <CiViewList className="mr-2 text-sm sm:text-base" /> Order List
+                    <CiViewList className="mr-2 text-sm sm:text-base" /> Order
+                    List
                   </button>
                 )}
               </MenuItem>
@@ -178,7 +190,8 @@ const Header = () => {
                       active ? "bg-gray-100" : "text-gray-700"
                     } w-full text-left`}
                   >
-                    <RiLockPasswordFill className="mr-2 text-sm sm:text-base" /> Change Password
+                    <RiLockPasswordFill className="mr-2 text-sm sm:text-base" />{" "}
+                    Change Password
                   </button>
                 )}
               </MenuItem>

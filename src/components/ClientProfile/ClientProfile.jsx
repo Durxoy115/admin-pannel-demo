@@ -4,8 +4,8 @@ import useToken from "../hooks/useToken";
 
 const ClientProfile = ({ id }) => {
   const navigate = useNavigate();
-  const { id: paramId } = useParams(); // Get id from URL params if not passed as prop
-  const clientId = id || paramId; // Use prop id if available, otherwise use paramId
+  const { id: paramId } = useParams();
+  const clientId = id || paramId;
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const fileInputRef = useRef(null);
@@ -20,13 +20,13 @@ const ClientProfile = ({ id }) => {
     website_url: "",
     contact_person: "",
     address: "",
-    photo: null, // URL or null
-    contact_doc: null, // URL or null
+    photo: null,
+    contact_doc: null,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [photoFile, setPhotoFile] = useState(null); // For new photo upload
-  const [docFile, setDocFile] = useState(null); // For new document upload
-  const [docFileName, setDocFileName] = useState(""); // Display document file name
+  const [photoFile, setPhotoFile] = useState(null);
+  const [docFile, setDocFile] = useState(null);
+  const [docFileName, setDocFileName] = useState("");
 
   useEffect(() => {
     const fetchClientDetails = async () => {
@@ -139,14 +139,14 @@ const ClientProfile = ({ id }) => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="flex-grow flex items-center justify-center mt-12 sm:py-6 md:py-8">
-        <div className="w-full  px-4 sm:px-6 md:px-28">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8">Client Profile</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex-grow flex items-center justify-center py-4 sm:py-6 md:py-8">
+        <div className="w-full  px-4 sm:px-6 lg:px-24">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 mt-12">Client Profile</h2>
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Image Uploader and Form Fields in Flex Container */}
-            <div className="flex flex-col lg:flex-row">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Image Uploader */}
-              <div className="mb-6 lg:mb-0 lg:w-40">
+              <div className="mb-4 sm:mb-0 lg:w-40">
                 <div className="relative">
                   <input
                     type="file"
@@ -159,32 +159,32 @@ const ClientProfile = ({ id }) => {
                   />
                   {clientData.photo ? (
                     <div
-                      className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg border border-gray-300 cursor-pointer"
+                      className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg border border-gray-300 cursor-pointer"
                       onClick={() => fileInputRef.current.click()}
                     >
                       <img
                         src={clientData.photo}
                         alt="Client"
                         className="w-full h-full rounded-lg object-cover"
-                        onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image
+                        onError={(e) => (e.target.src = "/default-image.jpg")}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                        <span className="text-white text-xs sm:text-sm">Upload New</span>
+                        <span className="text-white text-xs">Upload New</span>
                       </div>
                     </div>
                   ) : (
                     <div
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors duration-300"
+                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors duration-300"
                       onClick={() => fileInputRef.current.click()}
                     >
-                      <span className="text-gray-500 text-xs sm:text-sm text-center">Upload Image</span>
+                      <span className="text-gray-500 text-xs text-center px-2">Upload Image</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Form Fields */}
-              <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {[
                   { label: "Client Name*", name: "name", type: "text", required: true },
                   { label: "Client Mobile No.*", name: "contact", type: "tel", required: true },
@@ -195,7 +195,7 @@ const ClientProfile = ({ id }) => {
                   { label: "Contact Person", name: "contact_person", type: "text" },
                 ].map(({ label, name, type, required }) => (
                   <div key={name}>
-                    <label htmlFor={name} className="block mb-1 font-medium text-sm sm:text-base">
+                    <label htmlFor={name} className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
                       {label}
                     </label>
                     <input
@@ -204,7 +204,7 @@ const ClientProfile = ({ id }) => {
                       name={name}
                       value={clientData[name] || ""}
                       onChange={handleChange}
-                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                       required={required}
                     />
                   </div>
@@ -212,7 +212,7 @@ const ClientProfile = ({ id }) => {
 
                 {/* Document Upload Field */}
                 <div>
-                  <label htmlFor="contact_doc" className="block mb-1 font-medium text-sm sm:text-base">
+                  <label htmlFor="contact_doc" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
                     Contact Document
                   </label>
                   <div className="relative">
@@ -226,7 +226,7 @@ const ClientProfile = ({ id }) => {
                       accept=".pdf,.doc,.docx"
                     />
                     <div
-                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                       onClick={() => docInputRef.current.click()}
                     >
                       {docFileName || "Choose Document"}
@@ -235,8 +235,8 @@ const ClientProfile = ({ id }) => {
                 </div>
 
                 {/* Address Field */}
-                <div className="col-span-2">
-                  <label htmlFor="address" className="block mb-1 font-medium text-sm sm:text-base">
+                <div className="col-span-1 sm:col-span-2">
+                  <label htmlFor="address" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
                     Address
                   </label>
                   <textarea
@@ -244,40 +244,40 @@ const ClientProfile = ({ id }) => {
                     name="address"
                     value={clientData.address || ""}
                     onChange={handleChange}
-                    rows="3"
-                    className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   ></textarea>
                 </div>
 
                 {/* Notes Field */}
-                <div className="col-span-2">
-                  <label htmlFor="notes" className="block mb-1 font-medium text-sm sm:text-base">
+                <div className="col-span-1 sm:col-span-2">
+                  <label htmlFor="notes" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
                     Notes
                   </label>
                   <textarea
                     id="notes"
-                    name="notes" // Corrected from 'address' to 'notes'
-                    value={clientData.address || ""} // Using address field for notes as per original intent
+                    name="notes"
+                    value={clientData.address || ""}
                     onChange={handleChange}
-                    rows="3"
-                    className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   ></textarea>
                 </div>
               </div>
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-center space-x-4 mt-6 sm:mt-8">
+            <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
               <button
                 type="button"
-                className="px-6 sm:px-8 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
+                className="w-full sm:w-auto px-20 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm sm:text-base"
                 onClick={() => navigate("/dashboard")}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 sm:px-8 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                className="w-full sm:w-auto px-20 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 text-sm sm:text-base"
               >
                 Save
               </button>

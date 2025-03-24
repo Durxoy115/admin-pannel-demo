@@ -64,17 +64,17 @@ const PaymentAdd = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="bg-gray-100 min-h-screen flex flex-col md:px-20">
       {/* Header */}
-      <div className="flex justify-center md:justify-start items-center mb-6 px-4 md:px-16 lg:px-64">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mt-6">
+      <div className="flex  md:justify-start  mb-6 px-8">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mt-24">
           Add Payment Details
         </h1>
       </div>
 
       {/* Form Container */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-3/4">
+        <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Client Details */}

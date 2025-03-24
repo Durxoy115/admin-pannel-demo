@@ -15,7 +15,7 @@ const OrderAdd = () => {
     client_id: "",
     details: "",
   });
-  const [url,getTokenLocalStorage] = useToken();
+  const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
   const navigate = useNavigate();
@@ -56,124 +56,131 @@ const OrderAdd = () => {
   };
 
   return (
-    <div className="  p-10 bg-gray-100 rounded-md  ">
-      <h2 className="text-3xl font-bold mb-8">Create New Order</h2>
-      <form onSubmit={handleSubmit} className="space-y-6 min-h-screen">
-        <div className="grid grid-cols-3 gap-6 ">
+    <div className="w-full  mx-auto px-4 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10 bg-gray-100 rounded-md min-h-screen">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 mt-16">Create New Order</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-4 sm:p-8 rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Service/Product Name<span className="text-red-500">*</span>
+            <label htmlFor="name" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Service/Product Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               name="name"
+              id="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
+            <label htmlFor="duration" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Duration
             </label>
             <input
               type="text"
               name="duration"
+              id="duration"
               value={formData.duration}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Price<span className="text-red-500">*</span>
+            <label htmlFor="price" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Price <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               name="price"
+              id="price"
               value={formData.price}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Order Date<span className="text-red-500">*</span>
+            <label htmlFor="order_date" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Order Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
               name="order_date"
+              id="order_date"
               value={formData.order_date}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
+            <label htmlFor="estimate_delivery_date" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Estimate Delivery Date
             </label>
             <input
               type="date"
               name="estimate_delivery_date"
+              id="estimate_delivery_date"
               value={formData.estimate_delivery_date}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-               Delivery Date
+            <label htmlFor="delivery_date" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Delivery Date
             </label>
             <input
               type="date"
               name="delivery_date"
+              id="delivery_date"
               value={formData.delivery_date}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Client ID<span className="text-red-500">*</span>
+            <label htmlFor="client_id" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Client ID <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               name="client_id"
+              id="client_id"
               value={formData.client_id}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-md"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
         </div>
         <div>
-          <label className="block text-gray-700 font-medium mb-2 text-start ml-2">
+          <label htmlFor="details" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base text-start">
             Product Information
           </label>
           <ReactQuill
+            id="details"
             value={formData.details}
             onChange={handleQuillChange}
             className="bg-white border border-gray-300 rounded-md"
           />
         </div>
-        <div className="flex justify-center space-x-4">
-        <button
+        <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6">
+          <button
             type="button"
             onClick={handleCancel}
-            className="w-48 bg-red-500 text-white py-3 rounded-full hover:bg-red-600"
+            className="w-full sm:w-48 bg-red-500 text-white py-2 sm:py-3 rounded-full hover:bg-red-600 text-sm sm:text-base"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="w-48 bg-blue-600 text-white py-3 rounded-full hover:bg-blue-700"
+            className="w-full sm:w-48 bg-blue-600 text-white py-2 sm:py-3 rounded-full hover:bg-blue-700 text-sm sm:text-base"
           >
             Save Order
           </button>
-         
         </div>
       </form>
     </div>

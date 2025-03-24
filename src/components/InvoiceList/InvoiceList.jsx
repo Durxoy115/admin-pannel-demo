@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {  AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineEdit } from "react-icons/ai";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { PiUserListLight } from "react-icons/pi";
 import { CgNotes } from "react-icons/cg";
@@ -23,8 +23,7 @@ const InvoiceList = () => {
   const token = getTokenLocalStorage();
   const navigate = useNavigate();
 
-
-
+  // Fetch and filter logic remains unchanged
   const fetchInvoices = async () => {
     try {
       const response = await axios.get(`${url}/service/invoice/`, {
@@ -56,7 +55,6 @@ const InvoiceList = () => {
 
   useEffect(() => {
     let filtered = invoices;
-
     if (searchQuery) {
       filtered = filtered.filter((invoice) =>
         [invoice.clientName, invoice.companyName, invoice.invoiceId].some((field) =>
@@ -64,10 +62,8 @@ const InvoiceList = () => {
         )
       );
     }
-
     if (startDate) filtered = filtered.filter((invoice) => invoice.date >= startDate);
     if (endDate) filtered = filtered.filter((invoice) => invoice.date <= endDate);
-
     setFilteredInvoices(filtered);
   }, [searchQuery, startDate, endDate, invoices]);
 
@@ -83,31 +79,26 @@ const InvoiceList = () => {
 
   const handleDeleteInvoice = async () => {
     if (!selectedInvoiceId) return;
-  
     try {
       const response = await fetch(`${url}/service/invoice/?invoice_id=${selectedInvoiceId}`, {
         method: "DELETE",
         headers: { Authorization: `Token ${token}` },
       });
-  
       if (response.ok) {
         setInvoices(invoices.filter((invoice) => invoice.id !== selectedInvoiceId));
         setIsModalOpen(false);
-      } else {
-        console.error("Failed to delete invoice");
       }
     } catch (error) {
       console.error("Error deleting invoice:", error);
     }
   };
-  
 
   const handleDashboard = () => navigate("/dashboard");
   const handleCreateInvoice = () => navigate("/create-invoice");
   const handleEditInvoice = (id) => navigate(`/edit-invoice/${id}`);
 
-  if (loading) return <div className="p-8">Loading invoices...</div>;
-  if (error) return <div className="p-8 text-red-500">{error}</div>;
+  if (loading) return <div className="p-4">Loading invoices...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   const getSummaryData = () => {
     const totalAmount = invoices.reduce((acc, invoice) => acc + Number(invoice.amount), 0);
@@ -139,53 +130,57 @@ const InvoiceList = () => {
   } = getSummaryData();
 
   return (
-    <div className="p-8 w-full">
-      <h1 className="text-3xl font-semibold mb-6">Invoice Details</h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white shadow p-4 rounded-lg">
-          <h2 className="text-xl font-semibold">${totalAmount.toLocaleString()}</h2>
-          <p className="text-sm text-gray-600">INVOICE SENT</p>
-          <div className="text-blue-600 font-semibold">{totalInvoices} Invoice sent</div>
-        </div>
-
-        <div className="bg-white shadow p-4 rounded-lg">
-          <h2 className="text-xl font-semibold">${paidAmount.toLocaleString()}</h2>
-          <p className="text-sm text-gray-600">PAID INVOICE</p>
-          <div className="text-blue-600 font-semibold">{paidInvoices} Paid by clients</div>
-        </div>
-
-        <div className="bg-white shadow p-4 rounded-lg">
-          <h2 className="text-xl font-semibold">${unpaidAmount.toLocaleString()}</h2>
-          <p className="text-sm text-gray-600">UNPAID INVOICE</p>
-          <div className="text-red-600 font-semibold">{unpaidInvoices} Unpaid by clients</div>
-        </div>
-
-        <div className="bg-white shadow p-4 rounded-lg">
-          <h2 className="text-xl font-semibold">${cancelledAmount.toLocaleString()}</h2>
-          <p className="text-sm text-gray-600">CANCELLED INVOICES</p>
-          <div className="text-blue-600 font-semibold">{cancelledInvoices} Cancelled by clients</div>
-        </div>
+    <div className="p-4 sm:p-6 lg:p-8 w-full">
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-6">Invoice Details</h1>
+      
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { title: "INVOICE SENT", amount: totalAmount, count: totalInvoices, color: "text-blue-600" },
+          { title: "PAID INVOICE", amount: paidAmount, count: paidInvoices, color: "text-blue-600" },
+          { title: "UNPAID INVOICE", amount: unpaidAmount, count: unpaidInvoices, color: "text-red-600" },
+          { title: "CANCELLED INVOICES", amount: cancelledAmount, count: cancelledInvoices, color: "text-blue-600" },
+        ].map((item, index) => (
+          <div key={index} className="bg-white shadow p-4 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold">${item.amount.toLocaleString()}</h2>
+            <p className="text-xs sm:text-sm text-gray-600">{item.title}</p>
+            <div className={`text-xs sm:text-sm font-semibold ${item.color}`}>
+              {item.count} {item.title.toLowerCase().includes("cancelled") ? "Cancelled by clients" : item.title.toLowerCase().includes("unpaid") ? "Unpaid by clients" : "Invoice sent"}
+            </div>
+          </div>
+        ))}
       </div>
+
       {/* Toolbar */}
-      <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center mt-4 h-12">
-        <p>Invoice List</p>
+      <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4">
+        <p className="text-sm sm:text-base">Invoice List</p>
         <input
           type="text"
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 ml-4 mr-96"
+          className="w-1/4 sm:flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 sm:ml-4"
         />
-        <div className="rounded-lg ml-20">
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mr-1 rounded-md p-1 text-black" />
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="rounded-md p-1 text-black" />
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full sm:w-auto rounded-md p-1 text-black"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full sm:w-auto rounded-md p-1 text-black"
+          />
         </div>
-        <div className="ml-96 flex gap-6">
-          <button className="text-xl" onClick={handleCreateInvoice}><CgNotes /></button>
-          <button className="text-xl" onClick={handleDashboard}><PiUserListLight /></button>
-          <button className="text-xl" onClick={fetchInvoices}><IoMdRefresh /></button>
+        <div className="flex gap-4 sm:ml-auto">
+          <button className="text-lg sm:text-xl" onClick={handleCreateInvoice}><CgNotes /></button>
+          <button className="text-lg sm:text-xl" onClick={handleDashboard}><PiUserListLight /></button>
+          <button className="text-lg sm:text-xl" onClick={fetchInvoices}><IoMdRefresh /></button>
+          <button className="text-lg sm:text-xl"><BsDownload /></button>
         </div>
-        <button className="text-xl ml-4"><BsDownload /></button>
       </div>
 
       {/* Invoice Table */}
@@ -193,34 +188,33 @@ const InvoiceList = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
-              {["Invoice ID", "Client ID", "Client Name", "Company Name", "Amount (BDT)", "Date", "Payment Method", "Payment Status", "Actions"]
-                .map((heading) => (
-                  <th key={heading} className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">
-                    {heading}
-                  </th>
-                ))}
+              {["Invoice ID", "Client ID", "Client Name", "Company Name", "Amount (BDT)", "Date", "Payment Method", "Payment Status", "Actions"].map((heading) => (
+                <th key={heading} className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-700 uppercase">
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredInvoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{invoice.invoiceId}</td>
-                <td className="px-6 py-4">{invoice.clientId}</td>
-                <td className="px-6 py-4">{invoice.clientName}</td>
-                <td className="px-6 py-4">{invoice.companyName}</td>
-                <td className="px-6 py-4">{invoice.amount} BDT</td>
-                <td className="px-6 py-4">{invoice.date}</td>
-                <td className="px-6 py-4">{invoice.paymentMethod}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.invoiceId}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.clientId}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.clientName}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.companyName}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.amount} BDT</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.date}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">{invoice.paymentMethod}</td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
                     invoice.paymentStatus === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
                   }`}>
                     {invoice.paymentStatus}
                   </span>
                 </td>
-                <td className="px-6 py-4 flex gap-3">
-                  <button onClick={() => handleEditInvoice(invoice.id)}><AiOutlineEdit className="h-5 w-5 text-blue-500" /></button>
-                  <button onClick={() => openDeleteModal(invoice.id)}><RiDeleteBin6Line className="h-5 w-5 text-red-500" /></button>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3">
+                  <button onClick={() => handleEditInvoice(invoice.id)}><AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" /></button>
+                  <button onClick={() => openDeleteModal(invoice.id)}><RiDeleteBin6Line className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" /></button>
                 </td>
               </tr>
             ))}
@@ -230,13 +224,13 @@ const InvoiceList = () => {
 
       {/* Delete Confirmation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
-            <p>Are you sure you want to delete this invoice?</p>
-            <div className="mt-6 flex justify-end gap-4">
-              <button onClick={closeDeleteModal} className="px-4 py-2 bg-gray-300 rounded-md">Cancel</button>
-              <button onClick={handleDeleteInvoice} className="px-4 py-2 bg-red-500 text-white rounded-md">Delete</button>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">Confirm Deletion</h2>
+            <p className="text-sm sm:text-base">Are you sure you want to delete this invoice?</p>
+            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={closeDeleteModal} className="px-4 py-2 bg-gray-300 rounded-md text-sm sm:text-base">Cancel</button>
+              <button onClick={handleDeleteInvoice} className="px-4 py-2 bg-red-500 text-white rounded-md text-sm sm:text-base">Delete</button>
             </div>
           </div>
         </div>

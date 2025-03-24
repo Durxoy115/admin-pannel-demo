@@ -527,15 +527,34 @@ const CreateInvoice = () => {
         </button>
       </div>
 
-      <div className="text-right space-y-1 sm:space-y-2 border-t border-gray-200 pt-3 sm:pt-4">
-        <p className="text-sm sm:text-base">Sub Total: ${formData.sub_total.toFixed(2)}</p>
-        <p className="text-red-500 text-sm sm:text-base">
+      <div className="text-right space-y-1 sm:space-y-2 border-t-2 border-gray-200 pt-3 sm:pt-4  border-dashed">
+        <div className="flex justify-between items-center">
+        <span className="text-sm sm:text-base">Sub Total:</span>
+        <span>${formData.sub_total.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+      <span className="text-sm sm:text-base text-red-500">Discount:</span>
+      <span className="text-red-500 text-sm sm:text-base">
+        - ${parseFloat(formData.discount || 0).toFixed(2)}
+      </span>
+    </div>
+        {/* <p className="text-red-500 text-sm sm:text-base">
           Discount: - ${parseFloat(formData.discount || 0).toFixed(2)}
-        </p>
-        <p className="text-sm sm:text-base">VAT: {formData.vat}%</p>
-        <p className="text-lg sm:text-xl font-semibold">
+        </p> */}
+        <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
+        <span className="text-sm sm:text-base">VAT:</span>
+        <span className="text-sm sm:text-base">{formData.vat}%</span>
+        </div>
+      
+        {/* <p className="text-lg sm:text-xl font-semibold">
           TOTAL: ${formData.total_amount.toFixed(2)}
-        </p>
+        </p> */}
+         <div className="flex justify-between items-center">
+      <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
+      <span className="text-lg sm:text-xl font-semibold">
+        ${formData.total_amount.toFixed(2)}
+      </span>
+    </div>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
