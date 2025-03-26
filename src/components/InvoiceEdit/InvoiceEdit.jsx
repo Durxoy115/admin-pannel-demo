@@ -63,7 +63,9 @@ const InvoiceEdit = () => {
             }));
           }
         } else {
-          throw new Error(`Failed to fetch services. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch services. Status: ${response.status}`
+          );
         }
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -79,12 +81,15 @@ const InvoiceEdit = () => {
   useEffect(() => {
     const fetchInvoiceData = async () => {
       try {
-        const response = await fetch(`${url}/service/invoice/?invoice_id=${id}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${url}/service/invoice/?invoice_id=${id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
 
         const data = await response.json();
 
@@ -112,7 +117,8 @@ const InvoiceEdit = () => {
             client_phone: data.data.client_phone || "",
             billing_address: data.data.billing_address || "",
             service_name:
-              data.data.service_name || (services.length > 0 ? services[0].name : ""),
+              data.data.service_name ||
+              (services.length > 0 ? services[0].name : ""),
             sub_total: parseFloat(data.data.sub_total) || 0,
             discount: parseFloat(data.data.discount) || 0,
             vat: parseFloat(data.data.vat) || 0,
@@ -120,12 +126,14 @@ const InvoiceEdit = () => {
             services: services,
             company_logo: null,
             company_logo_name: data.data.company_logo
-              ? data.data.company_logo.split('/').slice(-1)[0]
+              ? data.data.company_logo.split("/").slice(-1)[0]
               : "",
           };
           setFormData(fetchedData);
         } else {
-          throw new Error(`Failed to fetch invoice data. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch invoice data. Status: ${response.status}`
+          );
         }
       } catch (error) {
         console.error("Error fetching invoice data:", error);
@@ -140,7 +148,11 @@ const InvoiceEdit = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if ((name === "discount" || name === "vat") && !/^\d*\.?\d{0,2}$/.test(value)) return;
+    if (
+      (name === "discount" || name === "vat") &&
+      !/^\d*\.?\d{0,2}$/.test(value)
+    )
+      return;
 
     setFormData((prev) => {
       const updatedData = { ...prev, [name]: value };
@@ -172,7 +184,8 @@ const InvoiceEdit = () => {
     }
 
     updatedServices[index].total_amount =
-      (updatedServices[index].quantity || 0) * (updatedServices[index].price || 0);
+      (updatedServices[index].quantity || 0) *
+      (updatedServices[index].price || 0);
     updatedServices[index]["id"] = id;
 
     setFormData((prev) => {
@@ -216,7 +229,8 @@ const InvoiceEdit = () => {
       0
     );
     const discountAmount = parseFloat(data.discount) || 0;
-    const vatAmount = ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
+    const vatAmount =
+      ((subTotal - discountAmount) * (parseFloat(data.vat) || 0)) / 100;
     const total = subTotal + vatAmount - discountAmount;
 
     return {
@@ -286,29 +300,68 @@ const InvoiceEdit = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col mt-24 px-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col mt-20 md:px-24">
+      <div className="flex justify-between items-center mb-2 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl p-1 md:text-3xl font-semibold text-gray-800">
+          Edit Invoice
+        </h1>
+      </div>
       <form
         onSubmit={handleSubmit}
-        className="p-4 sm:p-6 lg:p-8 w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl mt-2 sm:mt-4"
+        className="p-1 sm:p-6 lg:p-8 w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl"
       >
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800">Edit Invoice</h1>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[
-            { name: "client_invoice_id", placeholder: "Client Invoice ID*", required: true },
-            { name: "company_name", placeholder: "Company Name*", required: true },
-            { name: "billing_address", placeholder: "Company Billing Address*", required: true },
+            {
+              name: "client_invoice_id",
+              placeholder: "Client Invoice ID*",
+              required: true,
+            },
+            {
+              name: "company_name",
+              placeholder: "Company Name*",
+              required: true,
+            },
+            {
+              name: "billing_address",
+              placeholder: "Company Billing Address*",
+              required: true,
+            },
             { name: "client_id", placeholder: "Client ID*", required: true },
             { name: "website_url", placeholder: "Website URL" },
-            { name: "client_name", placeholder: "Client Name*", required: true },
+            {
+              name: "client_name",
+              placeholder: "Client Name*",
+              required: true,
+            },
             { name: "date", type: "date", required: true },
-            { name: "payment_status", placeholder: "Payment Status*", required: true },
-            { name: "client_email", placeholder: "Client Email*", required: true },
-            { name: "client_phone", placeholder: "Client Phone No.*", required: true },
-            { name: "vat", type: "number", step: "0.01", placeholder: "VAT (%)" },
-            { name: "discount", type: "number", step: "0.01", placeholder: "Discount" },
+            {
+              name: "payment_status",
+              placeholder: "Payment Status*",
+              required: true,
+            },
+            {
+              name: "client_email",
+              placeholder: "Client Email*",
+              required: true,
+            },
+            {
+              name: "client_phone",
+              placeholder: "Client Phone No.*",
+              required: true,
+            },
+            {
+              name: "vat",
+              type: "number",
+              step: "0.01",
+              placeholder: "VAT (%)",
+            },
+            {
+              name: "discount",
+              type: "number",
+              step: "0.01",
+              placeholder: "Discount",
+            },
           ].map((field) => (
             <input
               key={field.name}
@@ -372,7 +425,12 @@ const InvoiceEdit = () => {
                       <select
                         value={service.service_name}
                         onChange={(e) =>
-                          handleServiceChange(index, "service_name", e.target.value, service.id)
+                          handleServiceChange(
+                            index,
+                            "service_name",
+                            e.target.value,
+                            service.id
+                          )
                         }
                         className="w-full px-2 sm:px-4 py-1 sm:py-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                       >
@@ -388,7 +446,12 @@ const InvoiceEdit = () => {
                         type="number"
                         value={service.quantity}
                         onChange={(e) =>
-                          handleServiceChange(index, "quantity", parseInt(e.target.value, 10), service.id)
+                          handleServiceChange(
+                            index,
+                            "quantity",
+                            parseInt(e.target.value, 10),
+                            service.id
+                          )
                         }
                         className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                         required
@@ -398,28 +461,45 @@ const InvoiceEdit = () => {
                       <select
                         value={service.currency}
                         onChange={(e) =>
-                          handleServiceChange(index, "currency", e.target.value, service.id)
+                          handleServiceChange(
+                            index,
+                            "currency",
+                            e.target.value,
+                            service.id
+                          )
                         }
                         className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                         required
                       >
-                        {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
-                          <option key={currency} value={currency}>
-                            {currency}
-                          </option>
-                        ))}
+                        {["USD", "Dollar", "Rupee", "Euro", "BDT"].map(
+                          (currency) => (
+                            <option key={currency} value={currency}>
+                              {currency}
+                            </option>
+                          )
+                        )}
                       </select>
                     </td>
                     <td className="py-2 px-2 sm:px-4">
                       <select
                         value={service.rate}
                         onChange={(e) =>
-                          handleServiceChange(index, "rate", e.target.value, service.id)
+                          handleServiceChange(
+                            index,
+                            "rate",
+                            e.target.value,
+                            service.id
+                          )
                         }
                         className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                         required
                       >
-                        {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((rate) => (
+                        {[
+                          "Hourly",
+                          "Monthly",
+                          "Project Base",
+                          "Fixed Price",
+                        ].map((rate) => (
                           <option key={rate} value={rate}>
                             {rate}
                           </option>
@@ -431,7 +511,12 @@ const InvoiceEdit = () => {
                         type="number"
                         value={service.duration}
                         onChange={(e) =>
-                          handleServiceChange(index, "duration", parseInt(e.target.value, 10), service.id)
+                          handleServiceChange(
+                            index,
+                            "duration",
+                            parseInt(e.target.value, 10),
+                            service.id
+                          )
                         }
                         className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                         required
@@ -443,20 +528,31 @@ const InvoiceEdit = () => {
                         step="0.01"
                         value={service.price}
                         onChange={(e) =>
-                          handleServiceChange(index, "price", e.target.value, service.id)
+                          handleServiceChange(
+                            index,
+                            "price",
+                            e.target.value,
+                            service.id
+                          )
                         }
                         className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                         required
                       />
                     </td>
-                    <td className="py-2 px-2 sm:px-4">${service.total_amount.toFixed(2)}</td>
+                    <td className="py-2 px-2 sm:px-4">
+                      ${service.total_amount.toFixed(2)}
+                    </td>
                     <td className="py-2 px-2 sm:px-4">
                       <button
                         type="button"
                         onClick={() => removeServiceItem(index)}
                         className="text-red-500 hover:text-red-700"
                       >
-                        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg
+                          className="h-4 w-4 sm:h-5 sm:w-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
                           <path
                             fillRule="evenodd"
                             d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -475,7 +571,11 @@ const InvoiceEdit = () => {
             onClick={addServiceItem}
             className="mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
           >
-            <svg className="h-4 w-4 sm:h-5 sm:w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -486,30 +586,36 @@ const InvoiceEdit = () => {
           </button>
         </div>
 
-        <div className="border-t border-gray-200 pt-4">
-  <div className="flex flex-col space-y-2">
-    <div className="flex justify-between items-center">
-      <span className="text-sm sm:text-base">Sub Total:</span>
-      <span className="text-sm sm:text-base">${formData.sub_total.toFixed(2)}</span>
-    </div>
-    <div className="flex justify-between items-center">
-      <span className="text-sm sm:text-base text-red-500">Discount:</span>
-      <span className="text-red-500 text-sm sm:text-base">
-        - ${parseFloat(formData.discount || 0).toFixed(2)}
-      </span>
-    </div>
-    <div className="flex justify-between items-center">
-      <span className="text-sm sm:text-base">VAT:</span>
-      <span className="text-sm sm:text-base">${parseFloat(formData.vat || 0)}%</span>
-    </div>
-    <div className="flex justify-between items-center">
-      <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
-      <span className="text-lg sm:text-xl font-semibold">
-        ${formData.total_amount.toFixed(2)}
-      </span>
-    </div>
-  </div>
-</div>
+        <div className=" pt-4">
+          <div className="flex flex-col space-y-2">
+            <div className="flex justify-between items-center border-t-2   border-dashed">
+              <span className="text-sm sm:text-base mt-2">Sub Total:</span>
+              <span className="text-sm sm:text-base">
+                ${formData.sub_total.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm sm:text-base text-red-500">
+                Discount:
+              </span>
+              <span className="text-red-500 text-sm sm:text-base">
+                - ${parseFloat(formData.discount || 0).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
+              <span className="text-sm sm:text-base">VAT:</span>
+              <span className="text-sm sm:text-base">
+                ${parseFloat(formData.vat || 0)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center ">
+              <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
+              <span className="text-lg sm:text-xl font-semibold">
+                ${formData.total_amount.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
           <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">

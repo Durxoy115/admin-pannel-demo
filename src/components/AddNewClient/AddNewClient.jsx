@@ -206,7 +206,6 @@ const AddNewClient = () => {
                     id="contractDocument"
                     name="contractDocument"
                     accept=".pdf,.doc,.docx"
-                    required
                     className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     onChange={handleFileUpload}
                   />

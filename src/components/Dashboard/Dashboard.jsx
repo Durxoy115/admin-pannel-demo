@@ -60,9 +60,16 @@ const Dashboard = () => {
     }
   }, [location.state]);
 
+  // const handleOpenModal = () => {
+  //   window.open("/addnewclient", "_blank");
+  // };
+  // const handleInvoiceList = () =>{
+  //   window.open("/addnewclient", "_blank");
+  // }
   const handleOpenModal = () => navigate("/addnewclient");
   const handleInvoiceList = () => navigate("/invoice-list");
   const handleClientProfile = (id) => navigate(`/client-info/${id}`);
+  const handleClientInvoice = (clientId) => navigate(`/client-invoice-create/${clientId}`);
 
   const toggleClientSelection = (clientId) => {
     setSelectedClients((prev) =>
@@ -123,12 +130,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div className=" mx-auto p-10">
+    <div className=" mx-auto p-1 md:p-10">
       <div>
         <h1 className="text-3xl font-semibold mt-12 ">Clients Information</h1>
       </div>
 
-      <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center mt-4 h-16 justify-between">
+      {/* <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center mt-4 h-16 justify-between">
         <div className="flex gap-4">
           <div>
             <p>Clients Details</p>
@@ -188,7 +195,70 @@ const Dashboard = () => {
             <FaTrash />
           </button>
         )}
-      </div>
+      </div> */}
+      <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mt-4 min-h-[4rem]">
+  {/* Left Section: Title and Search */}
+  <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+    <div className="text-center sm:text-left">
+      <p className="text-sm sm:text-base">Clients Details</p>
+    </div>
+    <div className="w-full sm:w-64 lg:w-96"> {/* Adjusted width here */}
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchQuery}
+        onChange={handleSearch}
+        className="w-full text-black px-3 py-1 sm:px-4 sm:py-2 border border-gray-700 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  </div>
+
+  {/* Right Section: Buttons */}
+  <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-4 w-full sm:w-auto">
+    <button
+      className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
+      onClick={handleOpenModal}
+    >
+      <LuCirclePlus className="h-5 w-5 sm:h-6 sm:w-6" />
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+        Add New Client
+      </span>
+    </button>
+    <button
+      className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
+      onClick={handleInvoiceList}
+    >
+      <CgNotes className="h-5 w-5 sm:h-6 sm:w-6" />
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+        Invoice List
+      </span>
+    </button>
+    <button
+      className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
+      onClick={fetchClients}
+    >
+      <IoMdRefresh className="h-5 w-5 sm:h-6 sm:w-6" />
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+        Refresh
+      </span>
+    </button>
+    <button className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group">
+      <BsDownload className="h-5 w-5 sm:h-6 sm:w-6" />
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+        Download
+      </span>
+    </button>
+
+    {selectedClients.length > 0 && (
+      <button
+        className="text-white bg-red-600 px-2 py-1 sm:px-2 sm:py-2 rounded-lg"
+        onClick={() => openDeleteModal("bulk")}
+      >
+        <FaTrash className="h-4 w-4 sm:h-5 sm:w-5" />
+      </button>
+    )}
+  </div>
+</div>
 
       {isLoading ? (
         <p className="text-center mt-8">Loading...</p>
@@ -276,6 +346,7 @@ const Dashboard = () => {
                           borderRadius: "5px",
                           color: "#B9AB12",
                         }}
+                        onClick={() => handleClientInvoice(client.client_id) }
                       >
                         <GrNotes />
                       </button>

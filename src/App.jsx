@@ -30,6 +30,7 @@ import CombineComponent from "./components/CombineComponent/CombineComponent";
 import PaymentAdd from "./components/PaymentAdd/PaymentAdd";
 import Footer from "./components/Footer/Footer";
 import AddContact from "./components/AddContact/AddContact";
+import CreateInvoiceFromDashboard from "./components/CreateInvoiceFromDashboard/CreateInvoiceFromDashboard";
 
 
 // import Test from "./components/Test";
@@ -73,6 +74,7 @@ const App = () => {
                 <Route path="create-invoice" element={<CreateInvoice></CreateInvoice>} />
                 <Route path="add-payment" element={<PaymentAdd></PaymentAdd>} />
                 <Route path="add-support-contact" element={<AddContact></AddContact>} />
+                <Route path="client-invoice-create/:clientId" element={<CreateInvoiceFromDashboard></CreateInvoiceFromDashboard>} />
                 
                 
 

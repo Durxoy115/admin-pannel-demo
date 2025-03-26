@@ -581,7 +581,8 @@ const CreateInvoice = () => {
     className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
     style={{ backgroundColor: "#D8FCCC" }}
   >
-    <BsPrinter className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+    <BsPrinter className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5"
+    onClick={handleCreateInvoice} />
     <span>Save</span>
   </button>
   <button
