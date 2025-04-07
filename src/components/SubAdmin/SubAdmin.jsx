@@ -87,7 +87,7 @@ const SubAdmin = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-white">
+    <div className=" bg-white">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-3 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3">
         <h1 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Sub-Admin List</h1>
         <IoMdAddCircleOutline

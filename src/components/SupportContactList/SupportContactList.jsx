@@ -38,7 +38,7 @@ const SupportContactList = () => {
   return (
     <div className=" sm:p-2 lg:p-1 min-h-screen bg-white">
       <div className="mt-12 sm:mt-16">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mx-4 sm:mx-4 lg:mx-10 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center   mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
             Support Contact List
           </h1>
@@ -50,7 +50,7 @@ const SupportContactList = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto mx-4 sm:mx-6 lg:mx-10">
+        <div className="overflow-x-auto  ">
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
             <thead>
               <tr className="bg-gray-100">

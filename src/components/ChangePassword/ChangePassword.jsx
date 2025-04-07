@@ -1,35 +1,164 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const NotFound = () => {
-    const navigate = useNavigate();
+const ChangePassword = () => {
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-300">
-            <div className="text-center p-8 rounded-2xl shadow-xl bg-white max-w-md">
-                <h1 className="text-8xl font-extrabold text-gray-800">404</h1>
-                <h2 className="mt-4 text-2xl font-semibold text-gray-700">Page Not Found</h2>
-                <p className="mt-2 text-gray-600">Oops! The page you are looking for does not exist or has been moved.</p>
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear errors on change
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
-                <div className="mt-6">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="px-6 py-3 text-white font-semibold bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition-all"
-                    >
-                        Back to Home
-                    </button>
-                </div>
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.currentPassword) {
+      newErrors.currentPassword = "Current password is required";
+    }
+    if (!formData.newPassword) {
+      newErrors.newPassword = "New password is required";
+    } else if (formData.newPassword.length < 6) {
+      newErrors.newPassword = "New password must be at least 6 characters";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-                <div className="mt-8">
-                    <img
-                        src="https://previews.123rf.com/images/kaymosk/kaymosk1804/kaymosk180400006/100130939-error-404-page-not-found-error-with-glitch-effect-on-screen-vector-illustration-for-your-design.jpg"
-                        alt="Not Found Illustration"
-                        className="mx-auto w-48"
-                    />
-                </div>
-            </div>
+  // Dummy API call
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setMessage("");
+
+    try {
+      // Simulate API call to a dummy endpoint (e.g., jsonplaceholder)
+      const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to change password");
+      }
+
+      // Simulate success response
+      setMessage("Password changed successfully!");
+      setFormData({ currentPassword: "", newPassword: "" });
+      setTimeout(() => navigate("/dashboard"), 2000); // Redirect after 2 seconds
+    } catch (error) {
+      setMessage("Error: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 text-center mb-6">
+          Change Password
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Current Password Field */}
+          <div>
+            <label
+              htmlFor="currentPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Current Password
+            </label>
+            <input
+              type="password"
+              id="currentPassword"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleChange}
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Enter current password"
+            />
+            {errors.currentPassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
+            )}
+          </div>
+
+          {/* New Password Field */}
+          <div>
+            <label
+              htmlFor="newPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              New Password
+            </label>
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Enter new password"
+            />
+            {errors.newPassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              {isLoading ? "Changing..." : "Change Password"}
+            </button>
+          </div>
+
+          {/* Success/Error Message */}
+          {message && (
+            <p
+              className={`text-center text-sm ${
+                message.includes("successfully") ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {message}
+            </p>
+          )}
+        </form>
+
+        {/* Back to Dashboard Link */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Back to Dashboard
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
-export default NotFound;
+export default ChangePassword;

@@ -68,7 +68,14 @@ const AddNewClient = () => {
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (file && ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
+    if (
+      file &&
+      [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ].includes(file.type)
+    ) {
       setDocument(file);
     } else {
       alert("Please upload a valid document file (e.g., .pdf, .doc, .docx)");
@@ -83,7 +90,7 @@ const AddNewClient = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 mt-12">
       <div className="flex-grow flex items-center justify-center py-8">
-        <div className="w-full  px-4 sm:px-6 md:px-28">
+        <div className="w-full  px-2 sm:px-4 md:px-28">
           <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8">
             Add New Client
           </h2>
@@ -117,7 +124,10 @@ const AddNewClient = () => {
               {/* Form Fields */}
               <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label htmlFor="clientName" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="clientName"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Client Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -129,7 +139,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="clientMobile" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="clientMobile"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Client Mobile Number <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -141,7 +154,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="clientEmail" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="clientEmail"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Client Email <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -153,7 +169,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="companyName" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="companyName"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Company Name
                   </label>
                   <input
@@ -164,7 +183,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="country" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="country"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Country <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -176,7 +198,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="companyUrl" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="companyUrl"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Website URL
                   </label>
                   <input
@@ -187,7 +212,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contactPerson" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="contactPerson"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Contact Person
                   </label>
                   <input
@@ -198,7 +226,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contractDocument" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="contractDocument"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Contract Document <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -211,7 +242,10 @@ const AddNewClient = () => {
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="notes" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="notes"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Notes
                   </label>
                   <textarea
@@ -222,7 +256,10 @@ const AddNewClient = () => {
                   ></textarea>
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="address" className="block mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="address"
+                    className="block mb-2 font-medium text-sm sm:text-base"
+                  >
                     Address
                   </label>
                   <textarea
@@ -234,17 +271,17 @@ const AddNewClient = () => {
                 </div>
               </div>
             </div>
-            <div className="flex justify-center space-x-4 mt-6 sm:mt-8 mb-12 sm:mb-20">
+            <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
               <button
                 type="button"
-                className="px-4 sm:px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
+                className="w-full sm:w-auto px-20 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm sm:text-base"
                 onClick={handleClose}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+                className="w-full sm:w-auto px-20 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300 text-sm sm:text-base"
               >
                 Save
               </button>

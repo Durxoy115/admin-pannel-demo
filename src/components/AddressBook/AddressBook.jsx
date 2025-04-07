@@ -77,17 +77,17 @@ const AddressBook = () => {
   return (
     <div>
       <div className="mt-4 sm:mt-6 md:mt-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pl-3 sm:pl-4 pr-3 sm:pr-4 ml-4 sm:ml-6 md:ml-10 mr-4 sm:mr-6 md:mr-10 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:mr-6  mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Address Book</h1>
           <button
-            className="bg-blue-700 w-full sm:w-20 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
+            className="bg-blue-700 w-full sm:w-20 text-white  sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
             onClick={handleAddAddress}
           >
             Add
           </button>
         </div>
 
-        <div className="mt-4 sm:mt-6 ml-4 sm:ml-6 md:ml-10 mr-4 sm:mr-6 md:mr-10 overflow-x-auto">
+        <div className="mt-4 sm:mt-6   sm:mr-6 md:mr-10 overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md min-w-[800px]">
             <thead>
               <tr className="bg-gray-100">

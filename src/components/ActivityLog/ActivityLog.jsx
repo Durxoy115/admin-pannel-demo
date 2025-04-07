@@ -35,7 +35,7 @@ const ActivityLog = () => {
   if (error) return <p className="text-center text-red-500 py-8">{error}</p>;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-screen">
+    <div className="p-2 sm:p-6 lg:p-8 max-w-7xl mx-auto min-h-screen">
       <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800 mb-4 sm:mb-6 mt-20">Activity Log</h2>
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
         <table className="min-w-full border-collapse">

@@ -140,7 +140,7 @@ const ClientProfile = ({ id }) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-grow flex items-center justify-center py-4 sm:py-6 md:py-8">
-        <div className="w-full  px-4 sm:px-6 lg:px-24">
+        <div className="w-full  px-2 sm:px-6 lg:px-24">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 mt-12">Client Profile</h2>
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Image Uploader and Form Fields in Flex Container */}

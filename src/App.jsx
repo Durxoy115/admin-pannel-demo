@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import Header from "./components/Hearder/Header";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Login from "./components/Login/LoginPage";
@@ -31,6 +31,7 @@ import PaymentAdd from "./components/PaymentAdd/PaymentAdd";
 import Footer from "./components/Footer/Footer";
 import AddContact from "./components/AddContact/AddContact";
 import CreateInvoiceFromDashboard from "./components/CreateInvoiceFromDashboard/CreateInvoiceFromDashboard";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 
 // import Test from "./components/Test";
@@ -38,53 +39,51 @@ import CreateInvoiceFromDashboard from "./components/CreateInvoiceFromDashboard/
 const App = () => {
   return (
     <Router>
-      <Routes>
-        {/* Routes without Header */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/otp" element={<OTPPage />} />
-
-        {/* Routes with Header */}
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/otp" element={<OTPPage />} />
+  
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
         <Route
-          path="/*"
+          path="/"
           element={
             <WithHeader>
-              <Routes>
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="addnewclient" element={<AddNewClient />} />
-                <Route path="client-info/:id" element={<CombineComponent></CombineComponent>} />
-                <Route path="profile/" element={<UserProfile></UserProfile>} />
-                <Route path="activity-log" element={<ActivityLog></ActivityLog>} />
-                <Route path="message" element={<Message></Message>} />
-                <Route path="payment-history" element={<PaymentHistory></PaymentHistory>} />
-                {/* <Route path="orderlist" element={<OrderList></OrderList>} /> */}
-                <Route path="change-password" element={<ChangePassword></ChangePassword>} />
-                <Route path="edit-user-profile/:id" element={<EditUserProfile></EditUserProfile>} />
-                <Route path="edit-user/:id" element={<EditSubAdmin></EditSubAdmin>} />
-                <Route path="add-user" element={<AddUser></AddUser>} />
-                <Route path="add-product" element={<AddProductCard></AddProductCard>} />
-                <Route path="add-address" element={<AddAddress></AddAddress>} />
-                <Route path="edit-service/:id" element={<EditService></EditService>} />
-                <Route path="edit-address/:id" element={<EditCompanyAddress></EditCompanyAddress>} />
-                <Route path="order-list" element={<ListOrder></ListOrder>} />
-                <Route path="add-order" element={<OrderAdd></OrderAdd>} />
-                <Route path="order-details/:orderId" element={<OrderDetails></OrderDetails>} />
-                <Route path="invoice-list" element={<InvoiceList></InvoiceList>} />
-                <Route path="edit-invoice/:id" element={<InvoiceEdit></InvoiceEdit>} />
-                <Route path="create-invoice" element={<CreateInvoice></CreateInvoice>} />
-                <Route path="add-payment" element={<PaymentAdd></PaymentAdd>} />
-                <Route path="add-support-contact" element={<AddContact></AddContact>} />
-                <Route path="client-invoice-create/:clientId" element={<CreateInvoiceFromDashboard></CreateInvoiceFromDashboard>} />
-                
-                
-
-                {/* <Route path="test" element={<Test></Test>} /> */}
-              </Routes>
+              <Outlet />
             </WithHeader>
           }
-        />
-      </Routes>
-    </Router>
+        >
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="addnewclient" element={<AddNewClient />} />
+          <Route path="client-info/:id" element={<CombineComponent />} />
+          <Route path="profile" element={<UserProfile />} />
+          <Route path="activity-log" element={<ActivityLog />} />
+          <Route path="message" element={<Message />} />
+          <Route path="payment-history" element={<PaymentHistory />} />
+          <Route path="change-password" element={<ChangePassword />} />
+          <Route path="edit-user-profile/:id" element={<EditUserProfile />} />
+          <Route path="edit-user/:id" element={<EditSubAdmin />} />
+          <Route path="add-user" element={<AddUser />} />
+          <Route path="add-product" element={<AddProductCard />} />
+          <Route path="add-address" element={<AddAddress />} />
+          <Route path="edit-service/:id" element={<EditService />} />
+          <Route path="edit-address/:id" element={<EditCompanyAddress />} />
+          <Route path="order-list" element={<ListOrder />} />
+          <Route path="add-order" element={<OrderAdd />} />
+          <Route path="order-details/:orderId" element={<OrderDetails />} />
+          <Route path="invoice-list" element={<InvoiceList />} />
+          <Route path="edit-invoice/:id" element={<InvoiceEdit />} />
+          <Route path="create-invoice" element={<CreateInvoice />} />
+          <Route path="add-payment" element={<PaymentAdd />} />
+          <Route path="add-support-contact" element={<AddContact />} />
+          <Route path="client-invoice-create/:clientId" element={<CreateInvoiceFromDashboard />} />
+        </Route>
+      </Route>
+    </Routes>
+  </Router>
+  
   );
 };
 
