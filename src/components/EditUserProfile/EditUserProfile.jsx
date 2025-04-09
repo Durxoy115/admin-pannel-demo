@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { TfiPlus } from 'react-icons/tfi';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { TfiPlus } from "react-icons/tfi";
 import { IoArrowBack } from "react-icons/io5";
 import useToken from "../hooks/useToken";
 
 const EditUserProfile = () => {
   const [editProfile, setEditProfile] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    contact: '',
+    first_name: "",
+    last_name: "",
+    email: "",
+    contact: "",
     photo: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -22,29 +22,29 @@ const EditUserProfile = () => {
     const fetchClientDetails = async () => {
       try {
         const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Token ${token}`,
           },
         });
         const data = await response.json();
         if (response.ok && data.success) {
           setEditProfile({
-            first_name: data?.data?.first_name || '',
-            last_name: data?.data?.last_name || '',
-            email: data?.data?.email || '',
-            contact: data?.data?.contact || '',
+            first_name: data?.data?.first_name || "",
+            last_name: data?.data?.last_name || "",
+            email: data?.data?.email || "",
+            contact: data?.data?.contact || "",
             photo: null,
           });
           if (data?.data?.photo) {
             setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
           }
         } else {
-          console.error('Failed to fetch client details:', data.message);
+          console.error("Failed to fetch client details:", data.message);
         }
       } catch (error) {
-        console.error('Error fetching client data:', error);
+        console.error("Error fetching client data:", error);
       }
     };
 
@@ -67,17 +67,17 @@ const EditUserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('first_name', editProfile.first_name);
-    formData.append('last_name', editProfile.last_name);
-    formData.append('email', editProfile.email);
-    formData.append('contact', editProfile.contact);
+    formData.append("first_name", editProfile.first_name);
+    formData.append("last_name", editProfile.last_name);
+    formData.append("email", editProfile.email);
+    formData.append("contact", editProfile.contact);
     if (editProfile.photo) {
-      formData.append('photo', editProfile.photo);
+      formData.append("photo", editProfile.photo);
     }
 
     try {
       const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -86,20 +86,22 @@ const EditUserProfile = () => {
 
       const result = await response.json();
       if (response.ok && result.success) {
-        alert('Profile updated successfully!');
-        navigate('/profile');
+        alert("Profile updated successfully!");
+        navigate("/profile");
       } else {
-        console.error('Failed to update profile:', result.message);
-        alert('Failed to update profile: ' + (result.message || 'Unknown error'));
+        console.error("Failed to update profile:", result.message);
+        alert(
+          "Failed to update profile: " + (result.message || "Unknown error")
+        );
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('An error occurred while updating the profile.');
+      console.error("Error updating profile:", error);
+      alert("An error occurred while updating the profile.");
     }
   };
 
   return (
-    <div className="px-4 sm:px-6 md:px-24 py-6 bg-gray-100 min-h-screen">
+    <div className="px-1 sm:px-2 md:px-24 py-2 bg-gray-100 min-h-screen">
       <div className="relative  mx-auto">
         {/* <button
           className="absolute top-0 left-0 p-2 text-2xl sm:text-3xl text-black"
@@ -107,9 +109,11 @@ const EditUserProfile = () => {
         >
           <IoArrowBack />
         </button> */}
-        <h2 className="text-2xl sm:text-3xl font-semibold  mb-4 sm:mb-6 mt-20">Edit Profile</h2>
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 mt-16">
+          Edit Profile
+        </h2>
         <form onSubmit={handleSubmit} className="w-full flex flex-col">
-          <div className="w-full bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-md">
+          <div className="w-full bg-white p-1 sm:p-6 md:p-8 rounded-lg shadow-md">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 items-start">
               <div className="flex flex-col items-center">
                 <label
@@ -136,7 +140,10 @@ const EditUserProfile = () => {
               </div>
               <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
-                  <label htmlFor="first_name" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="first_name"
+                    className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                  >
                     First Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -150,7 +157,10 @@ const EditUserProfile = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="last_name" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="last_name"
+                    className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                  >
                     Last Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -164,7 +174,10 @@ const EditUserProfile = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="email"
+                    className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                  >
                     Email <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -178,7 +191,10 @@ const EditUserProfile = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact" className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base">
+                  <label
+                    htmlFor="contact"
+                    className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                  >
                     Phone Number <span className="text-red-500">*</span>
                   </label>
                   <input

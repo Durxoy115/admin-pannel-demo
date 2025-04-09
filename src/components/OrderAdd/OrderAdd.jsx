@@ -56,9 +56,9 @@ const OrderAdd = () => {
   };
 
   return (
-    <div className="w-full  mx-auto px-4 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10 bg-gray-100 rounded-md min-h-screen">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 mt-16">Create New Order</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-4 sm:p-8 rounded-lg">
+    <div className="w-full  mx-auto px-1 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10 bg-gray-100 rounded-md min-h-screen">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4 mt-12">Create New Order</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-1 sm:p-8 rounded-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="name" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">

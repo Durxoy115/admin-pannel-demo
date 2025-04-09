@@ -85,9 +85,9 @@ const ListOrder = () => {
   };
 
   return (
-    <div className="mx-4 sm:mx-6 md:mx-10 mt-4 sm:mt-6 md:mt-10">
+    <div className="mx-1 sm:mx-1 md:mx-10 mt-2 sm:mt-6 md:mt-10">
       {/* Header Section */}
-      <div className="bg-gray-900 text-white p-2 sm:p-3 md:p-2 flex flex-col sm:flex-row sm:items-center justify-between rounded-t-md gap-2 sm:gap-4 mt-28">
+      <div className="bg-gray-900 text-white p-1 sm:p-3 md:p-2 flex flex-col sm:flex-row sm:items-center justify-between rounded-t-md gap-2 sm:gap-4 mt-20 md:mt-24 sm:mt-16">
         <h2 className="text-base sm:text-lg md:text-xl font-semibold ">Order List</h2>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <input

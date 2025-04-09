@@ -119,7 +119,7 @@ const EditSubAdmin = () => {
     <div className="w-full flex justify-center bg-gray-100 min-h-screen">
       <div className="w-full   sm:px-6 md:px-24  sm:pt-6">
         <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 md:mt-20 sm:mt-4 ">Member Profile</h2>
-        <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-6 md:p-8 rounded-md">
+        <form onSubmit={handleSubmit} className="bg-white p-1 sm:p-6 md:p-8 rounded-md">
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 mb-4 sm:mb-6">
             {/* Image Previewer and Uploader */}
             <div className="flex flex-col items-center">

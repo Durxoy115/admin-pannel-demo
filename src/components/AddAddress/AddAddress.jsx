@@ -43,9 +43,9 @@ const AddAddress = () => {
   };
 
   return (
-    <div className="w-full  mx-auto mt-4 sm:mt-6 md:mt-10 px-2 sm:px-6 md:px-32 py-6 sm:py-8 rounded-md bg-gray-100 min-h-screen ">
+    <div className="w-full  mx-auto mt-4 sm:mt-6 md:mt-10 px-1 sm:px-6 md:px-32 py-6 sm:py-8 rounded-md bg-gray-100 min-h-screen ">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 mt-8">Create New Billing Address</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white rounded-lg  p-3 ">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white rounded-lg  p-1 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 ">
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">

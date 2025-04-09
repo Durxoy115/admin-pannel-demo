@@ -94,12 +94,12 @@ const AddUser = () => {
 
   return (
     <div className="">
-      <div className="w-full flex justify-center bg-gray-100 min-h-screen mt-12">
-      <div className="w-full px-4 sm:px-6 md:px-24 pt-4 sm:pt-6  ">
-        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8  sm:mt-8">Add New Member</h2>
+      <div className="w-full flex justify-center bg-gray-100 min-h-screen mt-10">
+      <div className="w-full px-1 sm:px-6 md:px-24 pt-4 sm:pt-6  ">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-8  sm:mt-8">Add New Member</h2>
 
         <form onSubmit={handleSave}>
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 bg-white p-6 sm:p-8 md:p-10 rounded-md">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-10 bg-white p-1 sm:p-8 md:p-10 rounded-md">
             <div className="flex flex-col items-center">
               <label
                 htmlFor="imageUpload"

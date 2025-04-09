@@ -66,15 +66,15 @@ const PaymentAdd = () => {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col md:px-20">
       {/* Header */}
-      <div className="flex  md:justify-start  mb-6 px-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mt-24">
+      <div className="flex  md:justify-start px-2  mb-2 md:px-8">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mt-16 md:mt-24">
           Add Payment Details
         </h1>
       </div>
 
       {/* Form Container */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full">
+      <div className="flex-1 flex items-center justify-center px-1 sm:px-6 lg:px-8">
+        <div className="bg-white p-1 md:p-8 sm:p-1 rounded-lg shadow-lg w-full">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Client Details */}

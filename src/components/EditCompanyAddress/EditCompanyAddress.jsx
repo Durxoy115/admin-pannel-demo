@@ -72,9 +72,9 @@ const EditCompanyAddress = () => {
   };
 
   return (
-    <div className="w-full  mx-auto mt-4 sm:mt-6 md:mt-10 px-4 sm:px-6 md:px-8 py-6 sm:py-8 bg-gray-100 min-h-screen rounded-md">
+    <div className="w-full  mx-auto mt-4 sm:mt-6 md:mt-10 sm:px-4  md:px-8 py-6 sm:py-8 bg-gray-100 min-h-screen rounded-md">
       <h2 className="text-2xl sm:text-3xl mt-10  font-bold mb-6 sm:mb-8">Edit Billing Address</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-8 rounded-md">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-1 md:p-8 sm:p-1 rounded-md">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="bank_name" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">

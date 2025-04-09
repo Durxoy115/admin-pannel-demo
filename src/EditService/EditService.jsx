@@ -108,11 +108,11 @@ const EditService = () => {
 
   return (
     <div className="w-full flex justify-center min-h-screen bg-gray-100">
-      <div className="w-full  px-4 sm:px-6 md:px-20 sm:pt-6 mt-16">
+      <div className="w-full  px-1 sm:px-6 md:px-20 sm:pt-6 mt-16">
         <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 sm:mt-4">
           Edit Product/Service
         </h2>
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-md">
+        <form onSubmit={handleSubmit} className="bg-white p-1 md:p-8 sm:p-1 rounded-md">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 ">
             {[
               { label: "Name", name: "name", type: "text" },

@@ -86,11 +86,11 @@ const AddProductCard = () => {
       <h1 className="text-2xl sm:text-3xl font-semibold mt-6 sm:mt-8 md:mt-10 ml-4 sm:ml-8 md:ml-44">
         Add Our Products & Services
       </h1>
-      <div className="flex flex-col items-center justify-start">
+      <div className="flex flex-col md:items-center md:justify-start">
         {/* Form Section */}
-        <div className="mt-4 sm:mt-6 sm:w-full md:w-5/6  px-4 sm:px-6 md:px-8">
+        <div className="mt-4 sm:mt-6 sm:w-full md:w-5/6  px-1 sm:px-6 md:px-8">
           <form
-            className="bg-white p-4 sm:p-6 rounded-lg shadow-md space-y-4 sm:space-y-5"
+            className="bg-white p-1 sm:p-6 rounded-lg shadow-md space-y-4 sm:space-y-5"
             onSubmit={handleAddService}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">

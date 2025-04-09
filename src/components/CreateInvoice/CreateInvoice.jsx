@@ -231,11 +231,11 @@ const CreateInvoice = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 mt-4">
-       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-16 pl-24">Create Invoice</h1>
+    <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12">
+       <h1 className="text-2xl sm:text-3xl  font-semibold text-gray-800 mt-2 sm:mt-4 md:mt-12 pl-4 sm:pl-12 md:pl-24">Create Invoice</h1>
       <form
 
-      className="p-4 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4  sm:space-y-6 bg-white rounded-2xl  sm:mt-8 md:mt-8"
+      className="p-1 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4  sm:space-y-6 bg-white rounded-2xl  sm:mt-8 md:mt-8"
     >
       
 

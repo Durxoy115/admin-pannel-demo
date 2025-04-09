@@ -273,11 +273,11 @@ const CreateInvoiceFromDashboard = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 mt-4">
+    <div className="bg-gray-100 p-1 mt-4">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-16 pl-24">
         Create Invoice
       </h1>
-      <form className="p-4 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
+      <form className="p-1 sm:p-1 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <select

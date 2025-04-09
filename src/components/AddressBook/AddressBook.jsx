@@ -88,7 +88,7 @@ const AddressBook = () => {
         </div>
 
         <div className="mt-4 sm:mt-6   sm:mr-6 md:mr-10 overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md min-w-[800px]">
+          <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md ">
             <thead>
               <tr className="bg-gray-100">
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Bank Name</th>
