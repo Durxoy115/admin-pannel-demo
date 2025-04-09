@@ -34,6 +34,7 @@ const InvoiceList = () => {
         invoiceId: invoice.client_invoice_id,
         clientId: invoice.client_id,
         clientName: invoice.client_name,
+       billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
         amount: invoice.total_amount,
         date: invoice.date.split("T")[0],
@@ -57,7 +58,7 @@ const InvoiceList = () => {
     let filtered = invoices;
     if (searchQuery) {
       filtered = filtered.filter((invoice) =>
-        [invoice.clientName, invoice.companyName, invoice.invoiceId].some(
+        [invoice.clientName, invoice.companyName, invoice.invoiceId, invoice.billing_company_address].some(
           (field) => field.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
@@ -289,6 +290,7 @@ const InvoiceList = () => {
                 "Client ID",
                 "Client Name",
                 "Company Name",
+                "Billing Address",
                 "Amount (BDT)",
                 "Date",
                 "Payment Method",
@@ -318,6 +320,9 @@ const InvoiceList = () => {
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.companyName}
+                </td>
+                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
+                  {invoice.billingCompanyAddress}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.amount} BDT

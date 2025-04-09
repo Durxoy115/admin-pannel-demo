@@ -70,7 +70,7 @@ const SupportContactList = () => {
                 <tr key={contact.id} className="hover:bg-gray-50">
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <img
-                      src={`https://admin.zgs.co.com${contact.logo}`}
+                      src={`${url}/${contact.logo}`}
                       alt="logo"
                       className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 sm:mr-3 object-cover"
                     />

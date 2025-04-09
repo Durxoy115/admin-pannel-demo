@@ -91,6 +91,8 @@ const AddressBook = () => {
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md ">
             <thead>
               <tr className="bg-gray-100">
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Logo</th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Bank Name</th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Branch Name</th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
@@ -102,6 +104,14 @@ const AddressBook = () => {
             <tbody>
               {addresses.map((address) => (
                 <tr key={address.id} className="hover:bg-gray-50">
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.company_name}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                    <img
+                      src={`${url}/${address.company_logo}`}
+                      alt="logo"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 sm:mr-3 object-cover"
+                    />
+                  </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.bank_name}</td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.branch_name}</td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>

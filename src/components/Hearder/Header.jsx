@@ -34,8 +34,10 @@ const Header = () => {
           setUserDetails({
             username: data?.data?.username || "User",
             userType: data?.data?.user_type?.name || "Role",
-            photo: data?.data?.photo || " ",
+            photo: data?.data?.photo || null,
           });
+
+          
         } else {
           console.error("Failed to fetch user details");
         }
@@ -72,7 +74,7 @@ const Header = () => {
       alert("An error occurred. Please try again.");
     }
   };
-
+ 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-4 sm:px-6 md:px-8 py-2">
       {/* Logo Section */}
@@ -98,14 +100,12 @@ const Header = () => {
             </span>
             <img
               src={
-                userDetails.photo && userDetails.photo !== " "
-                  ? `https://admin.zgs.co.com${userDetails.photo}` // Assuming the photo is a path that needs the base URL
-                  : "/assets/Images/default-user.jpg" // Fallback image
+                userDetails.photo 
+                  ? `${url}/${userDetails.photo}` 
+                  : "/public/assets/Images/Images-nav/images.png" 
               }
               alt={`${userDetails.username}'s profile photo`}
-              onError={(e) =>
-                (e.target.src = "/assets/Images/default-user.jpg")
-              } // Fallback on error
+              // Fallback on error
               className="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover ml-2 sm:ml-4"
             />
           </MenuButton>
