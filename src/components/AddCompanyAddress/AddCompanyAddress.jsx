@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import axios from "axios";
 
-const AddAddress = () => {
+const AddCompanyAddress = () => {
   const [formData, setFormData] = useState({
-    gateway: "",
-    bank_name: "",
-    branch_name: "",
-    account_name: "",
-    account_number: "",
-    routing_number: "",
-    company_address: "",
+    name: "",
+    email: "",
+    contact: "",
+    logo: null,
+    // account_name: "",
+    // account_number: "",
+    // routing_number: "",
+    // company_address: "",
   });
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
@@ -20,26 +21,26 @@ const AddAddress = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  // const handleFileChange = (e) => {
-  //   setFormData({ ...formData, company_logo: e.target.files[0] });
-  // };
+  const handleFileChange = (e) => {
+    setFormData({ ...formData,logo: e.target.files[0] });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+  console.log("object",formData.logo)
     const form = new FormData();
-    form.append("gateway", formData.gateway);
-    // form.append("company_logo", formData.company_logo); // real file!
-    form.append("bank_name", formData.bank_name);
-    form.append("branch_name", formData.branch_name);
-    form.append("account_name", formData.account_name);
-    form.append("account_number", formData.account_number);
-    form.append("routing_number", formData.routing_number);
-    form.append("company_address", formData.company_address);
+    form.append("name", formData.name);
+    form.append("logo", formData.logo); // real file!
+    form.append("email", formData.email);
+    form.append("contact", formData.contact);
+    // form.append("account_name", formData.account_name);
+    // form.append("account_number", formData.account_number);
+    // form.append("routing_number", formData.routing_number);
+    // form.append("company_address", formData.company_address);
   
     try {
       const response = await axios.post(
-        `${url}/company/billing-address/`,
+        `${url}/company/`,
         form,
         {
           headers: {
@@ -49,7 +50,7 @@ const AddAddress = () => {
         }
       );
   
-      console.log("Success:", response.data);
+    //   console.log("Success:", response.data);
       navigate("/profile");
     } catch (error) {
       console.error("Error adding address:", error);
@@ -61,7 +62,7 @@ const AddAddress = () => {
   return (
     <div className="w-full  mx-auto mt-4 sm:mt-6 md:mt-10 px-1 sm:px-6 md:px-32 py-6 sm:py-8 rounded-md bg-gray-100 min-h-screen ">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 mt-8">
-        Create New Billing Address
+        Create New Company Address
       </h2>
       <form
         onSubmit={handleSubmit}
@@ -70,19 +71,19 @@ const AddAddress = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 ">
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Gateway <span className="text-red-500">*</span>
+              Company Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              name="gateway"
-              value={formData.gateway}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              // placeholder="Enter your company name"
+              placeholder="Enter your company name"
               required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
-          {/* <div>
+          <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Company Logo <span className="text-red-500">*</span>
             </label>
@@ -94,36 +95,36 @@ const AddAddress = () => {
               required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
-          </div> */}
+          </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Bank Name <span className="text-red-500">*</span>
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              name="bank_name"
-              value={formData.bank_name}
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your bank name"
+              placeholder="Enter your email"
               required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Branch <span className="text-red-500">*</span>
+              Phone <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              name="branch_name"
-              value={formData.branch_name}
+              name="contact"
+              value={formData.contact}
               onChange={handleChange}
-              placeholder="Enter your branch name"
+              placeholder="Enter your mobile no"
               
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Account Name <span className="text-red-500">*</span>
             </label>
@@ -136,8 +137,8 @@ const AddAddress = () => {
               required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Account Number <span className="text-red-500">*</span>
             </label>
@@ -150,8 +151,8 @@ const AddAddress = () => {
               required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Routing Number <span className="text-red-500">*</span>
             </label>
@@ -164,9 +165,9 @@ const AddAddress = () => {
               
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
-          </div>
+          </div> */}
         </div>
-        <div>
+        {/* <div>
           <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
             Company Address <span className="text-red-500">*</span>
           </label>
@@ -178,7 +179,7 @@ const AddAddress = () => {
             className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             rows="3 sm:rows-4"
           ></textarea>
-        </div>
+        </div> */}
         <div className="flex justify-center">
           <button
             type="submit"
@@ -192,4 +193,4 @@ const AddAddress = () => {
   );
 };
 
-export default AddAddress;
+export default AddCompanyAddress;

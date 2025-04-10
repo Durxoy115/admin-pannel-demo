@@ -10,6 +10,7 @@ import { IoPlayOutline } from "react-icons/io5";
 const CreateInvoiceFromDashboard = () => {
   const [services, setServices] = useState();
   const [defaultService, setDefaultService] = useState();
+   const [addresses, setAddresses] = useState([]); 
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [clientData, setClientData] = useState(null);
@@ -134,6 +135,36 @@ const CreateInvoiceFromDashboard = () => {
     };
     fetchServiceData();
   }, [url, token]);
+
+    // Fetch billing addresses
+    useEffect(() => {
+      const fetchAddress = async () => {
+        try {
+          const response = await fetch(`${url}/company/billing-address/`, {
+            method: "GET",
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          });
+          const data = await response.json();
+          if (data.success) {
+            setAddresses(data.data); // Store the API response
+            // Set default billing address if available
+            if (data.data.length > 0) {
+              setFormData((prev) => ({
+                ...prev,
+                billing_address: data.data[0].branch_name,
+              }));
+            }
+          } else {
+            console.error("Error fetching billing addresses:", data.message);
+          }
+        } catch (error) {
+          console.error("Error fetching billing addresses:", error);
+        }
+      };
+      fetchAddress();
+    }, [url, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -320,14 +351,22 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
-            <input
+            <select
               name="billing_address"
-              placeholder="Company Billing Address*"
-              value={formData.billing_address}
+
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               required
-            />
+            >
+              <option value="" disabled>
+                Select Billing Address
+              </option>
+              {addresses.map((address) => (
+                <option key={address.id} value={parseInt(address.id)}>
+                  {address.company_name}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <input

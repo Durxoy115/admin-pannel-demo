@@ -9,17 +9,19 @@ import { IoPlayOutline } from "react-icons/io5";
 const CreateInvoice = () => {
   const [services, setServices] = useState([]);
   const [defaultService, setDefaultService] = useState("");
-  const [addresses, setAddresses] = useState([]); // State for billing addresses
+  const [addresses, setAddresses] = useState([]);
+  const [billingAddresses, setBillingAddresses] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     id: "",
-    service_name: "",
+    service_name: "", // Empty to show "Select Service" initially
     company_logo: null,
     company_name: "",
-    billing_address: "", // Will store selected branch_name
+    billing_address: "", // Empty to show "Select Billing Address" initially
+    company_address: "", // Empty to show "Select Address" initially
     client_id: "",
     website_url: "",
     address: "",
@@ -54,9 +56,9 @@ const CreateInvoice = () => {
           const data = await response.json();
           setServices(data?.data);
           if (data.data.length > 0) {
+            setDefaultService(data.data[0].name);
             setFormData((prev) => ({
               ...prev,
-              service_name: data?.data[0]?.name,
               services: [
                 {
                   service_name: data?.data[0]?.name,
@@ -69,7 +71,6 @@ const CreateInvoice = () => {
                 },
               ],
             }));
-            setDefaultService(data.data[0].name);
           }
         } else {
           console.error("Failed to fetch service data");
@@ -93,14 +94,7 @@ const CreateInvoice = () => {
         });
         const data = await response.json();
         if (data.success) {
-          setAddresses(data.data); // Store the API response
-          // Set default billing address if available
-          if (data.data.length > 0) {
-            setFormData((prev) => ({
-              ...prev,
-              billing_address: data.data[0].branch_name,
-            }));
-          }
+          setBillingAddresses(data.data);
         } else {
           console.error("Error fetching billing addresses:", data.message);
         }
@@ -111,9 +105,32 @@ const CreateInvoice = () => {
     fetchAddress();
   }, [url, token]);
 
+  // Fetch company addresses
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAddresses(data.data);
+        } else {
+          console.error("Error fetching company addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching company addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name,value)
+    console.log(name, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "vat") setVat(parseFloat(value) || 0);
@@ -185,6 +202,7 @@ const CreateInvoice = () => {
       const formDataPayload = new FormData();
       formDataPayload.append("service_name", formData.service_name);
       formDataPayload.append("company_name", formData.company_name);
+      formDataPayload.append("company_address", formData.company_address); // Updated to use selected value
       formDataPayload.append("billing_address", formData.billing_address);
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
@@ -264,6 +282,9 @@ const CreateInvoice = () => {
               value={formData.service_name}
               required
             >
+              <option value="" disabled>
+                Select Service
+              </option>
               {services?.map((e, key) => (
                 <option key={key} value={e.name}>
                   {e.name}
@@ -282,7 +303,6 @@ const CreateInvoice = () => {
                 }))
               }
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              required
             />
           </div>
           <div>
@@ -297,18 +317,36 @@ const CreateInvoice = () => {
           </div>
           <div>
             <select
-              name="billing_address"
-
+              name="company_address"
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.company_address}
               required
             >
               <option value="" disabled>
-                Select Billing Address
+                Select Company
               </option>
               {addresses.map((address) => (
                 <option key={address.id} value={parseInt(address.id)}>
-                  {address.company_name}
+                  {address.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <select
+              name="billing_address"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.billing_address}
+              required
+            >
+              <option value="" disabled>
+                Select Account
+              </option>
+              {billingAddresses.map((address) => (
+                <option key={address.id} value={parseInt(address.id)}>
+                  {address.gateway}-{address.account_number}
                 </option>
               ))}
             </select>

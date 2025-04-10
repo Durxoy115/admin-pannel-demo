@@ -6,6 +6,7 @@ import Products from "../Products/Products";
 import AddressBook from "../AddressBook/AddressBook";
 import SupportContactList from "../SupportContactList/SupportContactList";
 import useToken from "../hooks/useToken";
+import CompanyAddress from "../CompanyAddress/CompanyAddress";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -142,6 +143,7 @@ const MyProfile = () => {
       <div className="bg-white rounded-md p-2 sm:p-4 mt-4 sm:mt-6">
         <SubAdmin />
         <Products />
+        <CompanyAddress></CompanyAddress>
         <AddressBook />
         <SupportContactList />
       </div>

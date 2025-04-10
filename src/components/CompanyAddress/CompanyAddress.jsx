@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
 
-const AddressBook = () => {
+const CompanyAddress = () => {
   const [addresses, setAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -13,7 +13,7 @@ const AddressBook = () => {
 
   const fetchAddress = async () => {
     try {
-      const response = await fetch(`${url}/company/billing-address/`, {
+      const response = await fetch(`${url}/company/`, {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -34,18 +34,18 @@ const AddressBook = () => {
   }, [url, token]);
 
   const handleAddAddress = () => {
-    navigate("/add-address");
+    navigate("/add-company-address");
   };
 
   const handleEditAddress = (id) => {
-    navigate(`/edit-address/${id}`);
+    navigate(`/edit-company-address/${id}`);
   };
 
   const handleDeleteAddress = async () => {
     if (!selectedAddressId) return;
     try {
       const response = await fetch(
-        `${url}/company/billing-address/?billing_address_id=${selectedAddressId}`,
+        `${url}/company/?company_address_id=${selectedAddressId}`,
         {
           method: "DELETE",
           headers: {
@@ -78,7 +78,7 @@ const AddressBook = () => {
     <div>
       <div className="mt-4 sm:mt-6 md:mt-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:mr-6  mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Billing Address </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Address Book </h1>
           <button
             className="bg-blue-700 w-full sm:w-20 text-white  sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
             onClick={handleAddAddress}
@@ -91,32 +91,32 @@ const AddressBook = () => {
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md ">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Gateway</th>
-                {/* <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Logo</th> */}
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Bank Name</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Branch Name</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Name</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Logo</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Email</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Contact</th>
+                {/* <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Number</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Routing Number</th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Routing Number</th> */}
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-center border-b text-xs sm:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {addresses.map((address) => (
                 <tr key={address.id} className="hover:bg-gray-50">
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.gateway}</td>
-                  {/* <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.name}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <img
-                      src={`${url}/${address.company_logo}`}
+                      src={`${url}/${address.logo}`}
                       alt="logo"
                       className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 sm:mr-3 object-cover"
                     />
-                  </td> */}
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.bank_name}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.branch_name}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.email}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.contact}</td>
+                  {/* <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_number}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td> */}
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-center gap-2 sm:gap-3">
                       <FiEdit
@@ -164,4 +164,4 @@ const AddressBook = () => {
   );
 };
 
-export default AddressBook;
+export default CompanyAddress;

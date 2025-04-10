@@ -32,6 +32,9 @@ import Footer from "./components/Footer/Footer";
 import AddContact from "./components/AddContact/AddContact";
 import CreateInvoiceFromDashboard from "./components/CreateInvoiceFromDashboard/CreateInvoiceFromDashboard";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import CompanyAddress from "./components/CompanyAddress/CompanyAddress";
+import AddCompanyAddress from "./components/AddCompanyAddress/AddCompanyAddress";
+import EditCompany from "./components/EditCompany/EditCompany";
 
 
 // import Test from "./components/Test";
@@ -79,6 +82,9 @@ const App = () => {
           <Route path="add-payment" element={<PaymentAdd />} />
           <Route path="add-support-contact" element={<AddContact />} />
           <Route path="client-invoice-create/:clientId" element={<CreateInvoiceFromDashboard />} />
+          <Route path="company-address" element={<CompanyAddress></CompanyAddress>} />
+          <Route path="add-company-address" element={<AddCompanyAddress></AddCompanyAddress>} />
+          <Route path="edit-company-address/:id" element={<EditCompany></EditCompany>} />
         </Route>
       </Route>
     </Routes>
