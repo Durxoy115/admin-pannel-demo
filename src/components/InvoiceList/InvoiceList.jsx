@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
+  
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -38,8 +39,10 @@ const InvoiceList = () => {
         companyName: invoice.company_name,
         amount: invoice.total_amount,
         date: invoice.date.split("T")[0],
+        paymentMethod: invoice.gateway,
+        accountNumber: invoice.account_number,
         paymentStatus: invoice.payment_status,
-        paymentMethod: "N/A",
+        
       }));
       setInvoices(invoiceData);
       setFilteredInvoices(invoiceData);
@@ -54,6 +57,8 @@ const InvoiceList = () => {
     fetchInvoices();
   }, []);
 
+
+   
   useEffect(() => {
     let filtered = invoices;
     if (searchQuery) {
@@ -290,7 +295,6 @@ const InvoiceList = () => {
                 "Client ID",
                 "Client Name",
                 "Company Name",
-                "Billing Address",
                 "Amount (BDT)",
                 "Date",
                 "Payment Method",
@@ -322,16 +326,13 @@ const InvoiceList = () => {
                   {invoice.companyName}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
-                  {invoice.billingCompanyAddress}
-                </td>
-                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.amount} BDT
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.date}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
-                  {invoice.paymentMethod}
+                  {invoice.paymentMethod}-{invoice.accountNumber}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   <span

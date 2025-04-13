@@ -510,7 +510,7 @@ const CreateInvoiceFromDashboard = () => {
           <div>
             <input
               name="discount"
-              placeholder="Discount ($)"
+              placeholder="Discount"
               value={formData.discount}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -637,7 +637,7 @@ const CreateInvoiceFromDashboard = () => {
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
-                    ${service?.amount?.toFixed(2)}
+                    {service?.amount?.toFixed(2)}
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <button
@@ -664,12 +664,12 @@ const CreateInvoiceFromDashboard = () => {
         <div className="text-right space-y-1 sm:space-y-2 border-t-2 border-gray-200 pt-3 sm:pt-4 border-dashed">
           <div className="flex justify-between items-center">
             <span className="text-sm sm:text-base">Sub Total:</span>
-            <span>${formData.sub_total.toFixed(2)}</span>
+            <span>{formData.sub_total.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm sm:text-base text-red-500">Discount:</span>
             <span className="text-red-500 text-sm sm:text-base">
-              - ${parseFloat(formData.discount || 0).toFixed(2)}
+              - {parseFloat(formData.discount || 0).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
@@ -679,7 +679,7 @@ const CreateInvoiceFromDashboard = () => {
           <div className="flex justify-between items-center">
             <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
             <span className="text-lg sm:text-xl font-semibold">
-              ${formData.total_amount.toFixed(2)}
+              {formData.total_amount.toFixed(2)}
             </span>
           </div>
         </div>
