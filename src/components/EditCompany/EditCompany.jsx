@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { data, useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
 const EditCompany = () => {
@@ -29,10 +29,10 @@ const EditCompany = () => {
           // Assuming API returns something like { name, logo (URL), email, contact }
           const fetchedData = data.data;
           setFormData({
-            name: fetchedData.name || "",
+            name: fetchedData?.name || "",
             logo: null, // Reset logo for file input (file can't be pre-set)
-            email: fetchedData.email || "",
-            contact: fetchedData.contact || "",
+            email: fetchedData?.email || "",
+            contact: fetchedData?.contact || "",
           });
           setExistingLogo(fetchedData.logo || ""); // Store logo URL separately
         } else {
@@ -46,6 +46,8 @@ const EditCompany = () => {
 
     fetchAddress();
   }, [id, url, token]);
+
+  console.log("company id__________",formData)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

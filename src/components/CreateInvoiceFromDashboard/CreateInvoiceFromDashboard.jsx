@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import useToken from "../hooks/useToken";
-import { useNavigate, useParams, useLocation } from "react-router-dom"; // Add useParams and useLocation
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { BsPrinter } from "react-icons/bs";
 import { IoIosSend } from "react-icons/io";
 import { IoPlayOutline } from "react-icons/io5";
@@ -10,21 +9,23 @@ import { IoPlayOutline } from "react-icons/io5";
 const CreateInvoiceFromDashboard = () => {
   const [services, setServices] = useState();
   const [defaultService, setDefaultService] = useState();
-   const [addresses, setAddresses] = useState([]); 
+  const [addresses, setAddresses] = useState([]); // State for company addresses
+  const [billingAddresses, setBillingAddresses] = useState([]); // Renamed for clarity
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [clientData, setClientData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { clientId } = useParams(); 
-  const location = useLocation(); 
+  const { clientId } = useParams();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     service_name: "",
     company_logo: null,
     company_name: "",
     billing_address: "",
-    client_id: clientId || "", // Initialize with URL param if available
+    company_address: "",
+    client_id: clientId || "",
     website_url: "",
     address: "",
     client_name: "",
@@ -45,7 +46,7 @@ const CreateInvoiceFromDashboard = () => {
   // Fetch client details when client_id changes or on mount
   useEffect(() => {
     const fetchClientDetails = async () => {
-      if (!formData.client_id) return; // Skip if no client_id
+      if (!formData.client_id) return;
       setIsLoading(true);
       try {
         const response = await fetch(`${url}/client/?client_id=${formData.client_id}`, {
@@ -63,7 +64,6 @@ const CreateInvoiceFromDashboard = () => {
           };
           setClientData(fetchedData);
 
-          // Auto-fill formData with fetched client data
           setFormData((prev) => ({
             ...prev,
             client_name: fetchedData.name || "",
@@ -86,7 +86,7 @@ const CreateInvoiceFromDashboard = () => {
     fetchClientDetails();
   }, [formData.client_id, token, url]);
 
-  // Check for state passed via navigation (alternative to URL params)
+  // Check for state passed via navigation
   useEffect(() => {
     if (location.state?.clientId && !formData.client_id) {
       setFormData((prev) => ({ ...prev, client_id: location.state.clientId }));
@@ -136,35 +136,63 @@ const CreateInvoiceFromDashboard = () => {
     fetchServiceData();
   }, [url, token]);
 
-    // Fetch billing addresses
-    useEffect(() => {
-      const fetchAddress = async () => {
-        try {
-          const response = await fetch(`${url}/company/billing-address/`, {
-            method: "GET",
-            headers: {
-              Authorization: `Token ${token}`,
-            },
-          });
-          const data = await response.json();
-          if (data.success) {
-            setAddresses(data.data); // Store the API response
-            // Set default billing address if available
-            if (data.data.length > 0) {
-              setFormData((prev) => ({
-                ...prev,
-                billing_address: data.data[0].branch_name,
-              }));
-            }
-          } else {
-            console.error("Error fetching billing addresses:", data.message);
+  // Fetch billing addresses
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/billing-address/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setBillingAddresses(data.data);
+          if (data.data.length > 0) {
+            setFormData((prev) => ({
+              ...prev,
+              billing_address: data.data[0].id,
+            }));
           }
-        } catch (error) {
-          console.error("Error fetching billing addresses:", error);
+        } else {
+          console.error("Error fetching billing addresses:", data.message);
         }
-      };
-      fetchAddress();
-    }, [url, token]);
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+
+  // Fetch company addresses
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAddresses(data.data);
+          if (data.data.length > 0) {
+            setFormData((prev) => ({
+              ...prev,
+              company_address: data.data[0].id,
+            }));
+          }
+        } else {
+          console.error("Error fetching company addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching company addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -241,6 +269,7 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("service_name", formData.service_name);
       formDataPayload.append("company_name", formData.company_name);
       formDataPayload.append("billing_address", formData.billing_address);
+      formDataPayload.append("company_address", formData.company_address);
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
@@ -337,7 +366,7 @@ const CreateInvoiceFromDashboard = () => {
                 }))
               }
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              required
+              
             />
           </div>
           <div>
@@ -350,20 +379,40 @@ const CreateInvoiceFromDashboard = () => {
               required
             />
           </div>
+          {/* Company Address Dropdown */}
           <div>
             <select
-              name="billing_address"
-
+              name="company_address"
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.company_address}
               required
             >
               <option value="" disabled>
-                Select Billing Address
+                Select Company
               </option>
               {addresses.map((address) => (
-                <option key={address.id} value={parseInt(address.id)}>
-                  {address.company_name}
+                <option key={address.id} value={address.id}>
+                  {address.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Billing Address Dropdown */}
+          <div>
+            <select
+              name="billing_address"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.billing_address}
+              required
+            >
+              <option value="" disabled>
+                Select Account
+              </option>
+              {billingAddresses.map((address) => (
+                <option key={address.id} value={address.id}>
+                  {address.gateway}-{address.account_number}
                 </option>
               ))}
             </select>
@@ -396,7 +445,7 @@ const CreateInvoiceFromDashboard = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               rows="3"
-              required
+              
             />
           </div>
           <div>
@@ -435,7 +484,7 @@ const CreateInvoiceFromDashboard = () => {
               placeholder="Client Email*"
               value={formData.client_email}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus RING-purple-500 text-sm sm:text-base"
               required
             />
           </div>

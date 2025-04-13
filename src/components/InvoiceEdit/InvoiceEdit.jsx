@@ -11,6 +11,8 @@ const InvoiceEdit = () => {
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const fileInputRef = useRef(null);
+  const [addresses, setAddresses] = useState([]); // State for company addresses
+  const [billingAddresses, setBillingAddresses] = useState([]); // State for billing addresses
 
   const [formData, setFormData] = useState({
     client_invoice_id: "",
@@ -24,6 +26,7 @@ const InvoiceEdit = () => {
     client_email: "",
     client_phone: "",
     billing_address: "",
+    company_address: "",
     service_name: "",
     sub_total: 0,
     discount: 0.0,
@@ -116,6 +119,7 @@ const InvoiceEdit = () => {
             client_email: data.data.client_email || "",
             client_phone: data.data.client_phone || "",
             billing_address: data.data.billing_address || "",
+            company_address: data.data.company_address || "",
             service_name:
               data.data.service_name ||
               (services.length > 0 ? services[0].name : ""),
@@ -145,6 +149,52 @@ const InvoiceEdit = () => {
 
     fetchInvoiceData();
   }, [id]);
+
+  // Fetch billing addresses
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/billing-address/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setBillingAddresses(data.data);
+        } else {
+          console.error("Error fetching billing addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+
+  // Fetch company addresses
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAddresses(data.data);
+        } else {
+          console.error("Error fetching company addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching company addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -248,6 +298,7 @@ const InvoiceEdit = () => {
       const formDataPayload = new FormData();
       formDataPayload.append("service_name", formData.service_name);
       formDataPayload.append("company_name", formData.company_name);
+      formDataPayload.append("company_address", formData.company_address);
       formDataPayload.append("billing_address", formData.billing_address);
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
@@ -322,11 +373,6 @@ const InvoiceEdit = () => {
               placeholder: "Company Name*",
               required: true,
             },
-            {
-              name: "billing_address",
-              placeholder: "Company Billing Address*",
-              required: true,
-            },
             { name: "client_id", placeholder: "Client ID*", required: true },
             { name: "website_url", placeholder: "Website URL" },
             {
@@ -374,6 +420,46 @@ const InvoiceEdit = () => {
               required={field.required}
             />
           ))}
+
+          {/* Company Address Dropdown */}
+          <div>
+            <select
+              name="company_address"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.company_address}
+              required
+            >
+              <option value="" disabled>
+                Select Company
+              </option>
+              {addresses.map((address) => (
+                <option key={address.id} value={address.id}>
+                  {address.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Billing Address Dropdown */}
+          <div>
+            <select
+              name="billing_address"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.billing_address}
+              required
+            >
+              <option value="" disabled>
+                Select Account
+              </option>
+              {billingAddresses.map((address) => (
+                <option key={address.id} value={address.id}>
+                  {address.gateway}-{address.account_number}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="relative">
             <input
@@ -586,9 +672,9 @@ const InvoiceEdit = () => {
           </button>
         </div>
 
-        <div className=" pt-4">
+        <div className="pt-4">
           <div className="flex flex-col space-y-2">
-            <div className="flex justify-between items-center border-t-2   border-dashed">
+            <div className="flex justify-between items-center border-t-2 border-dashed">
               <span className="text-sm sm:text-base mt-2">Sub Total:</span>
               <span className="text-sm sm:text-base">
                 ${formData.sub_total.toFixed(2)}
@@ -608,7 +694,7 @@ const InvoiceEdit = () => {
                 ${parseFloat(formData.vat || 0)}%
               </span>
             </div>
-            <div className="flex justify-between items-center ">
+            <div className="flex justify-between items-center">
               <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
               <span className="text-lg sm:text-xl font-semibold">
                 ${formData.total_amount.toFixed(2)}

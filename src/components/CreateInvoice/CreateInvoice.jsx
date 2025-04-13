@@ -308,7 +308,7 @@ const CreateInvoice = () => {
           <div>
             <input
               name="company_name"
-              placeholder="Company Name*"
+              placeholder="Client Company Name*"
               value={formData.company_name}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
@@ -324,7 +324,7 @@ const CreateInvoice = () => {
               required
             >
               <option value="" disabled>
-                Select Company
+                Select Our Company
               </option>
               {addresses.map((address) => (
                 <option key={address.id} value={parseInt(address.id)}>
@@ -379,7 +379,7 @@ const CreateInvoice = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               rows="3"
-              required
+              
             />
           </div>
           <div>
