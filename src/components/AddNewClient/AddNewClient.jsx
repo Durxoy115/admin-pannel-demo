@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
 import useToken from "../hooks/useToken";
-import Footer from "../Footer/Footer";
 
 const AddNewClient = () => {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState(null);
+  const [message, setMessage] = useState(""); // For error or success messages
   const [image, setImage] = useState(null);
   const [document, setDocument] = useState(null);
   const [url, getTokenLocalStorage] = useToken();
@@ -14,6 +14,8 @@ const AddNewClient = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setMessage(""); // Clear previous messages
+
     const formData = new FormData();
     formData.append("name", e.target.clientName.value);
     formData.append("contact", e.target.clientMobile.value);
@@ -23,8 +25,8 @@ const AddNewClient = () => {
     formData.append("website_url", e.target.companyUrl.value);
     formData.append("contact_person", e.target.contactPerson.value);
     formData.append("address", e.target.address.value);
-    formData.append("photo", image);
-    formData.append("contact_doc", document);
+    if (image) formData.append("photo", image);
+    if (document) formData.append("contact_doc", document);
 
     try {
       const response = await fetch(`${url}/client/`, {
@@ -34,21 +36,25 @@ const AddNewClient = () => {
         },
         body: formData,
       });
+      const data = await response.json();
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.ok && data.success) {
         console.log("Success:", data);
         navigate("/dashboard", { state: { reload: true } });
       } else {
-        const errorData = await response.json();
-        console.error("Error:", errorData);
-        alert(errorData.detail || "Failed to add client");
+        // Display specific API error message
+        const errorMessage = data.message || "Failed to add client. Please check your input.";
+        setMessage(errorMessage);
+        console.error("API Error:", data);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      // Handle network or unexpected errors
+      const errorMessage = "An error occurred while adding the client. Please try again later.";
+      setMessage(errorMessage);
+      console.error("Network Error:", error);
     }
 
+    // Debugging: Log FormData entries
     for (let [key, value] of formData.entries()) {
       console.log(`${key}: ${value}`);
     }
@@ -59,8 +65,9 @@ const AddNewClient = () => {
     if (file && file.type.startsWith("image/")) {
       setImagePreview(URL.createObjectURL(file));
       setImage(file);
+      setMessage(""); // Clear any previous error messages
     } else {
-      alert("Please upload a valid image file (e.g., .jpg, .png)");
+      setMessage("Please upload a valid image file (e.g., .jpg, .png)");
       setImagePreview(null);
       setImage(null);
     }
@@ -77,8 +84,9 @@ const AddNewClient = () => {
       ].includes(file.type)
     ) {
       setDocument(file);
+      setMessage(""); // Clear any previous error messages
     } else {
-      alert("Please upload a valid document file (e.g., .pdf, .doc, .docx)");
+      setMessage("Please upload a valid document file (e.g., .pdf, .doc, .docx)");
       setDocument(null);
     }
   };
@@ -90,10 +98,16 @@ const AddNewClient = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 mt-12">
       <div className="flex-grow flex items-center justify-center py-8">
-        <div className="w-full  px-2 sm:px-4 md:px-28">
+        <div className="w-full px-2 sm:px-4 md:px-28">
           <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8">
             Add New Client
           </h2>
+          {/* Display Error Message */}
+          {message && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm sm:text-base">
+              {message}
+            </div>
+          )}
           <form onSubmit={handleSave}>
             <div className="flex flex-col sm:flex-row sm:space-x-6">
               {/* Image Uploader */}
@@ -135,7 +149,7 @@ const AddNewClient = () => {
                     id="clientName"
                     name="clientName"
                     required
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -150,7 +164,7 @@ const AddNewClient = () => {
                     id="clientMobile"
                     name="clientMobile"
                     required
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -165,7 +179,7 @@ const AddNewClient = () => {
                     id="clientEmail"
                     name="clientEmail"
                     required
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -179,7 +193,7 @@ const AddNewClient = () => {
                     type="text"
                     id="companyName"
                     name="companyName"
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -194,7 +208,7 @@ const AddNewClient = () => {
                     id="country"
                     name="country"
                     required
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -208,7 +222,7 @@ const AddNewClient = () => {
                     type="url"
                     id="companyUrl"
                     name="companyUrl"
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -222,7 +236,7 @@ const AddNewClient = () => {
                     type="text"
                     id="contactPerson"
                     name="contactPerson"
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -239,6 +253,7 @@ const AddNewClient = () => {
                     accept=".pdf,.doc,.docx"
                     className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     onChange={handleFileUpload}
+                  
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -252,7 +267,7 @@ const AddNewClient = () => {
                     id="notes"
                     name="notes"
                     rows="3"
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   ></textarea>
                 </div>
                 <div className="sm:col-span-2">
@@ -266,7 +281,7 @@ const AddNewClient = () => {
                     id="address"
                     name="address"
                     rows="3"
-                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   ></textarea>
                 </div>
               </div>

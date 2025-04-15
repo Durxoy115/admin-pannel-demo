@@ -169,7 +169,7 @@ const AddProductCard = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, image: e.target.files[0] })
                   }
-                  required
+                 
                 />
               </div>
             </div>

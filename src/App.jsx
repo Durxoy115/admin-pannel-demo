@@ -35,6 +35,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import CompanyAddress from "./components/CompanyAddress/CompanyAddress";
 import AddCompanyAddress from "./components/AddCompanyAddress/AddCompanyAddress";
 import EditCompany from "./components/EditCompany/EditCompany";
+import EditSupportContact from "./components/EditSupportContact/EditSupportContact";
 
 
 // import Test from "./components/Test";
@@ -85,6 +86,7 @@ const App = () => {
           <Route path="company-address" element={<CompanyAddress></CompanyAddress>} />
           <Route path="add-company-address" element={<AddCompanyAddress></AddCompanyAddress>} />
           <Route path="edit-company-address/:id" element={<EditCompany></EditCompany>} />
+          <Route path="edit-support-contact/:id" element={<EditSupportContact></EditSupportContact>} />
         </Route>
       </Route>
     </Routes>

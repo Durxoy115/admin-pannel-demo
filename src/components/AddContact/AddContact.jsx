@@ -116,7 +116,7 @@ const AddContact = () => {
                 value={formData.link}
                 onChange={handleChange}
                 placeholder="Enter your social media link"
-                required
+                
                 className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>

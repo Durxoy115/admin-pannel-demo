@@ -282,13 +282,15 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
-      formDataPayload.append("company_logo", formData.company_logo);
       formDataPayload.append("services", JSON.stringify(formData.services));
+      if (formData.company_logo) {
+        formDataPayload.append("company_logo", formData.company_logo);
+      }
 
       if (action === "save" || action === "sent") {
         let req_url = `${url}/service/invoice/`;
         if (action === "sent") {
-          req_url += "?sent=true";
+          req_url += "&sent=true";
         }
         const response = await fetch(req_url, {
           method: "POST",
