@@ -216,8 +216,11 @@ const CreateInvoice = () => {
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
-      formDataPayload.append("company_logo", formData.company_logo);
       formDataPayload.append("services", JSON.stringify(formData.services));
+      console.log("formData.company_log", formData.company_logo)
+      if (formData.company_logo){
+        formDataPayload.append("company_logo", formData.company_logo);
+      }
 
       if (action === "save" || action === "sent") {
         let req_url = `${url}/service/invoice/`;
@@ -321,7 +324,7 @@ const CreateInvoice = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.company_address}
-              required
+              
             >
               <option value="" disabled>
                 Select Our Company

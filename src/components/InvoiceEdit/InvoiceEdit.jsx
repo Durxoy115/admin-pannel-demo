@@ -291,7 +291,7 @@ const InvoiceEdit = () => {
     };
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, action) => {
     e.preventDefault();
 
     try {
@@ -316,8 +316,15 @@ const InvoiceEdit = () => {
         formDataPayload.append("company_logo", formData.company_logo);
       }
       formDataPayload.append("services", JSON.stringify(formData.services));
-
-      const response = await fetch(`${url}/service/invoice/?invoice_id=${id}`, {
+      console.log("ID",parseInt(id))
+      let req_url = `${url}/service/invoice/?invoice_id=${parseInt(id)}`;
+      if (action === "save" || action === "sent") {
+      
+        if (action === "sent") {
+          req_url += "&sent=true";
+        }
+      }
+      const response = await fetch (req_url, {
         method: "PUT",
         headers: {
           Authorization: `Token ${token}`,
@@ -483,7 +490,7 @@ const InvoiceEdit = () => {
             value={formData.address}
             onChange={handleChange}
             className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 col-span-1 sm:col-span-2 lg:col-span-3 text-sm sm:text-base"
-            required
+            
           />
         </div>
 
@@ -685,19 +692,19 @@ const InvoiceEdit = () => {
                 Discount:
               </span>
               <span className="text-red-500 text-sm sm:text-base">
-                - ${parseFloat(formData.discount || 0).toFixed(2)}
+                - {parseFloat(formData.discount || 0).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
               <span className="text-sm sm:text-base">VAT:</span>
               <span className="text-sm sm:text-base">
-                ${parseFloat(formData.vat || 0)}%
+                {parseFloat(formData.vat || 0)}%
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
               <span className="text-lg sm:text-xl font-semibold">
-                ${formData.total_amount.toFixed(2)}
+                {formData.total_amount.toFixed(2)}
               </span>
             </div>
           </div>
@@ -720,8 +727,9 @@ const InvoiceEdit = () => {
           <button
             type="button"
             className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 text-sm sm:text-base"
+            onClick={(e) => handleSubmit(e, "sent")}
           >
-            Send
+            Sent
           </button>
         </div>
       </form>
