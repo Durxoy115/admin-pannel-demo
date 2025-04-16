@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
-import Footer from "../Footer/Footer";
 
 const PaymentAdd = () => {
   const navigate = useNavigate();
@@ -42,13 +41,31 @@ const PaymentAdd = () => {
     setSuccessMessage(null);
 
     try {
+      // Create payload, including all fields (optional fields may be empty)
+      const payload = {
+        invoice_id: formData.invoice_id,
+        client_id: formData.client_id,
+        client_name: formData.client_name || "",
+        client_bank_name: formData.client_bank_name || "",
+        client_account_no: formData.client_account_no,
+        date: formData.date || "",
+        contact: formData.contact || "",
+        receiver_name: formData.receiver_name,
+        receiver_bank_name: formData.receiver_bank_name,
+        receiver_branch: formData.receiver_branch,
+        receiver_account_name: formData.receiver_account_name,
+        receiver_account_no: formData.receiver_account_no,
+        trans_id: formData.trans_id,
+        trans_type: formData.trans_type || "",
+      };
+
       const response = await fetch(`${url}/service/payment/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -66,7 +83,7 @@ const PaymentAdd = () => {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col md:px-20">
       {/* Header */}
-      <div className="flex  md:justify-start px-2  mb-2 md:px-8">
+      <div className="flex md:justify-start px-2 mb-2 md:px-8">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mt-16 md:mt-24">
           Add Payment Details
         </h1>
@@ -84,19 +101,19 @@ const PaymentAdd = () => {
                 </h2>
                 <div className="space-y-4">
                   {[
-                    { label: "Client Name", name: "client_name", type: "text" },
-                    { label: "Client ID", name: "client_id", type: "text" },
-                    { label: "Invoice ID", name: "invoice_id", type: "text" },
-                    { label: "Transaction ID", name: "trans_id", type: "text" },
-                    { label: "Transaction Type", name: "trans_type", type: "text" },
-                    { label: "Bank Name", name: "client_bank_name", type: "text" },
-                    { label: "Account Number", name: "client_account_no", type: "text" },
-                    { label: "Date", name: "date", type: "date" },
-                    { label: "Contact", name: "contact", type: "text" },
+                    { label: "Client Name", name: "client_name", type: "text", required: false },
+                    { label: "Client ID", name: "client_id", type: "text", required: true },
+                    { label: "Invoice ID", name: "invoice_id", type: "text", required: true },
+                    { label: "Transaction ID", name: "trans_id", type: "text", required: true },
+                    { label: "Transaction Type", name: "trans_type", type: "text", required: false },
+                    { label: "Bank Name", name: "client_bank_name", type: "text", required: false },
+                    { label: "Account Number", name: "client_account_no", type: "text", required: true },
+                    { label: "Date", name: "date", type: "date", required: true },
+                    { label: "Contact", name: "contact", type: "text", required: false },
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-600">
-                        {field.label} <span className="text-red-500">*</span>
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
                       </label>
                       <input
                         type={field.type}
@@ -104,7 +121,7 @@ const PaymentAdd = () => {
                         value={formData[field.name]}
                         onChange={handleChange}
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                        required={field.required}
                       />
                     </div>
                   ))}
@@ -126,7 +143,7 @@ const PaymentAdd = () => {
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-600">
-                        {field.label} <span className="text-red-500">*</span>
+                        {field.label} <span className="text-red-500"></span>
                       </label>
                       <input
                         type={field.type}
@@ -134,7 +151,7 @@ const PaymentAdd = () => {
                         value={formData[field.name]}
                         onChange={handleChange}
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                        
                       />
                     </div>
                   ))}
@@ -162,8 +179,6 @@ const PaymentAdd = () => {
           </form>
         </div>
       </div>
-
-    
     </div>
   );
 };

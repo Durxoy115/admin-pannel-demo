@@ -25,8 +25,8 @@ const AddNewClient = () => {
     formData.append("website_url", e.target.companyUrl.value);
     formData.append("contact_person", e.target.contactPerson.value);
     formData.append("address", e.target.address.value);
-    if (image) formData.append("photo", image);
-    if (document) formData.append("contact_doc", document);
+    if (image) formData.append("photo", image || null);
+    if (document) formData.append("contact_doc", document || null);
 
     try {
       const response = await fetch(`${url}/client/`, {

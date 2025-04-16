@@ -7,6 +7,7 @@ import AddressBook from "../AddressBook/AddressBook";
 import SupportContactList from "../SupportContactList/SupportContactList";
 import useToken from "../hooks/useToken";
 import CompanyAddress from "../CompanyAddress/CompanyAddress";
+import Signature from "../Signature/Signature";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -145,6 +146,7 @@ const MyProfile = () => {
         <Products />
         <CompanyAddress></CompanyAddress>
         <AddressBook />
+        <Signature></Signature>
         <SupportContactList />
       </div>
     </div>

@@ -77,7 +77,7 @@ const AddressBook = () => {
   return (
     <div>
       <div className="mt-4 sm:mt-6 md:mt-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:mr-6  mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between   mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Billing Address </h1>
           <button
             className="bg-blue-700 w-full sm:w-20 text-white  sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
@@ -87,7 +87,7 @@ const AddressBook = () => {
           </button>
         </div>
 
-        <div className="mt-4 sm:mt-6   sm:mr-6 md:mr-10 overflow-x-auto">
+        <div className="mt-4 sm:mt-6   sm:mr-2 md:mr-2 overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md ">
             <thead>
               <tr className="bg-gray-100">

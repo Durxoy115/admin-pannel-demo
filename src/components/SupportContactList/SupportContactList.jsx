@@ -140,7 +140,7 @@ const SupportContactList = () => {
                     {contact.account}
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
-                    <div className="flex justify-center gap-2 sm:gap-3">
+                    <div className="flex justify-end gap-2 sm:gap-3">
                       <FiEdit
                         className="text-purple-500 hover:text-purple-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer"
                         onClick={() => handleEdit(contact.id)}

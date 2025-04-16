@@ -9,8 +9,8 @@ import { IoPlayOutline } from "react-icons/io5";
 const CreateInvoiceFromDashboard = () => {
   const [services, setServices] = useState();
   const [defaultService, setDefaultService] = useState();
-  const [addresses, setAddresses] = useState([]); // State for company addresses
-  const [billingAddresses, setBillingAddresses] = useState([]); // Renamed for clarity
+  const [addresses, setAddresses] = useState([]);
+  const [billingAddresses, setBillingAddresses] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [clientData, setClientData] = useState(null);
@@ -43,7 +43,6 @@ const CreateInvoiceFromDashboard = () => {
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
-  // Fetch client details when client_id changes or on mount
   useEffect(() => {
     const fetchClientDetails = async () => {
       if (!formData.client_id) return;
@@ -86,14 +85,12 @@ const CreateInvoiceFromDashboard = () => {
     fetchClientDetails();
   }, [formData.client_id, token, url]);
 
-  // Check for state passed via navigation
   useEffect(() => {
     if (location.state?.clientId && !formData.client_id) {
       setFormData((prev) => ({ ...prev, client_id: location.state.clientId }));
     }
   }, [location.state]);
 
-  // Fetch services
   useEffect(() => {
     const fetchServiceData = async () => {
       try {
@@ -136,7 +133,6 @@ const CreateInvoiceFromDashboard = () => {
     fetchServiceData();
   }, [url, token]);
 
-  // Fetch billing addresses
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -165,7 +161,6 @@ const CreateInvoiceFromDashboard = () => {
     fetchAddress();
   }, [url, token]);
 
-  // Fetch company addresses
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -342,6 +337,9 @@ const CreateInvoiceFromDashboard = () => {
       <form className="p-1 sm:p-1 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Service Name <span className="text-red-500">*</span>
+            </label>
             <select
               id="service_name"
               name="service_name"
@@ -358,6 +356,9 @@ const CreateInvoiceFromDashboard = () => {
             </select>
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Company Logo
+            </label>
             <input
               type="file"
               name="company_logo"
@@ -368,21 +369,24 @@ const CreateInvoiceFromDashboard = () => {
                 }))
               }
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Client Company Name <span className="text-red-500">*</span>
+            </label>
             <input
               name="company_name"
-              placeholder="Company Name*"
               value={formData.company_name}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
               required
             />
           </div>
-          {/* Company Address Dropdown */}
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Our Company  <span className="text-red-500">*</span>
+            </label>
             <select
               name="company_address"
               onChange={handleChange}
@@ -400,8 +404,10 @@ const CreateInvoiceFromDashboard = () => {
               ))}
             </select>
           </div>
-          {/* Billing Address Dropdown */}
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Billing Account <span className="text-red-500">*</span>
+            </label>
             <select
               name="billing_address"
               onChange={handleChange}
@@ -420,9 +426,11 @@ const CreateInvoiceFromDashboard = () => {
             </select>
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Client ID <span className="text-red-500">*</span>
+            </label>
             <input
               name="client_id"
-              placeholder="Client ID*"
               value={formData.client_id}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -430,30 +438,34 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Website URL
+            </label>
             <input
               name="website_url"
-              placeholder="Website URL"
               value={formData.website_url}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              required
             />
           </div>
           <div className="sm:col-span-2 lg:col-span-3">
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Address
+            </label>
             <textarea
               name="address"
-              placeholder="Address*"
               value={formData.address}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               rows="3"
-              
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Client Name <span className="text-red-500">*</span>
+            </label>
             <input
               name="client_name"
-              placeholder="Client Name*"
               value={formData.client_name}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -461,6 +473,9 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Date <span className="text-red-500">*</span>
+            </label>
             <input
               name="date"
               type="date"
@@ -471,9 +486,11 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Payment Status <span className="text-red-500">*</span>
+            </label>
             <input
               name="payment_status"
-              placeholder="Payment Status*"
               value={formData.payment_status}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -481,19 +498,23 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Client Email <span className="text-red-500">*</span>
+            </label>
             <input
               name="client_email"
-              placeholder="Client Email*"
               value={formData.client_email}
               onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus RING-purple-500 text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               required
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Client Phone No. <span className="text-red-500">*</span>
+            </label>
             <input
               name="client_phone"
-              placeholder="Client Phone No.*"
               value={formData.client_phone}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -501,18 +522,22 @@ const CreateInvoiceFromDashboard = () => {
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              VAT (%)
+            </label>
             <input
               name="vat"
-              placeholder="VAT (%)"
               value={formData.vat}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             />
           </div>
           <div>
+            <label className="block text-sm sm:text-base font-medium text-gray-600">
+              Discount
+            </label>
             <input
               name="discount"
-              placeholder="Discount"
               value={formData.discount}
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"

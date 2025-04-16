@@ -359,65 +359,106 @@ const InvoiceEdit = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col mt-20 md:px-24">
-      <div className="flex justify-between items-center mb-2 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl p-1 md:text-3xl font-semibold text-gray-800">
-          Edit Invoice
-        </h1>
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className="p-1 sm:p-6 lg:p-8 w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {[
-            {
-              name: "client_invoice_id",
-              placeholder: "Client Invoice ID*",
-              required: true,
-            },
-            {
-              name: "company_name",
-              placeholder: "Company Name*",
-              required: true,
-            },
-            { name: "client_id", placeholder: "Client ID*", required: true },
-            { name: "website_url", placeholder: "Website URL" },
-            {
-              name: "client_name",
-              placeholder: "Client Name*",
-              required: true,
-            },
-            { name: "date", type: "date", required: true },
-            {
-              name: "payment_status",
-              placeholder: "Payment Status*",
-              required: true,
-            },
-            {
-              name: "client_email",
-              placeholder: "Client Email*",
-              required: true,
-            },
-            {
-              name: "client_phone",
-              placeholder: "Client Phone No.*",
-              required: true,
-            },
-            {
-              name: "vat",
-              type: "number",
-              step: "0.01",
-              placeholder: "VAT (%)",
-            },
-            {
-              name: "discount",
-              type: "number",
-              step: "0.01",
-              placeholder: "Discount",
-            },
-          ].map((field) => (
+    <div className="flex justify-between items-center mb-2 sm:mb-6">
+      <h1 className="text-xl sm:text-2xl p-1 md:text-3xl font-semibold text-gray-800">
+        Edit Invoice
+      </h1>
+    </div>
+    <form
+      onSubmit={(e) => handleSubmit(e, "save")}
+      className="p-1 sm:p-6 lg:p-8 w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl"
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {[
+          {
+            id: "client_invoice_id",
+            name: "client_invoice_id",
+            label: "Client Invoice ID",
+            placeholder: "Client Invoice ID",
+            required: true,
+          },
+          {
+            id: "company_name",
+            name: "company_name",
+            label: "Company Name",
+            placeholder: "Company Name",
+            required: true,
+          },
+          {
+            id: "client_id",
+            name: "client_id",
+            label: "Client ID",
+            placeholder: "Client ID",
+            required: true,
+          },
+          {
+            id: "website_url",
+            name: "website_url",
+            label: "Website URL",
+            placeholder: "Website URL",
+          },
+          {
+            id: "client_name",
+            name: "client_name",
+            label: "Client Name",
+            placeholder: "Client Name",
+            required: true,
+          },
+          {
+            id: "date",
+            name: "date",
+            label: "Date",
+            type: "date",
+            required: true,
+          },
+          {
+            id: "payment_status",
+            name: "payment_status",
+            label: "Payment Status",
+            placeholder: "Payment Status",
+            required: true,
+          },
+          {
+            id: "client_email",
+            name: "client_email",
+            label: "Client Email",
+            placeholder: "Client Email",
+            required: true,
+          },
+          {
+            id: "client_phone",
+            name: "client_phone",
+            label: "Client Phone No.",
+            placeholder: "Client Phone No.",
+            required: true,
+          },
+          {
+            id: "vat",
+            name: "vat",
+            label: "VAT (%)",
+            type: "number",
+            step: "0.01",
+            placeholder: "VAT (%)",
+          },
+          {
+            id: "discount",
+            name: "discount",
+            label: "Discount",
+            type: "number",
+            step: "0.01",
+            placeholder: "Discount",
+          },
+        ].map((field) => (
+          <div key={field.id}>
+            <label
+              htmlFor={field.id}
+              className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500">*</span>}
+            </label>
             <input
-              key={field.name}
+              id={field.id}
               name={field.name}
               type={field.type || "text"}
               placeholder={field.placeholder}
@@ -426,50 +467,71 @@ const InvoiceEdit = () => {
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               required={field.required}
             />
-          ))}
-
-          {/* Company Address Dropdown */}
-          <div>
-            <select
-              name="company_address"
-              onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              value={formData.company_address}
-              required
-            >
-              <option value="" disabled>
-                Select Company
-              </option>
-              {addresses.map((address) => (
-                <option key={address.id} value={address.id}>
-                  {address.name}
-                </option>
-              ))}
-            </select>
           </div>
+        ))}
 
-          {/* Billing Address Dropdown */}
-          <div>
-            <select
-              name="billing_address"
-              onChange={handleChange}
-              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              value={formData.billing_address}
-              required
-            >
-              <option value="" disabled>
-                Select Account
+        <div>
+          <label
+            htmlFor="company_address"
+            className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
+          >
+            Our Company  <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="company_address"
+            name="company_address"
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            value={formData.company_address}
+            required
+          >
+            <option value="" disabled>
+              Select Company
+            </option>
+            {addresses.map((address) => (
+              <option key={address.id} value={address.id}>
+                {address.name}
               </option>
-              {billingAddresses.map((address) => (
-                <option key={address.id} value={address.id}>
-                  {address.gateway}-{address.account_number}
-                </option>
-              ))}
-            </select>
-          </div>
+            ))}
+          </select>
+        </div>
 
+        <div>
+          <label
+            htmlFor="billing_address"
+            className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
+          >
+            Billing Address <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="billing_address"
+            name="billing_address"
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            value={formData.billing_address}
+            required
+          >
+            <option value="" disabled>
+              Select Account
+            </option>
+            {billingAddresses.map((address) => (
+              <option key={address.id} value={address.id}>
+                {address.gateway}-{address.account_number}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label
+            htmlFor="company_logo"
+            className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
+          >
+            Company Logo
+          </label>
           <div className="relative">
             <input
+              id="company_logo"
               type="file"
               name="company_logo"
               ref={fileInputRef}
@@ -483,257 +545,232 @@ const InvoiceEdit = () => {
               {formData.company_logo_name || "Choose Company Logo"}
             </div>
           </div>
+        </div>
 
+        <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+          <label
+            htmlFor="address"
+            className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
+          >
+            Address
+          </label>
           <textarea
+            id="address"
             name="address"
-            placeholder="Address*"
+            placeholder="Address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 col-span-1 sm:col-span-2 lg:col-span-3 text-sm sm:text-base"
-            
+            className="w-full p-2 sm:p-3 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            rows="3"
           />
         </div>
+      </div>
 
-        <div className="bg-gray-100 p-4 sm:p-6 rounded-2xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs sm:text-sm text-left text-gray-700">
-              <thead>
-                <tr className="border-b border-gray-300">
-                  <th className="py-2 px-2 sm:px-4">#</th>
-                  <th className="py-2 px-2 sm:px-4">Item Name</th>
-                  <th className="py-2 px-2 sm:px-4">Quantity</th>
-                  <th className="py-2 px-2 sm:px-4">Currency</th>
-                  <th className="py-2 px-2 sm:px-4">Rate</th>
-                  <th className="py-2 px-2 sm:px-4">Time Duration</th>
-                  <th className="py-2 px-2 sm:px-4">Price</th>
-                  <th className="py-2 px-2 sm:px-4">Total Amount</th>
-                  <th className="py-2 px-2 sm:px-4">Action</th>
+      <div className="bg-gray-100 p-4 sm:p-6 rounded-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs sm:text-sm text-left text-gray-700">
+            <thead>
+              <tr className="border-b border-gray-300">
+                <th className="py-2 px-2 sm:px-4">#</th>
+                <th className="py-2 px-2 sm:px-4">Item Name</th>
+                <th className="py-2 px-2 sm:px-4">Quantity</th>
+                <th className="py-2 px-2 sm:px-4">Currency</th>
+                <th className="py-2 px-2 sm:px-4">Rate</th>
+                <th className="py-2 px-2 sm:px-4">Time Duration</th>
+                <th className="py-2 px-2 sm:px-4">Price</th>
+                <th className="py-2 px-2 sm:px-4">Total Amount</th>
+                <th className="py-2 px-2 sm:px-4">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {formData.services.map((service, index) => (
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="py-2 px-2 sm:px-4">{index + 1}</td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <select
+                      value={service.service_name}
+                      onChange={(e) =>
+                        handleServiceChange(index, "service_name", e.target.value, service.id)
+                      }
+                      className="w-full px-2 sm:px-4 py-1 sm:py-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                    >
+                      {services?.map((e, key) => (
+                        <option key={key} value={e.name}>
+                          {e.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      value={service.quantity}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "quantity",
+                          parseInt(e.target.value, 10),
+                          service.id
+                        )
+                      }
+                      className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    />
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <select
+                      value={service.currency}
+                      onChange={(e) =>
+                        handleServiceChange(index, "currency", e.target.value, service.id)
+                      }
+                      className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    >
+                      {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
+                        <option key={currency} value={currency}>
+                          {currency}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <select
+                      value={service.rate}
+                      onChange={(e) =>
+                        handleServiceChange(index, "rate", e.target.value, service.id)
+                      }
+                      className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    >
+                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((rate) => (
+                        <option key={rate} value={rate}>
+                          {rate}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      value={service.duration}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "duration",
+                          parseInt(e.target.value, 10),
+                          service.id
+                        )
+                      }
+                      className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    />
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={service.price}
+                      onChange={(e) =>
+                        handleServiceChange(index, "price", e.target.value, service.id)
+                      }
+                      className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    />
+                  </td>
+                  <td className="py-2 px-2 sm:px-4">${service.total_amount.toFixed(2)}</td>
+                  <td className="py-2 px-2 sm:px-4">
+                    <button
+                      type="button"
+                      onClick={() => removeServiceItem(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg
+                        className="h-4 w-4 sm:h-5 sm:w-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {formData.services.map((service, index) => (
-                  <tr key={index} className="border-b border-gray-200">
-                    <td className="py-2 px-2 sm:px-4">{index + 1}</td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <select
-                        value={service.service_name}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "service_name",
-                            e.target.value,
-                            service.id
-                          )
-                        }
-                        className="w-full px-2 sm:px-4 py-1 sm:py-2 border rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      >
-                        {services?.map((e, key) => (
-                          <option key={key} value={e.name}>
-                            {e.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <input
-                        type="number"
-                        value={service.quantity}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "quantity",
-                            parseInt(e.target.value, 10),
-                            service.id
-                          )
-                        }
-                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <select
-                        value={service.currency}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "currency",
-                            e.target.value,
-                            service.id
-                          )
-                        }
-                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                        required
-                      >
-                        {["USD", "Dollar", "Rupee", "Euro", "BDT"].map(
-                          (currency) => (
-                            <option key={currency} value={currency}>
-                              {currency}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <select
-                        value={service.rate}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "rate",
-                            e.target.value,
-                            service.id
-                          )
-                        }
-                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                        required
-                      >
-                        {[
-                          "Hourly",
-                          "Monthly",
-                          "Project Base",
-                          "Fixed Price",
-                        ].map((rate) => (
-                          <option key={rate} value={rate}>
-                            {rate}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <input
-                        type="number"
-                        value={service.duration}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "duration",
-                            parseInt(e.target.value, 10),
-                            service.id
-                          )
-                        }
-                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={service.price}
-                        onChange={(e) =>
-                          handleServiceChange(
-                            index,
-                            "price",
-                            e.target.value,
-                            service.id
-                          )
-                        }
-                        className="w-full p-1 sm:p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      ${service.total_amount.toFixed(2)}
-                    </td>
-                    <td className="py-2 px-2 sm:px-4">
-                      <button
-                        type="button"
-                        onClick={() => removeServiceItem(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <svg
-                          className="h-4 w-4 sm:h-5 sm:w-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button
-            type="button"
-            onClick={addServiceItem}
-            className="mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button
+          type="button"
+          onClick={addServiceItem}
+          className="mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
+        >
+          <svg
+            className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
           >
-            <svg
-              className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Add Item
-          </button>
-        </div>
-
-        <div className="pt-4">
-          <div className="flex flex-col space-y-2">
-            <div className="flex justify-between items-center border-t-2 border-dashed">
-              <span className="text-sm sm:text-base mt-2">Sub Total:</span>
-              <span className="text-sm sm:text-base">
-                ${formData.sub_total.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm sm:text-base text-red-500">
-                Discount:
-              </span>
-              <span className="text-red-500 text-sm sm:text-base">
-                - {parseFloat(formData.discount || 0).toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
-              <span className="text-sm sm:text-base">VAT:</span>
-              <span className="text-sm sm:text-base">
-                {parseFloat(formData.vat || 0)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
-              <span className="text-lg sm:text-xl font-semibold">
-                {formData.total_amount.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
-          <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+            <path
+              fillRule="evenodd"
+              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              clipRule="evenodd"
             />
-            <span>Do you want signature field</span>
-          </label>
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm sm:text-base"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 text-sm sm:text-base"
-            onClick={(e) => handleSubmit(e, "sent")}
-          >
-            Sent
-          </button>
+          </svg>
+          Add Item
+        </button>
+      </div>
+
+      <div className="pt-4">
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between items-center border-t-2 border-dashed">
+            <span className="text-sm sm:text-base mt-2">Sub Total:</span>
+            <span className="text-sm sm:text-base">${formData.sub_total.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm sm:text-base text-red-500">Discount:</span>
+            <span className="text-red-500 text-sm sm:text-base">
+              - {parseFloat(formData.discount || 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
+            <span className="text-sm sm:text-base">VAT:</span>
+            <span className="text-sm sm:text-base">{parseFloat(formData.vat || 0)}%</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
+            <span className="text-lg sm:text-xl font-semibold">
+              {formData.total_amount.toFixed(2)}
+            </span>
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
+        <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
+          <input
+            type="checkbox"
+            className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+          />
+          <span>Do you want signature field</span>
+        </label>
+        <button
+          type="submit"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm sm:text-base"
+        >
+          Save
+        </button>
+        <button
+          type="button"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 text-sm sm:text-base"
+          onClick={(e) => handleSubmit(e, "sent")}
+        >
+          Sent
+        </button>
+      </div>
+    </form>
+  </div>
   );
 };
 

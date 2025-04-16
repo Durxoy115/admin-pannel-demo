@@ -31,13 +31,29 @@ const OrderAdd = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Create payload, excluding empty estimate_delivery_date and delivery_date
+      const payload = {
+        name: formData.name,
+        duration: formData.duration,
+        price: formData.price,
+        order_date: formData.order_date,
+        client_id: formData.client_id,
+        details: formData.details,
+      };
+      if (formData.estimate_delivery_date) {
+        payload.estimate_delivery_date = formData.estimate_delivery_date;
+      }
+      if (formData.delivery_date) {
+        payload.delivery_date = formData.delivery_date;
+      }
+
       const response = await fetch(`${url}/service/order/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (data.success) {
@@ -56,7 +72,7 @@ const OrderAdd = () => {
   };
 
   return (
-    <div className="w-full  mx-auto px-1 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10 bg-gray-100 rounded-md min-h-screen">
+    <div className="w-full mx-auto px-1 sm:px-6 md:px-10 py-6 sm:py-8 md:py-10 bg-gray-100 rounded-md min-h-screen">
       <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4 mt-12">Create New Order</h2>
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 bg-white p-1 sm:p-8 rounded-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -111,7 +127,6 @@ const OrderAdd = () => {
               id="order_date"
               value={formData.order_date}
               onChange={handleChange}
-              required
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base"
             />
           </div>
@@ -164,10 +179,11 @@ const OrderAdd = () => {
             id="details"
             value={formData.details}
             onChange={handleQuillChange}
-            className="bg-white border border-gray-300 rounded-md"
+            className="bg-white rounded-md"
+            style={{ height: "200px" }}
           />
         </div>
-        <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6">
+        <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-6" style={{ marginTop: "70px" }}>
           <button
             type="button"
             onClick={handleCancel}

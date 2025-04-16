@@ -65,7 +65,7 @@ const AddAddress = () => {
       </h2>
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 sm:space-y-6 bg-white rounded-lg  p-1 "
+        className="space-y-4 sm:space-y-6 bg-white rounded-lg  p-1 md:p-6 "
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 ">
           <div>
@@ -97,7 +97,7 @@ const AddAddress = () => {
           </div> */}
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Bank Name <span className="text-red-500">*</span>
+              Bank Name <span className="text-red-500"></span>
             </label>
             <input
               type="text"
@@ -105,13 +105,13 @@ const AddAddress = () => {
               value={formData.bank_name}
               onChange={handleChange}
               placeholder="Enter your bank name"
-              required
+              
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Branch <span className="text-red-500">*</span>
+              Branch <span className="text-red-500"></span>
             </label>
             <input
               type="text"
@@ -125,7 +125,7 @@ const AddAddress = () => {
           </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Account Name <span className="text-red-500">*</span>
+              Account Name <span className="text-red-500"></span>
             </label>
             <input
               type="text"
@@ -133,7 +133,7 @@ const AddAddress = () => {
               value={formData.account_name}
               onChange={handleChange}
               placeholder="Enter your account name"
-              required
+             
               className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
@@ -153,7 +153,7 @@ const AddAddress = () => {
           </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              Routing Number <span className="text-red-500">*</span>
+              Routing Number <span className="text-red-500"></span>
             </label>
             <input
               type="text"
@@ -168,7 +168,7 @@ const AddAddress = () => {
         </div>
         <div>
           <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-            Company Address <span className="text-red-500">*</span>
+            Company Address <span className="text-red-500"></span>
           </label>
           <textarea
             name="company_address"
