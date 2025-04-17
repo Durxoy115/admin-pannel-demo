@@ -12,6 +12,7 @@ const Signature = () => {
   const token = getTokenLocalStorage();
 
     const fetchData = async () => {
+      
       try {
         const response = await fetch(`${url}/company/authority-signature/`, {
           headers: {
@@ -28,6 +29,7 @@ const Signature = () => {
         console.error("Error fetching Services:", error);
       }
     };
+    
   
     useEffect(() => {
         fetchData();
@@ -44,7 +46,7 @@ const Signature = () => {
         if (!selectedSignatureId) return;
         try {
           const response = await fetch(
-            `${url}/company/?company_address_id=${selectedSignatureId}`,
+            `${url}/company/authority-signature/?authority_signature_id=${selectedSignatureId}`,
             {
               method: "DELETE",
               headers: {
@@ -52,6 +54,7 @@ const Signature = () => {
               },
             }
           );
+          
           if (response.ok) {
             setSignature(signature.filter((sign) => sign.id !== selectedSignatureId));
             setIsModalOpen(false);
@@ -72,6 +75,8 @@ const Signature = () => {
         setIsModalOpen(false);
         setSelectedSignatureId(null);
       };
+
+      console.log("Signature_id",selectedSignatureId)
     return (
        <div>
              <div className="mt-4 sm:mt-6 md:mt-8">

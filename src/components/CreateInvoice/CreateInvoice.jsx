@@ -11,6 +11,7 @@ const CreateInvoice = () => {
   const [defaultService, setDefaultService] = useState("");
   const [addresses, setAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
+  const [author, setAuthor] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
@@ -24,10 +25,12 @@ const CreateInvoice = () => {
     company_address: "", // Empty to show "Select Address" initially
     client_id: "",
     website_url: "",
+    authority_signature:"",
     address: "",
     client_name: "",
     date: "",
     payment_status: "",
+    invoice_date:"",
     client_email: "",
     client_phone: "",
     sub_total: 0,
@@ -95,6 +98,27 @@ const CreateInvoice = () => {
         const data = await response.json();
         if (data.success) {
           setBillingAddresses(data.data);
+        } else {
+          console.error("Error fetching billing addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/authority-signature/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAuthor(data.data);
         } else {
           console.error("Error fetching billing addresses:", data.message);
         }
@@ -205,6 +229,8 @@ const CreateInvoice = () => {
       formDataPayload.append("company_address", formData.company_address); // Updated to use selected value
       formDataPayload.append("billing_address", formData.billing_address);
       formDataPayload.append("client_id", formData.client_id);
+      formDataPayload.append("authority_signature", formData.authority_signature);
+      formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
       formDataPayload.append("client_name", formData.client_name);
@@ -395,6 +421,40 @@ const CreateInvoice = () => {
             name="website_url"
             placeholder="Website URL"
             value={formData.website_url}
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+          />
+        </div>
+        <div>
+          <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+            Company Author
+          </label>
+          <select
+            id="authority_signature"
+            name="authority_signature"
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            value={formData.authority_signature}
+          >
+            <option value="" disabled>
+              Select Author
+            </option>
+            {author.map((a) => (
+              <option key={a.id} value={parseInt(a.id)}>
+                {a.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+          Payment Due In (Days)
+          </label>
+          <input
+            id="invoice_date"
+            name="invoice_date"
+            // placeholder="Discount"
+            value={formData.payment_date}
             onChange={handleChange}
             className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
@@ -677,13 +737,9 @@ const CreateInvoice = () => {
 
       <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
         <div>
-          <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-purple-600 focus:ring-purple-500"
-            />
-            <span>Do you want signature field</span>
-          </label>
+          
+            <span></span>
+          
         </div>
         <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
           <button

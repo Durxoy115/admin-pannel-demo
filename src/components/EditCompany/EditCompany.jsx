@@ -47,7 +47,7 @@ const EditCompany = () => {
     fetchAddress();
   }, [id, url, token]);
 
-  console.log("company id__________",formData)
+  // console.log("company id__________",formData)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

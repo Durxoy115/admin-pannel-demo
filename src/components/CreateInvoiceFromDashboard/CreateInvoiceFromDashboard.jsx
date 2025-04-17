@@ -11,6 +11,7 @@ const CreateInvoiceFromDashboard = () => {
   const [defaultService, setDefaultService] = useState();
   const [addresses, setAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
+  const [author, setAuthor] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [clientData, setClientData] = useState(null);
@@ -25,6 +26,8 @@ const CreateInvoiceFromDashboard = () => {
     company_name: "",
     billing_address: "",
     company_address: "",
+    authority_signature:"",
+    invoice_date:"",
     client_id: clientId || "",
     website_url: "",
     address: "",
@@ -84,6 +87,27 @@ const CreateInvoiceFromDashboard = () => {
 
     fetchClientDetails();
   }, [formData.client_id, token, url]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/authority-signature/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAuthor(data.data);
+        } else {
+          console.error("Error fetching billing addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
 
   useEffect(() => {
     if (location.state?.clientId && !formData.client_id) {
@@ -268,6 +292,8 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
+      formDataPayload.append("authority_signature", formData.authority_signature);
+      formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("client_name", formData.client_name);
       formDataPayload.append("date", formData.date);
       formDataPayload.append("payment_status", formData.payment_status);
@@ -425,6 +451,41 @@ const CreateInvoiceFromDashboard = () => {
               ))}
             </select>
           </div>
+          <div>
+          <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+            Company Author
+          </label>
+          <select
+            id="authority_signature"
+            name="authority_signature"
+
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            value={formData.authority_signature}
+          >
+            <option value="" disabled>
+              Select Author
+            </option>
+            {author.map((a) => (
+              <option key={a.id} value={parseInt(a.id)}>
+                {a.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+          Payment Due In (Days)
+          </label>
+          <input
+            id="invoice_date"
+            name="invoice_date"
+            // placeholder="Discount"
+            value={formData.invoice_date}
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+          />
+        </div> 
           <div>
             <label className="block text-sm sm:text-base font-medium text-gray-600">
               Client ID <span className="text-red-500">*</span>
@@ -714,11 +775,8 @@ const CreateInvoiceFromDashboard = () => {
         <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
           <div>
             <label className="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500"
-              />
-              <span>Do you want signature field</span>
+              
+              <span></span>
             </label>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">

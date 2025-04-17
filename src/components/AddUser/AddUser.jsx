@@ -7,6 +7,8 @@ const AddUser = () => {
   const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState(null);
   const [userType, setUserType] = useState();
+  const [userGroups, setUserGroup] = useState();
+  const [groups, setGroups] = useState([]);
   const [image, setImage] = useState(null);
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -35,6 +37,30 @@ const AddUser = () => {
     fetchUserData();
   }, [url, token]);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`${url}/user-group/`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserGroup(data?.data);
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, [url, token]);
+
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -45,9 +71,17 @@ const AddUser = () => {
     formData.append("username", e.target.userName.value);
     formData.append("contact", e.target.userContact.value);
     formData.append("user_type", e.target.user_type.value);
+    
     formData.append("password", e.target.password.value);
     formData.append("dob", e.target.dob.value);
-
+    
+    if(groups.length){
+      formData.append("groups", groups);
+    } 
+// else{
+//   console.log(groups);
+//   return;
+// }
     if (image) {
       formData.append("photo", image);
     }
@@ -64,7 +98,7 @@ const AddUser = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Success:", data);
-        navigate("/profile", { state: { reload: true } });
+        // navigate("/profile", { state: { reload: true } });
       } else {
         const errorData = await response.json();
         console.error("Error:", errorData);
@@ -87,6 +121,19 @@ const AddUser = () => {
       setImagePreview(null);
     }
   };
+  const handleToGroups = (e) => {
+      // For multiple select, get all selected options as an array
+      let new_group = []
+
+      Array.from(e.target.selectedOptions)
+        .filter((option) => option.value !== "" && !isNaN(parseInt(option.value)))
+        .map((option) => new_group.push(parseInt(option.value)));
+
+      console.log(new_group);
+
+      setGroups([new_group]);
+
+    } 
 
   const handleClose = () => {
     navigate("/profile");
@@ -227,6 +274,28 @@ const AddUser = () => {
                 >
                   <option value="">Select Member Type</option>
                   {userType?.map((e, key) => (
+                    <option key={key} value={e.id}>
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="user_type"
+                  className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
+                >
+                  User Permission Group
+                </label>
+                <select
+                  id="groups"
+                  name="groups"
+                  multiple
+                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
+                  onChange={handleToGroups}
+                >
+                  <option>Select Group</option>
+                  {userGroups?.map((e, key) => (
                     <option key={key} value={e.id}>
                       {e.name}
                     </option>

@@ -37,6 +37,7 @@ import AddCompanyAddress from "./components/AddCompanyAddress/AddCompanyAddress"
 import EditCompany from "./components/EditCompany/EditCompany";
 import EditSupportContact from "./components/EditSupportContact/EditSupportContact";
 import AddSignature from "./components/AddSignature/AddSignature";
+import EditSignature from "./components/EditSignature/EditSignature";
 
 
 // import Test from "./components/Test";
@@ -89,6 +90,7 @@ const App = () => {
           <Route path="edit-company-address/:id" element={<EditCompany></EditCompany>} />
           <Route path="edit-support-contact/:id" element={<EditSupportContact></EditSupportContact>} />
           <Route path="add-signature" element={<AddSignature></AddSignature>} />
+          <Route path="edit-signature/:id" element={<EditSignature></EditSignature>} />
         </Route>
       </Route>
     </Routes>

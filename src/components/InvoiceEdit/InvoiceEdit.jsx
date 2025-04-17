@@ -13,6 +13,7 @@ const InvoiceEdit = () => {
   const fileInputRef = useRef(null);
   const [addresses, setAddresses] = useState([]); // State for company addresses
   const [billingAddresses, setBillingAddresses] = useState([]); // State for billing addresses
+  const [author, setAuthor] = useState([]);
 
   const [formData, setFormData] = useState({
     client_invoice_id: "",
@@ -21,12 +22,14 @@ const InvoiceEdit = () => {
     date: "",
     payment_status: "",
     company_name: "",
+    authority_signature:"",
     website_url: "",
     address: "",
     client_email: "",
     client_phone: "",
     billing_address: "",
     company_address: "",
+    invoice_date:"",
     service_name: "",
     sub_total: 0,
     discount: 0.0,
@@ -120,6 +123,8 @@ const InvoiceEdit = () => {
             client_phone: data.data.client_phone || "",
             billing_address: data.data.billing_address || "",
             company_address: data.data.company_address || "",
+            authority_signature: data.data.authority_signature || "",
+            invoice_date: data.data.invoice_date || "",
             service_name:
               data.data.service_name ||
               (services.length > 0 ? services[0].name : ""),
@@ -191,6 +196,27 @@ const InvoiceEdit = () => {
         }
       } catch (error) {
         console.error("Error fetching company addresses:", error);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/company/authority-signature/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAuthor(data.data);
+        } else {
+          console.error("Error fetching billing addresses:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
       }
     };
     fetchAddress();
@@ -304,6 +330,8 @@ const InvoiceEdit = () => {
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
       formDataPayload.append("client_name", formData.client_name);
+      formDataPayload.append("authority_signature", formData.authority_signature);
+      formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("date", formData.date);
       formDataPayload.append("payment_status", formData.payment_status);
       formDataPayload.append("client_email", formData.client_email);
@@ -356,7 +384,7 @@ const InvoiceEdit = () => {
   if (servicesError) {
     return <p className="text-red-500 text-center py-8">{servicesError}</p>;
   }
-
+console.log("object",formData.authority_signature, formData.invoice_date)
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col mt-20 md:px-24">
     <div className="flex justify-between items-center mb-2 sm:mb-6">
@@ -418,6 +446,7 @@ const InvoiceEdit = () => {
             placeholder: "Payment Status",
             required: true,
           },
+        
           {
             id: "client_email",
             name: "client_email",
@@ -521,7 +550,41 @@ const InvoiceEdit = () => {
             ))}
           </select>
         </div>
+        <div>
+          <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+            Company Author
+          </label>
+          <select
+            id="authority_signature"
+            name="authority_signature"
 
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            value={formData.authority_signature}
+          >
+            <option value="" disabled>
+              Select Author
+            </option>
+            {author.map((a) => (
+              <option key={a.id} value={parseInt(a.id)}>
+                {a.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+          Payment Due In (Days)
+          </label>
+          <input
+            id="invoice_date"
+            name="invoice_date"
+            // placeholder="Discount"
+            value={formData.invoice_date}
+            onChange={handleChange}
+            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+          />
+        </div>
         <div>
           <label
             htmlFor="company_logo"
@@ -545,6 +608,7 @@ const InvoiceEdit = () => {
               {formData.company_logo_name || "Choose Company Logo"}
             </div>
           </div>
+          
         </div>
 
         <div className="col-span-1 sm:col-span-2 lg:col-span-3">
