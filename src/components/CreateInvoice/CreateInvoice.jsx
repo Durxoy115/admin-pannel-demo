@@ -14,23 +14,25 @@ const CreateInvoice = () => {
   const [author, setAuthor] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
+  const [errors, setErrors] = useState({}); // State for field-specific errors
+  const [globalError, setGlobalError] = useState(""); // State for global errors
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     id: "",
-    service_name: "", // Empty to show "Select Service" initially
+    service_name: "",
     company_logo: null,
     company_name: "",
-    billing_address: "", // Empty to show "Select Billing Address" initially
-    company_address: "", // Empty to show "Select Address" initially
+    billing_address: "",
+    company_address: "",
     client_id: "",
     website_url: "",
-    authority_signature:"",
+    authority_signature: "",
     address: "",
     client_name: "",
     date: "",
     payment_status: "",
-    invoice_date:"",
+    invoice_date: "",
     client_email: "",
     client_phone: "",
     sub_total: 0,
@@ -43,6 +45,29 @@ const CreateInvoice = () => {
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
+  // Validate form fields
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.service_name) newErrors.service_name = "Service Name is required";
+    if (!formData.company_name) newErrors.company_name = "Client Company Name is required";
+    if (!formData.billing_address) newErrors.billing_address = "Billing Account is required";
+    if (!formData.client_id) newErrors.client_id = "Client ID is required";
+    if (!formData.client_name) newErrors.client_name = "Client Name is required";
+    if (!formData.date) newErrors.date = "Date is required";
+    if (!formData.payment_status) newErrors.payment_status = "Payment Status is required";
+    if (!formData.client_email) newErrors.client_email = "Client Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.client_email)) newErrors.client_email = "Invalid email format";
+    if (!formData.client_phone) newErrors.client_phone = "Client Phone No. is required";
+    if (formData.services.length === 0) newErrors.services = "At least one service is required";
+    formData.services.forEach((service, index) => {
+      if (!service.service_name) newErrors[`service_name_${index}`] = "Service Name is required";
+      if (service.quantity <= 0) newErrors[`quantity_${index}`] = "Quantity must be greater than 0";
+      if (service.price <= 0) newErrors[`price_${index}`] = "Price must be greater than 0";
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Fetch services
   useEffect(() => {
     const fetchServiceData = async () => {
@@ -54,9 +79,8 @@ const CreateInvoice = () => {
             Authorization: `Token ${token}`,
           },
         });
-
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        if (response.ok && data.success) {
           setServices(data?.data);
           if (data.data.length > 0) {
             setDefaultService(data.data[0].name);
@@ -76,10 +100,10 @@ const CreateInvoice = () => {
             }));
           }
         } else {
-          console.error("Failed to fetch service data");
+          setGlobalError("Failed to fetch service data");
         }
       } catch (error) {
-        console.error("Error fetching service data:", error);
+        setGlobalError("Error fetching service data: " + error.message);
       }
     };
     fetchServiceData();
@@ -99,14 +123,16 @@ const CreateInvoice = () => {
         if (data.success) {
           setBillingAddresses(data.data);
         } else {
-          console.error("Error fetching billing addresses:", data.message);
+          setGlobalError("Error fetching billing addresses: " + data.message);
         }
       } catch (error) {
-        console.error("Error fetching billing addresses:", error);
+        setGlobalError("Error fetching billing addresses: " + error.message);
       }
     };
     fetchAddress();
   }, [url, token]);
+
+  // Fetch authority signatures
   useEffect(() => {
     const fetchAddress = async () => {
       try {
@@ -120,10 +146,10 @@ const CreateInvoice = () => {
         if (data.success) {
           setAuthor(data.data);
         } else {
-          console.error("Error fetching billing addresses:", data.message);
+          setGlobalError("Error fetching authority signatures: " + data.message);
         }
       } catch (error) {
-        console.error("Error fetching billing addresses:", error);
+        setGlobalError("Error fetching authority signatures: " + error.message);
       }
     };
     fetchAddress();
@@ -143,10 +169,10 @@ const CreateInvoice = () => {
         if (data.success) {
           setAddresses(data.data);
         } else {
-          console.error("Error fetching company addresses:", data.message);
+          setGlobalError("Error fetching company addresses: " + data.message);
         }
       } catch (error) {
-        console.error("Error fetching company addresses:", error);
+        setGlobalError("Error fetching company addresses: " + error.message);
       }
     };
     fetchAddress();
@@ -154,8 +180,8 @@ const CreateInvoice = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error on change
 
     if (name === "vat") setVat(parseFloat(value) || 0);
     if (name === "discount") setDiscount(parseFloat(value) || 0);
@@ -176,6 +202,7 @@ const CreateInvoice = () => {
       const totals = calculateTotals(newFormData);
       return { ...newFormData, ...totals };
     });
+    setErrors((prev) => ({ ...prev, [`${field}_${index}`]: "" })); // Clear service-specific error
   };
 
   const addServiceItem = () => {
@@ -203,6 +230,13 @@ const CreateInvoice = () => {
       const totals = calculateTotals(newFormData);
       return { ...newFormData, ...totals };
     });
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      Object.keys(newErrors).forEach((key) => {
+        if (key.includes(`_${index}`)) delete newErrors[key];
+      });
+      return newErrors;
+    });
   };
 
   const calculateTotals = (data = formData) => {
@@ -220,13 +254,19 @@ const CreateInvoice = () => {
 
   const handleSubmit = async (e, action) => {
     e.preventDefault();
-    // console.log("action------", formData.billing_address);
+    setGlobalError("");
+    setErrors({});
+
+    if (!validateForm()) {
+      setGlobalError("Please correct the errors in the form.");
+      return;
+    }
 
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("service_name", formData.service_name);
       formDataPayload.append("company_name", formData.company_name);
-      formDataPayload.append("company_address", formData.company_address); // Updated to use selected value
+      formDataPayload.append("company_address", formData.company_address);
       formDataPayload.append("billing_address", formData.billing_address);
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("authority_signature", formData.authority_signature);
@@ -243,8 +283,7 @@ const CreateInvoice = () => {
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
       formDataPayload.append("services", JSON.stringify(formData.services));
-      console.log("formData.company_log", formData.company_logo)
-      if (formData.company_logo){
+      if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
       }
 
@@ -253,7 +292,7 @@ const CreateInvoice = () => {
         if (action === "sent") {
           req_url += "?sent=true";
         }
-        const response = await fetch(`${req_url}`, {
+        const response = await fetch(req_url, {
           method: "POST",
           headers: {
             Authorization: `Token ${token}`,
@@ -261,11 +300,12 @@ const CreateInvoice = () => {
           body: formDataPayload,
         });
 
+        const data = await response.json();
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to create invoice.");
+          throw new Error(data.message || "Failed to create invoice.");
         } else {
           alert("Invoice created successfully!");
+          navigate("/invoice-list");
         }
       } else if (action === "preview") {
         const response = await fetch(`${url}/service/invoice-pdf/`, {
@@ -278,7 +318,7 @@ const CreateInvoice = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          alert(errorData.message || "Failed to create invoice.");
+          throw new Error(errorData.message || "Failed to generate preview.");
         } else {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
@@ -286,8 +326,7 @@ const CreateInvoice = () => {
         }
       }
     } catch (error) {
-      console.error("Error creating invoice:", error.message);
-      alert("Failed to create invoice: " + error.message);
+      setGlobalError("Failed to create invoice: " + error.message);
     }
   };
 
@@ -297,482 +336,497 @@ const CreateInvoice = () => {
 
   return (
     <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
-    <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-2 mb-2 sm:mt-4 md:mt-12 pl-4 sm:pl-12 md:pl-24">
-      Create Invoice
-    </h1>
-    <form className="p-1 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div>
-          <label htmlFor="service_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Service Name <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="service_name"
-            name="service_name"
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
-            onChange={handleChange}
-            value={formData.service_name}
-            required
-          >
-            <option value="" disabled>
-              Select Service
-            </option>
-            {services?.map((e, key) => (
-              <option key={key} value={e.name}>
-                {e.name}
+      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-2 mb-2 sm:mt-4 md:mt-12 pl-4 sm:pl-12 md:pl-24">
+        Create Invoice
+      </h1>
+      {globalError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-auto sm:w-full lg:w-5/6" role="alert">
+          <span className="block sm:inline">{globalError}</span>
+        </div>
+      )}
+      <form className="p-1 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div>
+            <label htmlFor="service_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Service Name <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="service_name"
+              name="service_name"
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.service_name ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base`}
+              onChange={handleChange}
+              value={formData.service_name}
+              required
+            >
+              <option value="" disabled>
+                Select Service
               </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="company_logo" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Company Logo
-          </label>
-          <input
-            type="file"
-            id="company_logo"
-            name="company_logo"
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                company_logo: e.target.files[0],
-              }))
-            }
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
-        </div>
-        <div>
-          <label htmlFor="company_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Client Company Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="company_name"
-            name="company_name"
-            placeholder="Client Company Name"
-            value={formData.company_name}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Our Company
-          </label>
-          <select
-            id="company_address"
-            name="company_address"
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            value={formData.company_address}
-          >
-            <option value="" disabled>
-              Select Our Company
-            </option>
-            {addresses.map((address) => (
-              <option key={address.id} value={parseInt(address.id)}>
-                {address.name}
+              {services?.map((e, key) => (
+                <option key={key} value={e.name}>
+                  {e.name}
+                </option>
+              ))}
+            </select>
+            {errors.service_name && <p className="text-red-500 text-xs mt-1">{errors.service_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="company_logo" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client Company Logo
+            </label>
+            <input
+              type="file"
+              id="company_logo"
+              name="company_logo"
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  company_logo: e.target.files[0],
+                }))
+              }
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+          <div>
+            <label htmlFor="company_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client Company Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="company_name"
+              name="company_name"
+              placeholder="Client Company Name"
+              value={formData.company_name}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.company_name ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base`}
+              required
+            />
+            {errors.company_name && <p className="text-red-500 text-xs mt-1">{errors.company_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Our Company
+            </label>
+            <select
+              id="company_address"
+              name="company_address"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.company_address}
+            >
+              <option value="" disabled>
+                Select Our Company
               </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="billing_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Billing Account <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="billing_address"
-            name="billing_address"
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            value={formData.billing_address}
-            required
-          >
-            <option value="" disabled>
-              Select Account
-            </option>
-            {billingAddresses.map((address) => (
-              <option key={address.id} value={parseInt(address.id)}>
-                {address.gateway}-{address.account_number}
+              {addresses.map((address) => (
+                <option key={address.id} value={parseInt(address.id)}>
+                  {address.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="billing_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Billing Account <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="billing_address"
+              name="billing_address"
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.billing_address ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              value={formData.billing_address}
+              required
+            >
+              <option value="" disabled>
+                Select Account
               </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="client_id" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Client ID <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="client_id"
-            name="client_id"
-            placeholder="Client ID"
-            value={formData.client_id}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="website_url" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Website URL
-          </label>
-          <input
-            id="website_url"
-            name="website_url"
-            placeholder="Website URL"
-            value={formData.website_url}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-          />
-        </div>
-        <div>
-          <label htmlFor="company_address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Company Author
-          </label>
-          <select
-            id="authority_signature"
-            name="authority_signature"
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            value={formData.authority_signature}
-          >
-            <option value="" disabled>
-              Select Author
-            </option>
-            {author.map((a) => (
-              <option key={a.id} value={parseInt(a.id)}>
-                {a.title}
+              {billingAddresses.map((address) => (
+                <option key={address.id} value={parseInt(address.id)}>
+                  {address.gateway}-{address.account_number}
+                </option>
+              ))}
+            </select>
+            {errors.billing_address && <p className="text-red-500 text-xs mt-1">{errors.billing_address}</p>}
+          </div>
+          <div>
+            <label htmlFor="client_id" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="client_id"
+              name="client_id"
+              placeholder="Client ID"
+              value={formData.client_id}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.client_id ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.client_id && <p className="text-red-500 text-xs mt-1">{errors.client_id}</p>}
+          </div>
+          <div>
+            <label htmlFor="website_url" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Website URL
+            </label>
+            <input
+              id="website_url"
+              name="website_url"
+              placeholder="Website URL"
+              value={formData.website_url}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <label htmlFor="authority_signature" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Company Author
+            </label>
+            <select
+              id="authority_signature"
+              name="authority_signature"
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.authority_signature}
+            >
+              <option value="" disabled>
+                Select Author
               </option>
-            ))}
-          </select>
+              {author.map((a) => (
+                <option key={a.id} value={parseInt(a.id)}>
+                  {a.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="invoice_date" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Payment Due In (Days)
+            </label>
+            <input
+              id="invoice_date"
+              name="invoice_date"
+              value={formData.invoice_date}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <label htmlFor="address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Address
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              rows="3"
+            />
+          </div>
+          <div>
+            <label htmlFor="client_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="client_name"
+              name="client_name"
+              placeholder="Client Name"
+              value={formData.client_name}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.client_name ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.client_name && <p className="text-red-500 text-xs mt-1">{errors.client_name}</p>}
+          </div>
+          <div>
+            <label htmlFor="date" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="date"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.date ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
+          </div>
+          <div>
+            <label htmlFor="payment_status" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Payment Status <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="payment_status"
+              name="payment_status"
+              placeholder="Payment Status"
+              value={formData.payment_status}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.payment_status ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.payment_status && <p className="text-red-500 text-xs mt-1">{errors.payment_status}</p>}
+          </div>
+          <div>
+            <label htmlFor="client_email" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="client_email"
+              name="client_email"
+              placeholder="Client Email"
+              value={formData.client_email}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.client_email ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.client_email && <p className="text-red-500 text-xs mt-1">{errors.client_email}</p>}
+          </div>
+          <div>
+            <label htmlFor="client_phone" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Client Phone No. <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="client_phone"
+              name="client_phone"
+              placeholder="Client Phone No."
+              value={formData.client_phone}
+              onChange={handleChange}
+              className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.client_phone ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
+              required
+            />
+            {errors.client_phone && <p className="text-red-500 text-xs mt-1">{errors.client_phone}</p>}
+          </div>
+          <div>
+            <label htmlFor="vat" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              VAT (%)
+            </label>
+            <input
+              id="vat"
+              name="vat"
+              placeholder="VAT (%)"
+              value={formData.vat}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Discount
+            </label>
+            <input
+              id="discount"
+              name="discount"
+              placeholder="Discount"
+              value={formData.discount}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            />
+          </div>
         </div>
-        <div>
-          <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-          Payment Due In (Days)
-          </label>
-          <input
-            id="invoice_date"
-            name="invoice_date"
-            // placeholder="Discount"
-            value={formData.payment_date}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-          />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-3">
-          <label htmlFor="address" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Address
-          </label>
-          <textarea
-            id="address"
-            name="address"
-            placeholder="Address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            rows="3"
-          />
-        </div>
-        <div>
-          <label htmlFor="client_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Client Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="client_name"
-            name="client_name"
-            placeholder="Client Name"
-            value={formData.client_name}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="date" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Date <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="date"
-            name="date"
-            type="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="payment_status" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Payment Status <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="payment_status"
-            name="payment_status"
-            placeholder="Payment Status"
-            value={formData.payment_status}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="client_email" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Client Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="client_email"
-            name="client_email"
-            placeholder="Client Email"
-            value={formData.client_email}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="client_phone" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Client Phone No. <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="client_phone"
-            name="client_phone"
-            placeholder="Client Phone No."
-            value={formData.client_phone}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="vat" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            VAT (%)
-          </label>
-          <input
-            id="vat"
-            name="vat"
-            placeholder="VAT (%)"
-            value={formData.vat}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-          />
-        </div>
-        <div>
-          <label htmlFor="discount" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-            Discount
-          </label>
-          <input
-            id="discount"
-            name="discount"
-            placeholder="Discount"
-            value={formData.discount}
-            onChange={handleChange}
-            className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-          />
-        </div>
-      </div>
 
-      <div className="bg-gray-100 p-3 sm:p-4 rounded-2xl overflow-x-auto">
-        <table className="w-full text-xs sm:text-sm text-left text-gray-700 min-w-[800px]">
-          <thead>
-            <tr className="border-b border-gray-300">
-              <th className="py-1 sm:py-2 px-2 sm:px-4">#</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Item Name</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Quantity</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Rate</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Time Duration</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Price</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Total Amount</th>
-              <th className="py-1 sm:py-2 px-2 sm:px-4">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {formData.services.map((service, index) => (
-              <tr key={index} className="border-b border-gray-200">
-                <td className="py-1 sm:py-2 px-2 sm:px-4">{index + 1}</td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <select
-                    id={`service_name_${index}`}
-                    name="service_name"
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border rounded-lg text-xs sm:text-sm"
-                    onChange={(e) =>
-                      handleServiceChange(index, "service_name", e.target.value)
-                    }
-                    value={service.service_name}
-                    required
-                  >
-                    {services?.map((e, key) => (
-                      <option key={key} value={e.name}>
-                        {e.name}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <input
-                    type="number"
-                    value={service.quantity}
-                    onChange={(e) =>
-                      handleServiceChange(
-                        index,
-                        "quantity",
-                        parseInt(e.target.value, 10) || 0
-                      )
-                    }
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                    required
-                  />
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <select
-                    value={service.currency}
-                    onChange={(e) =>
-                      handleServiceChange(index, "currency", e.target.value)
-                    }
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                    required
-                  >
-                    {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <select
-                    value={service.rate}
-                    onChange={(e) =>
-                      handleServiceChange(index, "rate", e.target.value)
-                    }
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                    required
-                  >
-                    {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
-                      (rate) => (
-                        <option key={rate} value={rate}>
-                          {rate}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <input
-                    type="number"
-                    value={service.duration}
-                    onChange={(e) =>
-                      handleServiceChange(
-                        index,
-                        "duration",
-                        parseInt(e.target.value, 10) || 0
-                      )
-                    }
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                    required
-                  />
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <input
-                    type="number"
-                    value={service.price}
-                    onChange={(e) =>
-                      handleServiceChange(
-                        index,
-                        "price",
-                        parseInt(e.target.value, 10) || 0
-                      )
-                    }
-                    className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                    required
-                  />
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  {service?.amount?.toFixed(2)}
-                </td>
-                <td className="py-1 sm:py-2 px-2 sm:px-4">
-                  <button
-                    type="button"
-                    onClick={() => removeServiceItem(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <TrashIcon className="h-4 sm:h-5 w-4 sm:w-5" />
-                  </button>
-                </td>
+        <div className="bg-gray-100 p-3 sm:p-4 rounded-2xl overflow-x-auto">
+          {errors.services && <p className="text-red-500 text-xs mb-2">{errors.services}</p>}
+          <table className="w-full text-xs sm:text-sm text-left text-gray-700 min-w-[800px]">
+            <thead>
+              <tr className="border-b border-gray-300">
+                <th className="py-1 sm:py-2 px-2 sm:px-4">#</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Item Name</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Quantity</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Rate</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Time Duration</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Price</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Total Amount</th>
+                <th className="py-1 sm:py-2 px-2 sm:px-4">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <button
-          type="button"
-          onClick={addServiceItem}
-          className="mt-3 sm:mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
-        >
-          <PlusIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1 sm:mr-2" /> Add Item
-        </button>
-      </div>
+            </thead>
+            <tbody>
+              {formData.services.map((service, index) => (
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">{index + 1}</td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <select
+                      id={`service_name_${index}`}
+                      name="service_name"
+                      className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${errors[`service_name_${index}`] ? "border-red-500" : "border-gray-300"} rounded-lg text-xs sm:text-sm`}
+                      onChange={(e) =>
+                        handleServiceChange(index, "service_name", e.target.value)
+                      }
+                      value={service.service_name}
+                      required
+                    >
+                      {services?.map((e, key) => (
+                        <option key={key} value={e.name}>
+                          {e.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors[`service_name_${index}`] && <p className="text-red-500 text-xs mt-1">{errors[`service_name_${index}`]}</p>}
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      value={service.quantity}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "quantity",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
+                      className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${errors[`quantity_${index}`] ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
+                      required
+                    />
+                    {errors[`quantity_${index}`] && <p className="text-red-500 text-xs mt-1">{errors[`quantity_${index}`]}</p>}
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <select
+                      value={service.currency}
+                      onChange={(e) =>
+                        handleServiceChange(index, "currency", e.target.value)
+                      }
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    >
+                      {["USD", "Dollar", "Rupee", "Euro", "BDT"].map((currency) => (
+                        <option key={currency} value={currency}>
+                          {currency}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <select
+                      value={service.rate}
+                      onChange={(e) =>
+                        handleServiceChange(index, "rate", e.target.value)
+                      }
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    >
+                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
+                        (rate) => (
+                          <option key={rate} value={rate}>
+                            {rate}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      value={service.duration}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "duration",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
+                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      required
+                    />
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <input
+                      type="number"
+                      value={service.price}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "price",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
+                      className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${errors[`price_${index}`] ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
+                      required
+                    />
+                    {errors[`price_${index}`] && <p className="text-red-500 text-xs mt-1">{errors[`price_${index}`]}</p>}
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    {service?.amount?.toFixed(2)}
+                  </td>
+                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                    <button
+                      type="button"
+                      onClick={() => removeServiceItem(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <TrashIcon className="h-4 sm:h-5 w-4 sm:w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button
+            type="button"
+            onClick={addServiceItem}
+            className="mt-3 sm:mt-4 flex items-center text-purple-500 hover:text-purple-700 text-sm sm:text-base"
+          >
+            <PlusIcon className="h-4 sm:h-5 w-4 sm:w-5 mr-1 sm:mr-2" /> Add Item
+          </button>
+        </div>
 
-      <div className="text-right space-y-1 sm:space-y-2 border-t-2 border-gray-200 pt-3 sm:pt-4 border-dashed">
-        <div className="flex justify-between items-center">
-          <span className="text-sm sm:text-base">Sub Total:</span>
-          <span>{formData.sub_total.toFixed(2)}</span>
+        <div className="text-right space-y-1 sm:space-y-2 border-t-2 border-gray-200 pt-3 sm:pt-4 border-dashed">
+          <div className="flex justify-between items-center">
+            <span className="text-sm sm:text-base">Sub Total:</span>
+            <span>{formData.sub_total.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm sm:text-base text-red-500">Discount:</span>
+            <span className="text-red-500 text-sm sm:text-base">
+              - {parseFloat(formData.discount || 0).toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
+            <span className="text-sm sm:text-base">VAT:</span>
+            <span className="text-sm sm:text-base">{formData.vat}%</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
+            <span className="text-lg sm:text-xl font-semibold">
+              {formData.total_amount.toFixed(2)}
+            </span>
+          </div>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm sm:text-base text-red-500">Discount:</span>
-          <span className="text-red-500 text-sm sm:text-base">
-            - {parseFloat(formData.discount || 0).toFixed(2)}
-          </span>
-        </div>
-        <div className="flex justify-between items-center border-b-2 border-dashed pb-2">
-          <span className="text-sm sm:text-base">VAT:</span>
-          <span className="text-sm sm:text-base">{formData.vat}%</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
-          <span className="text-lg sm:text-xl font-semibold">
-            {formData.total_amount.toFixed(2)}
-          </span>
-        </div>
-      </div>
 
-      <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
-        <div>
-          
+        <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
+          <div>
             <span></span>
-          
+          </div>
+          <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+            <button
+              type="submit"
+              onClick={(e) => handleSubmit(e, "save")}
+              className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
+              style={{ backgroundColor: "#D8FCCC" }}
+            >
+              <BsPrinter className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+              <span>Save</span>
+            </button>
+            <button
+              type="submit"
+              onClick={(e) => handleSubmit(e, "sent")}
+              className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
+              style={{ backgroundColor: "#EEE5FF" }}
+            >
+              <IoIosSend className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+              <span>Sent</span>
+            </button>
+            <button
+              type="submit"
+              className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
+              onClick={(e) => handleSubmit(e, "preview")}
+              style={{ backgroundColor: "#CEDBFF" }}
+            >
+              <IoPlayOutline className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
+              <span>Preview</span>
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-          <button
-            type="submit"
-            onClick={(e) => handleSubmit(e, "save")}
-            className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
-            style={{ backgroundColor: "#D8FCCC" }}
-          >
-            <BsPrinter className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-            <span>Save</span>
-          </button>
-          <button
-            type="submit"
-            onClick={(e) => handleSubmit(e, "sent")}
-            className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
-            style={{ backgroundColor: "#EEE5FF" }}
-          >
-            <IoIosSend className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-            <span>Sent</span>
-          </button>
-          <button
-            type="submit"
-            className="flex items-center px-3 sm:px-6 py-1 sm:py-2 text-black rounded-md hover:bg-green-600 transition-colors duration-300 text-sm sm:text-base"
-            onClick={(e) => handleSubmit(e, "preview")}
-            style={{ backgroundColor: "#CEDBFF" }}
-          >
-            <IoPlayOutline className="mr-1 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5" />
-            <span>Preview</span>
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
   );
 };
 

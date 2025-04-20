@@ -244,7 +244,7 @@ const AddNewClient = () => {
                     htmlFor="contractDocument"
                     className="block mb-2 font-medium text-sm sm:text-base"
                   >
-                    Contract Document <span className="text-red-500">*</span>
+                    Contract Document <span className="text-red-500"></span>
                   </label>
                   <input
                     type="file"

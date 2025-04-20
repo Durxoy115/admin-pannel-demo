@@ -38,6 +38,8 @@ import EditCompany from "./components/EditCompany/EditCompany";
 import EditSupportContact from "./components/EditSupportContact/EditSupportContact";
 import AddSignature from "./components/AddSignature/AddSignature";
 import EditSignature from "./components/EditSignature/EditSignature";
+import AddUserRole from "./components/AddUserRole/AddUserRole";
+import EditUserRole from "./components/EditUserRole/EditUserRole";
 
 
 // import Test from "./components/Test";
@@ -91,6 +93,8 @@ const App = () => {
           <Route path="edit-support-contact/:id" element={<EditSupportContact></EditSupportContact>} />
           <Route path="add-signature" element={<AddSignature></AddSignature>} />
           <Route path="edit-signature/:id" element={<EditSignature></EditSignature>} />
+          <Route path="add-user-role" element={<AddUserRole></AddUserRole>} />
+          <Route path="edit-user-role/:id" element={<EditUserRole></EditUserRole>} />
         </Route>
       </Route>
     </Routes>

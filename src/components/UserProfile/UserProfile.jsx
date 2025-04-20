@@ -8,6 +8,7 @@ import SupportContactList from "../SupportContactList/SupportContactList";
 import useToken from "../hooks/useToken";
 import CompanyAddress from "../CompanyAddress/CompanyAddress";
 import Signature from "../Signature/Signature";
+import UserPermission from "../UserPermission/UserPermission";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -143,6 +144,7 @@ const MyProfile = () => {
       </div>
       <div className="bg-white rounded-md p-2 sm:p-4 mt-4 sm:mt-6">
         <SubAdmin />
+        <UserPermission></UserPermission>
         <Products />
         <CompanyAddress></CompanyAddress>
         <AddressBook />
