@@ -8,6 +8,7 @@ import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
 import useToken from "../hooks/useToken";
 import { useNavigate } from "react-router-dom";
+import useUserPermission from "../hooks/usePermission";
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
@@ -23,6 +24,11 @@ const InvoiceList = () => {
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const navigate = useNavigate();
+  const {permissions} = useUserPermission();
+
+  const canAddInvoice = permissions.includes("service.add_invoice");
+  const canEditInvoice = permissions.includes("service.change_invoice");
+  const canDeleteInvoice = permissions.includes("service.delete_invoice");
 
   // Fetch and filter logic remains unchanged
   const fetchInvoices = async () => {
@@ -246,7 +252,9 @@ const InvoiceList = () => {
           />
         </div>
         <div className="flex gap-4 sm:ml-auto">
-          <button
+          {
+            canAddInvoice && 
+            <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleCreateInvoice}
           >
@@ -255,6 +263,8 @@ const InvoiceList = () => {
               Create Invoice
             </span>
           </button>
+          }
+          
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleDashboard}
@@ -346,12 +356,20 @@ const InvoiceList = () => {
                   </span>
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3">
-                  <button onClick={() => handleEditInvoice(invoice.id)}>
+                  {
+                    canEditInvoice && 
+                    <button onClick={() => handleEditInvoice(invoice.id)}>
                     <AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                   </button>
-                  <button onClick={() => openDeleteModal(invoice.id)}>
+                  }
+                  {
+                    canDeleteInvoice &&
+                    <button onClick={() => openDeleteModal(invoice.id)}>
                     <RiDeleteBin6Line className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                   </button>
+                  }
+                  
+                  
                 </td>
               </tr>
             ))}

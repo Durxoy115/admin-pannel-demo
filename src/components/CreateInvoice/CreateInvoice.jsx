@@ -665,7 +665,7 @@ const CreateInvoice = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.quantity}
+                      value={service.quantity || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
@@ -730,7 +730,7 @@ const CreateInvoice = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.price}
+                      value={service.price || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,

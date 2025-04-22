@@ -3,6 +3,7 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const ListOrder = () => {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,11 @@ const ListOrder = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const canAddOrder = permissions.includes("service.add_order");
+  const canUpdateOrder = permissions.includes("service.change_order");
+  const canDeleteOrder = permissions.includes("service.delete_order");
 
   useEffect(() => {
     fetchOrders();
@@ -101,10 +107,14 @@ const ListOrder = () => {
             placeholder="End date"
           />
         </div>
-        <IoMdAddCircleOutline
+        {
+          canAddOrder && 
+          <IoMdAddCircleOutline
           className="text-white text-xl sm:text-2xl md:text-3xl cursor-pointer"
           onClick={handleAddOrder}
         />
+        }
+       
       </div>
 
       {/* Table Section */}
@@ -140,14 +150,23 @@ const ListOrder = () => {
                   <td className="text-left px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">{order.status || "N/A"}</td>
                   <td className="text-center px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex justify-center space-x-2 sm:space-x-3">
-                      <FiEdit
+                      {
+                        canUpdateOrder && 
+                        <FiEdit
                         className="text-purple-500 hover:text-purple-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
                         onClick={() => handleOrderDetails(order.order_id)}
                       />
-                      <FiTrash2
+                      }
+                      {
+                        canDeleteOrder && 
+                        <FiTrash2
                         className="text-red-500 hover:text-red-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
                         onClick={() => handleDeleteOrder(order.order_id)}
                       />
+
+                      }
+                    
+                     
                     </div>
                   </td>
                 </tr>

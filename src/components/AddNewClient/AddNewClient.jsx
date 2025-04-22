@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TfiPlus } from "react-icons/tfi";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const AddNewClient = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const AddNewClient = () => {
   const [document, setDocument] = useState(null);
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+ 
 
   const handleSave = async (e) => {
     e.preventDefault();

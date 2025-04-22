@@ -3,6 +3,7 @@ import { FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const PaymentHistory = () => {
   const [payments, setPayment] = useState([]);
@@ -11,6 +12,11 @@ const PaymentHistory = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const canAddPayment = permissions.includes("service.add_payment");
+  // const canUpdatePayment = permissions.includes("service.change_payment");
+  const canDeletePayment = permissions.includes("service.delete_payment");
 
   const fetchUsers = async () => {
     try {
@@ -92,12 +98,16 @@ const PaymentHistory = () => {
             className="w-full sm:w-auto bg-white text-black px-3 py-1.5 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <button
+        {
+          canAddPayment && 
+          <button
           className="text-white text-2xl sm:text-3xl hover:text-gray-300 transition-colors"
           onClick={handleAddPayment}
         >
           <IoMdAddCircleOutline />
         </button>
+        }
+       
       </div>
 
       {/* Table */}
@@ -126,12 +136,16 @@ const PaymentHistory = () => {
                   <td className="p-3 sm:p-4">{payment.trans_id || "N/A"}</td>
                   <td className="p-3 sm:p-4">{payment.date || "N/A"}</td>
                   <td className="p-3 sm:p-4 flex gap-2">
-                    <button
+                    {
+                      canDeletePayment && 
+                      <button
                       className="p-1.5 rounded-md bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
                       onClick={() => openDeleteModal(payment.id)}
                     >
                       <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
+                    }
+                   
                   </td>
                 </tr>
               ))

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const AddUserRole = () => {
   const [selectedPermissions, setSelectedPermissions] = useState([]);
@@ -9,7 +10,8 @@ const AddUserRole = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
-  const token = getTokenLocalStorage();
+  const token = getTokenLocalStorage(); 
+
 
   useEffect(() => {
     const fetchPermissions = async () => {

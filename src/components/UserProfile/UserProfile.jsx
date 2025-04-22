@@ -8,14 +8,30 @@ import SupportContactList from "../SupportContactList/SupportContactList";
 import useToken from "../hooks/useToken";
 import CompanyAddress from "../CompanyAddress/CompanyAddress";
 import Signature from "../Signature/Signature";
-import UserPermission from "../UserPermission/UserPermission";
+import useUserPermission from "../hooks/usePermission";
+import UserPermissionGroup from "../UserPermissionGroup/UserPermissionGroup";
+
+
 
 const MyProfile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const canViewUser = permissions.includes("users.view_user");
+
+  const viewServices = permissions.includes("service.view_service");
+  const viewCompany = permissions.includes("company.view_company");
+  const viewCompanyBillingAddress = permissions.includes("company.view_billingaddress");
+  const canViewUserPermissionGroup = permissions.includes("company.view_billingaddress");
+  const canViewAuthoritySign = permissions.includes("company.view_authoritysignature");
+  const CanViewSupportContact = permissions.includes("company.view_supportcontact");
+
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,7 +48,7 @@ const MyProfile = () => {
           const data = await response.json();
           setUserData(data.data);
           if (data.data?.photo) {
-            setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
+            setImagePreview(`${url}${data.data.photo}`);
           }
         } else {
           console.error("Failed to fetch user data");
@@ -62,6 +78,8 @@ const MyProfile = () => {
       console.error("User ID not found");
     }
   };
+
+  
 
   return (
     <div className="p-1 sm:p-6 md:p-8 bg-gray-100 shadow-md mt-14">
@@ -143,13 +161,31 @@ const MyProfile = () => {
         </div>
       </div>
       <div className="bg-white rounded-md p-2 sm:p-4 mt-4 sm:mt-6">
-        <SubAdmin />
-        <UserPermission></UserPermission>
-        <Products />
-        <CompanyAddress></CompanyAddress>
-        <AddressBook />
-        <Signature></Signature>
-        <SupportContactList />
+        
+        {
+          canViewUser && <SubAdmin />
+        }
+        {
+          canViewUserPermissionGroup && <UserPermissionGroup></UserPermissionGroup>
+        }
+        
+        {
+          viewServices && <Products />
+        }
+        {
+          viewCompany && <CompanyAddress></CompanyAddress>
+        }
+        {
+          viewCompanyBillingAddress && <AddressBook />
+        }
+        {
+          canViewAuthoritySign &&  <Signature></Signature>
+        }
+        {
+          CanViewSupportContact && <SupportContactList />
+        }
+       
+        
       </div>
     </div>
   );

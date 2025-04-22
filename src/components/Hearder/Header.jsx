@@ -9,6 +9,7 @@ import { CiViewList } from "react-icons/ci";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { CiLogout } from "react-icons/ci";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -19,6 +20,12 @@ const Header = () => {
   });
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const { permissions } = useUserPermission();
+
+  const viewActivitylog = permissions.includes("activity.view_activitylog");
+  const viewPaymentHistory = permissions.includes("service.view_payment");
+  const viewOrderList = permissions.includes("service.view_order");
+  // const canChangePassword = permissions.includes("service.view_order");
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -36,8 +43,6 @@ const Header = () => {
             userType: data?.data?.user_type?.name || "Role",
             photo: data?.data?.photo || null,
           });
-
-          
         } else {
           console.error("Failed to fetch user details");
         }
@@ -74,7 +79,7 @@ const Header = () => {
       alert("An error occurred. Please try again.");
     }
   };
- 
+
   return (
     <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-4 sm:px-6 md:px-8 py-2">
       {/* Logo Section */}
@@ -100,9 +105,9 @@ const Header = () => {
             </span>
             <img
               src={
-                userDetails.photo 
-                  ? `${url}/${userDetails.photo}` 
-                  : "/public/assets/Images/Images-nav/images.png" 
+                userDetails.photo
+                  ? `${url}/${userDetails.photo}`
+                  : "/public/assets/Images/Images-nav/images.png"
               }
               alt={`${userDetails.username}'s profile photo`}
               // Fallback on error
@@ -112,19 +117,22 @@ const Header = () => {
 
           <MenuItems className="absolute right-0 z-10 mt-2 w-48 sm:w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
             <div className="py-1">
-              <MenuItem>
-                {({ active }) => (
-                  <button
-                    onClick={() => handleNavigation("activity-log")}
-                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
-                      active ? "bg-gray-100" : "text-gray-700"
-                    } w-full text-left`}
-                  >
-                    <RxActivityLog className="mr-2 text-sm sm:text-base" />{" "}
-                    Activity Log
-                  </button>
-                )}
-              </MenuItem>
+              {viewActivitylog && (
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => handleNavigation("activity-log")}
+                      className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
+                        active ? "bg-gray-100" : "text-gray-700"
+                      } w-full text-left`}
+                    >
+                      <RxActivityLog className="mr-2 text-sm sm:text-base" />{" "}
+                      Activity Log
+                    </button>
+                  )}
+                </MenuItem>
+              )}
+
               <div className="flex items-center px-3 sm:px-4 py-2">
                 <span className="font-bold text-xs sm:text-sm truncate">
                   {userDetails.username}
@@ -156,7 +164,9 @@ const Header = () => {
                   </button>
                 )}
               </MenuItem>
-              <MenuItem>
+              {
+                viewPaymentHistory && 
+                <MenuItem>
                 {({ active }) => (
                   <button
                     onClick={() => handleNavigation("payment-history")}
@@ -169,19 +179,24 @@ const Header = () => {
                   </button>
                 )}
               </MenuItem>
-              <MenuItem>
-                {({ active }) => (
-                  <button
-                    onClick={() => handleNavigation("order-list")}
-                    className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
-                      active ? "bg-gray-100" : "text-gray-700"
-                    } w-full text-left`}
-                  >
-                    <CiViewList className="mr-2 text-sm sm:text-base" /> Order
-                    List
-                  </button>
-                )}
-              </MenuItem>
+              }
+             
+              {viewOrderList && (
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => handleNavigation("order-list")}
+                      className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
+                        active ? "bg-gray-100" : "text-gray-700"
+                      } w-full text-left`}
+                    >
+                      <CiViewList className="mr-2 text-sm sm:text-base" /> Order
+                      List
+                    </button>
+                  )}
+                </MenuItem>
+              )}
+
               <MenuItem>
                 {({ active }) => (
                   <button

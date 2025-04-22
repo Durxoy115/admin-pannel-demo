@@ -1,6 +1,6 @@
 
 // import React, { createContext, useState, useEffect } from "react";
-// import useToken from "../hooks/useToken";
+
 
 // export const UserContext = createContext();
 
@@ -41,3 +41,39 @@
 //     </UserContext.Provider>
 //   );
 // };
+
+import axios from "axios";
+// import useToken from "../hooks/useToken";
+
+// const usePermissionCheck = () => {
+//   const [url, getTokenLocalStorage] = useToken();
+
+//   const checkPermission = async (method, extra_url) => {
+//     const token = getTokenLocalStorage();
+//     try {
+//       const response = await axios({
+//         method,
+//         url: `${url}${extra_url}`,
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Token ${token}`,
+//         },
+//       });
+
+//       if (response.status === 403) return false;
+//       return true;
+//     } catch (error) {
+//       console.error("Axios error:", error);
+//       return true;
+//     }
+//   };
+
+//   return checkPermission;
+// };
+
+// export default usePermissionCheck;
+
+
+
+
+

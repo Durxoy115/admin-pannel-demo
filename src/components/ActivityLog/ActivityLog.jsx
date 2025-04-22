@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const ActivityLog = () => {
   const [logs, setLogs] = useState([]);
@@ -7,6 +8,7 @@ const ActivityLog = () => {
   const [error, setError] = useState(null);
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  
 
   useEffect(() => {
     fetch(`${url}/activity/log/`, {

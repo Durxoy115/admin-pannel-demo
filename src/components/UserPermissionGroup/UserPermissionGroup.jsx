@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
-const UserPermission = () => {
+const UserPermissionGroup = () => {
   const [userRole, setuserRole] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -11,6 +12,11 @@ const UserPermission = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const canAddUserPermissionGroup = permissions.includes("auth.add_group");
+  const canEditUserPermissionGroup = permissions.includes("auth.add_group");
+  const canDeleteUserPermissionGroup = permissions.includes("auth.add_group");
 
 
   const fetchAddress = async () => {
@@ -94,12 +100,16 @@ const UserPermission = () => {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
             User Role List
           </h1>
-          <button
+          {
+            canAddUserPermissionGroup && 
+            <button
             className="bg-blue-700 w-full sm:w-20 text-white py-2 px-4 rounded-md hover:bg-blue-800 transition-colors duration-200 text-sm sm:text-base"
             onClick={handleUserRole}
           >
             Add
           </button>
+          }
+          
         </div>
 
         {/* Display Success/Error Message */}
@@ -136,14 +146,22 @@ const UserPermission = () => {
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-end gap-2 sm:gap-3">
-                      <FiEdit
+                      {
+                        canEditUserPermissionGroup && 
+                        <FiEdit
                         className="text-purple-500 hover:text-purple-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer"
                         onClick={() => handleEdit(contact.id)}
                       />
-                      <FiTrash2
+                      }
+                      {
+                        canDeleteUserPermissionGroup && 
+                        <FiTrash2
                         className="text-red-500 hover:text-red-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer"
                         onClick={() => openDeleteModal(contact.id)}
                       />
+                      }
+                    
+                    
                     </div>
                   </td>
                 </tr>
@@ -182,4 +200,4 @@ const UserPermission = () => {
   );
 };
 
-export default UserPermission;
+export default UserPermissionGroup;

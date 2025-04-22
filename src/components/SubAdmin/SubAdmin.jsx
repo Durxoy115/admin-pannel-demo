@@ -3,6 +3,8 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import axios from "axios";
+import useUserPermission from "../hooks/usePermission";
 
 const SubAdmin = () => {
   const [users, setUsers] = useState([]);
@@ -12,6 +14,16 @@ const SubAdmin = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  
+
+  const canAddUser = permissions.includes("users.add_user");
+  const canUpdateUser = permissions.includes("users.change_user");
+  const canDeletedUser = permissions.includes("users.delete_user");
+  
+  
+
 
   const fetchUsers = async () => {
     try {
@@ -85,19 +97,25 @@ const SubAdmin = () => {
         : [...prev, userId]
     );
   };
-
+// console.log("------", canViewUserList)
   return (
-    <div className=" bg-white">
+      <div className=" bg-white">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-3 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3">
         <h1 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Sub-Admin List</h1>
-        <IoMdAddCircleOutline
+        {
+          canAddUser && 
+          <IoMdAddCircleOutline
           className="text-lg sm:text-xl cursor-pointer"
           onClick={handleAddSubAdmin}
         />
+        }
+          
+        
+        
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 min-w-[800px]">
+        <table className="min-w-full border-collapse border border-gray-300 ">
           <thead className="bg-gray-100">
             <tr>
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Name</th>
@@ -139,18 +157,25 @@ const SubAdmin = () => {
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{user.user_type?.name || "N/A"}</td>
                 <td className="border-b border-gray-300 p-2 sm:p-3">
                   <div className="flex gap-2">
-                    <button
+                    {
+                      canUpdateUser && 
+                      <button
                       className="text-purple-500 hover:text-purple-700"
                       onClick={() => handleEditSubAdmin(user.id)}
                     >
                       <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                     </button>
+                    }
+                   {
+                    canDeletedUser && 
                     <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => openDeleteModal(user.id)}
-                    >
-                      <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
-                    </button>
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => openDeleteModal(user.id)}
+                  >
+                    <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
+                  </button>
+                   }
+                   
                   </div>
                 </td>
               </tr>
@@ -184,6 +209,7 @@ const SubAdmin = () => {
         </div>
       )}
     </div>
+    
   );
 };
 

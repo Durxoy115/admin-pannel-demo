@@ -11,6 +11,7 @@ import { IoIosCall } from "react-icons/io";
 import { MdOutlineMail } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const Dashboard = () => {
   const [clients, setClients] = useState([]);
@@ -22,7 +23,15 @@ const Dashboard = () => {
   const [deleteMode, setDeleteMode] = useState("");
   const [clientToDelete, setClientToDelete] = useState(null);
   const [rowHide, setRowHide] = useState({}); // State for row blur/disable
+  const { permissions } = useUserPermission();
 
+  const addClient = permissions.includes("users.add_client");
+  const canViewInvoiceList = permissions.includes("service.view_invoice")
+  const editClient = permissions.includes("users.change_client");
+  const canDeleteCient = permissions.includes("users.delete_client");
+  const canViewClient = permissions.includes("users.delete_client");
+  // const canDeleteCient = permissions.includes("users.delete_client");
+  const canAddInvoice = permissions.includes("service.add_invoice");
   const navigate = useNavigate();
   const location = useLocation();
   const [url, getTokenLocalStorage] = useToken();
@@ -63,7 +72,8 @@ const Dashboard = () => {
   const handleOpenModal = () => navigate("/addnewclient");
   const handleInvoiceList = () => navigate("/invoice-list");
   const handleClientProfile = (id) => navigate(`/client-info/${id}`);
-  const handleClientInvoice = (clientId) => navigate(`/client-invoice-create/${clientId}`);
+  const handleClientInvoice = (clientId) =>
+    navigate(`/client-invoice-create/${clientId}`);
 
   const toggleClientSelection = (clientId) => {
     setSelectedClients((prev) =>
@@ -130,11 +140,12 @@ const Dashboard = () => {
       },
     }));
   };
-  
-  
 
   return (
-    <div className="mx-auto p-1 md:p-10">
+    <>
+    {
+      canViewClient && 
+      <div className="mx-auto p-1 md:p-10">
       <div>
         <h1 className="text-3xl font-semibold mt-12">Clients Information</h1>
       </div>
@@ -155,16 +166,21 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 sm:gap-4 w-full sm:w-auto">
-          <button
-            className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
-            onClick={handleOpenModal}
-          >
-            <LuCirclePlus className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-              Add New Client
-            </span>
-          </button>
-          <button
+          {addClient && (
+            <button
+              className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
+              onClick={handleOpenModal}
+            >
+              <LuCirclePlus className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                Add New Client
+              </span>
+            </button>
+          )}
+
+          {
+            canViewInvoiceList && 
+<button
             className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleInvoiceList}
           >
@@ -173,6 +189,9 @@ const Dashboard = () => {
               Invoice List
             </span>
           </button>
+          }
+
+          
           <button
             className="text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={fetchClients}
@@ -203,130 +222,147 @@ const Dashboard = () => {
         <p className="text-center mt-8">Loading...</p>
       ) : filteredClients.length > 0 ? (
         <div className="overflow-x-auto bg-white rounded-lg shadow-md mx-auto">
-        <table className="table-auto w-full border-collapse">
-          <thead className="bg-gray-50 text-black">
-            <tr>
-              <th className="text-left px-4 py-2 border-b">Client Name</th>
-              <th className="text-left px-4 py-2 border-b">Client ID</th>
-              <th className="text-left px-4 py-2 border-b">Mobile</th>
-              <th className="text-left px-4 py-2 border-b">Email</th>
-              <th className="text-left px-4 py-2 border-b">Company Name</th>
-              <th className="text-left px-4 py-2 border-b">Country</th>
-              <th className="text-center px-4 py-2 border-b">Status</th>
-              <th className="text-center px-4 py-2 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredClients.map((client, index) => (
-              <tr
-                key={client.client_id}
-                className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
-                  rowHide[client.client_id]?.invisible ? "opacity-30 pointer-events-none-off" : ""
-                } transition-all duration-300`}
-              >
-                <td className="text-left px-4 py-2 flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedClients.includes(client.client_id)}
-                    onChange={() => toggleClientSelection(client.client_id)}
-                    className="mr-3"
-                    disabled={rowHide[client.client_id]?.disabled}
-                  />
-                  <img
-                    src={`https://admin.zgs.co.com${client.photo}`}
-                    alt="client"
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "50%",
-                      marginRight: "5px",
-                    }}
-                  />
-                  {client.name || "N/A"}
-                </td>
-                <td>{client.client_id}</td>
-                <td className="flex items-center gap-2">
-                  <IoIosCall className="text-green-500" />
-                  {client.contact}
-                </td>
-                <td>
-                  <div className="flex items-center gap-2">
-                    <MdOutlineMail className="text-red-500" />
-                    {client.email}
-                  </div>
-                </td>
-                <td>{client.company_name}</td>
-                <td>{client.country}</td>
-                <td className="text-center">
-                  {client.user_id.is_active ? "Active" : "Inactive"}
-                </td>
-                <td>
-                  <div className="flex justify-center space-x-2">
-                    <button
-                      style={{
-                        backgroundColor: "#EFEFEF",
-                        padding: "2px",
-                        borderRadius: "5px",
-                      }}
-                      onClick={() => handleEyeClick(client.client_id)}
-                    >
-                      <AiOutlineEye />
-                    </button>
-                    <button
-                      style={{
-                        backgroundColor: "#EFE5FF",
-                        padding: "2px",
-                        borderRadius: "5px",
-                        color: "#5800FF",
-                      }}
-                      className="relative group"
-                      onClick={() => handleClientProfile(client.client_id)}
-                      disabled={rowHide[client.client_id]?.disabled}
-                    >
-                      <AiOutlineEdit />
-                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-purple-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                        Edit
-                      </span>
-                    </button>
-                    <button
-                      style={{
-                        backgroundColor: "#FEF9C2",
-                        padding: "2px",
-                        borderRadius: "5px",
-                        color: "#B9AB12",
-                      }}
-                      className="relative group"
-                      onClick={() => handleClientInvoice(client.client_id)}
-                      disabled={rowHide[client.client_id]?.disabled}
-                    >
-                      <GrNotes />
-                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-yellow-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                        Invoice
-                      </span>
-                    </button>
-                    <button
-                      style={{
-                        backgroundColor: "#FFC6B8",
-                        padding: "2px",
-                        borderRadius: "5px",
-                        color: "#FF4242",
-                      }}
-                      className="relative group"
-                      onClick={() => openDeleteModal("single", client.client_id)}
-                      disabled={rowHide[client.client_id]?.disabled}
-                    >
-                      <RiDeleteBin6Line />
-                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-red-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-                        Delete
-                      </span>
-                    </button>
-                  </div>
-                </td>
+          <table className="table-auto w-full border-collapse">
+            <thead className="bg-gray-50 text-black">
+              <tr>
+                <th className="text-left  px-4 py-2 border-b">Client Name</th>
+                <th className="text-center px-4 py-2 border-b">Client ID</th>
+                <th className="text-left  px-4 py-2 border-b">Mobile</th>
+                <th className="text-left  px-4 py-2 border-b">Email</th>
+                <th className="text-center px-4 py-2 border-b">Company Name</th>
+                <th className="text-center  px-4 py-2 border-b">Country</th>
+                <th className="text-center px-4 py-2 border-b">Status</th>
+                <th className="text-center px-4 py-2 border-b">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredClients.map((client, index) => (
+                <tr
+                  key={client.client_id}
+                  className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} ${
+                    rowHide[client.client_id]?.invisible
+                      ? "opacity-30 pointer-events-none-off"
+                      : ""
+                  } transition-all duration-300`}
+                >
+                  <td className="text-left px-4 py-2 flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedClients.includes(client.client_id)}
+                      onChange={() => toggleClientSelection(client.client_id)}
+                      className="mr-3"
+                      disabled={rowHide[client.client_id]?.disabled}
+                    />
+                    <img
+                      src={`https://admin.zgs.co.com${client.photo}`}
+                      alt="client"
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        marginRight: "5px",
+                      }}
+                    />
+                    {client.name || "N/A"}
+                  </td>
+                  <td className="text-center">{client.client_id}</td>
+                  <td className="flex  gap-2">
+                    <IoIosCall className="text-green-500" />
+                    {client.contact}
+                  </td>
+
+                  <td>
+                    <div className="flex  gap-2">
+                      <MdOutlineMail className="text-red-500" />
+                      {client.email}
+                    </div>
+                  </td>
+                  <td className="text-center">{client.company_name}</td>
+                  <td className="text-center">{client.country}</td>
+                  <td className="text-center">
+                    {client.user_id.is_active ? "Active" : "Inactive"}
+                  </td>
+                  <td>
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        style={{
+                          backgroundColor: "#EFEFEF",
+                          padding: "2px",
+                          borderRadius: "5px",
+                        }}
+                        onClick={() => handleEyeClick(client.client_id)}
+                      >
+                        <AiOutlineEye />
+                      </button>
+                      {editClient && (
+                        <button
+                          style={{
+                            backgroundColor: "#EFE5FF",
+                            padding: "2px",
+                            borderRadius: "5px",
+                            color: "#5800FF",
+                          }}
+                          className="relative group"
+                          onClick={() => handleClientProfile(client.client_id)}
+                          disabled={rowHide[client.client_id]?.disabled}
+                        >
+                          <AiOutlineEdit />
+                          <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-purple-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                            Edit
+                          </span>
+                        </button>
+                      )}
+                      {
+                        canAddInvoice && 
+                        <button
+                        style={{
+                          backgroundColor: "#FEF9C2",
+                          padding: "2px",
+                          borderRadius: "5px",
+                          color: "#B9AB12",
+                        }}
+                        className="relative group"
+                        onClick={() => handleClientInvoice(client.client_id)}
+                        disabled={rowHide[client.client_id]?.disabled}
+                      >
+                        <GrNotes />
+                        <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-yellow-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                          Invoice
+                        </span>
+                      </button>
+                      }
+
+                     
+                      {
+                        canDeleteCient &&
+                        <button
+                        style={{
+                          backgroundColor: "#FFC6B8",
+                          padding: "2px",
+                          borderRadius: "5px",
+                          color: "#FF4242",
+                        }}
+                        className="relative group"
+                        onClick={() =>
+                          openDeleteModal("single", client.client_id)
+                        }
+                        disabled={rowHide[client.client_id]?.disabled}
+                      >
+                        <RiDeleteBin6Line />
+                        <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block bg-red-600 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                          Delete
+                        </span>
+                      </button>
+
+                      }
+                      
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p className="text-center mt-8">No clients available.</p>
       )}
@@ -356,6 +392,10 @@ const Dashboard = () => {
         </div>
       )}
     </div>
+      
+    }
+    </>
+    
   );
 };
 

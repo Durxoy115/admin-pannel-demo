@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const CompanyAddress = () => {
   const [addresses, setAddresses] = useState([]);
@@ -10,6 +11,11 @@ const CompanyAddress = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const addCompany = permissions.includes("company.add_company");
+  const canEditCompany = permissions.includes("company.change_company");
+  const canDeleteCompany = permissions.includes("company.delete_company");
 
   const fetchAddress = async () => {
     try {
@@ -78,13 +84,18 @@ const CompanyAddress = () => {
     <div>
       <div className="mt-4 sm:mt-6 md:mt-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between   mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company Address Book </h1>
-          <button
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company  </h1>
+
+          {
+            addCompany && 
+            <button
             className="bg-blue-700 w-full sm:w-20 text-white  sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
             onClick={handleAddAddress}
           >
             Add
           </button>
+          }
+          
         </div>
 
         <div className="mt-4 sm:mt-6   sm:mr-6 md:mr-2 overflow-x-auto">
@@ -119,14 +130,22 @@ const CompanyAddress = () => {
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td> */}
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-center gap-2 sm:gap-3">
-                      <FiEdit
+                      {
+                        canEditCompany && 
+                        <FiEdit
                         className="text-purple-500 hover:text-purple-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
                         onClick={() => handleEditAddress(address.id)}
                       />
-                      <FiTrash2
+                      }
+                      {
+                        canDeleteCompany && 
+                        <FiTrash2
                         className="text-red-500 hover:text-red-700 w-4 sm:w-5 h-4 sm:h-5 cursor-pointer"
                         onClick={() => openDeleteModal(address.id)}
                       />
+                      }
+                      
+                      
                     </div>
                   </td>
                 </tr>

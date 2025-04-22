@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const SupportContactList = () => {
   const [contacts, setContact] = useState([]);
@@ -11,6 +12,11 @@ const SupportContactList = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+  const canAddContact = permissions.includes("company.add_supportcontact");
+  const canUpdateContact = permissions.includes("company.add_supportcontact");
+  const canDeleteContact = permissions.includes("company.add_supportcontact");
 
 
   const fetchAddress = async () => {
@@ -94,12 +100,16 @@ const SupportContactList = () => {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
             Support Contact List
           </h1>
-          <button
+          {
+            canAddContact && 
+            <button
             className="bg-blue-700 w-full sm:w-20 text-white py-2 px-4 rounded-md hover:bg-blue-800 transition-colors duration-200 text-sm sm:text-base"
             onClick={handleContact}
           >
             Add
           </button>
+          }
+         
         </div>
 
         {/* Display Success/Error Message */}
@@ -141,14 +151,22 @@ const SupportContactList = () => {
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-end gap-2 sm:gap-3">
-                      <FiEdit
+                      {
+                        canUpdateContact && 
+                        <FiEdit
                         className="text-purple-500 hover:text-purple-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer"
                         onClick={() => handleEdit(contact.id)}
                       />
-                      <FiTrash2
+                      }
+                      {
+                        canDeleteContact && 
+                        <FiTrash2
                         className="text-red-500 hover:text-red-700 h-4 w-4 sm:h-5 sm:w-5 cursor-pointer"
                         onClick={() => openDeleteModal(contact.id)}
                       />
+                      }
+                      
+                     
                     </div>
                   </td>
                 </tr>

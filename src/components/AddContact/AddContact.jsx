@@ -97,7 +97,7 @@ const AddContact = () => {
             </div>
             <div>
               <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-                Social Media Logo<span className="text-red-500">*</span>
+                Social Media Logo<span className="text-red-500"></span>
               </label>
               <input
                 type="file"
@@ -108,7 +108,7 @@ const AddContact = () => {
             </div>
             <div>
               <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-                Social Media Link<span className="text-red-500">*</span>
+                Social Media Link<span className="text-red-500"></span>
               </label>
               <input
                 type="url"

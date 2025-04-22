@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CiEdit } from "react-icons/ci";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import useToken from "../hooks/useToken";
+import useUserPermission from "../hooks/usePermission";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -11,6 +12,13 @@ const Products = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
+  const {permissions} = useUserPermission();
+
+
+  const canAddService = permissions.includes("service.add_service");
+  const canUpdateService = permissions.includes("service.change_service");
+  const canDeleteService = permissions.includes("service.delete_service");
+
 
   const fetchProducts = async () => {
     try {
@@ -88,12 +96,17 @@ const Products = () => {
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">
           Our Products and Services List
         </h1>
-        <button
+
+        {
+          canAddService && 
+          <button
           className="bg-blue-700 w-full sm:w-20 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-blue-800 text-sm sm:text-base"
           onClick={handleAddProduct}
         >
           Add
         </button>
+        }
+       
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8  sm:p-4">
@@ -118,14 +131,21 @@ const Products = () => {
               <p className="mt-2 sm:mt-4 text-base sm:text-lg font-semibold text-gray-700">
                 Price: {product?.price ? `$${product.price} USD` : "Contact us"}
               </p>
-              <CiEdit
+              {
+                canUpdateService && 
+                <CiEdit
                 className="absolute top-3 sm:top-4 right-3 sm:right-4 text-black bg-gray-100 text-lg sm:text-xl cursor-pointer"
                 onClick={() => handleEditProduct(product.id)}
-              />
-              <RiDeleteBin6Line
+              /> 
+              }
+              {
+                canDeleteService && 
+                <RiDeleteBin6Line
                 className="absolute top-3 sm:top-4 right-9 sm:right-10 bg-gray-100 text-gray-700 text-lg sm:text-xl cursor-pointer"
                 onClick={() => openDeleteModal(product.id)}
               />
+              }
+            
             </div>
           ))}
       </div>
