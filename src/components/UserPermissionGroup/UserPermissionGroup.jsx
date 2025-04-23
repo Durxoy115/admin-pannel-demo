@@ -48,7 +48,7 @@ const UserPermissionGroup = () => {
 
     try {
       const response = await fetch(
-        `${url}//user-group/?user_group_id=${selectedContactId}`,
+        `${url}/user-group/?user_group_id=${selectedContactId}`,
         {
           method: "DELETE",
           headers: {

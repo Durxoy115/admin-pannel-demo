@@ -41,7 +41,7 @@ const ClientProfile = ({ id }) => {
           const data = await response.json();
           const fetchedData = {
             ...data?.data,
-            photo: data?.data?.photo ? `https://admin.zgs.co.com${data.data.photo}` : null,
+            photo: data?.data?.photo ? `${url}${data.data.photo}` : null,
             contact_doc: data?.data?.contact_doc ? data.data.contact_doc : null,
           };
           setClientData(fetchedData);

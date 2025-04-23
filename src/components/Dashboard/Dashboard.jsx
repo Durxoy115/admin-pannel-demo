@@ -29,7 +29,7 @@ const Dashboard = () => {
   const canViewInvoiceList = permissions.includes("service.view_invoice")
   const editClient = permissions.includes("users.change_client");
   const canDeleteCient = permissions.includes("users.delete_client");
-  const canViewClient = permissions.includes("users.delete_client");
+  const canViewClient = permissions.includes("users.view_client");
   // const canDeleteCient = permissions.includes("users.delete_client");
   const canAddInvoice = permissions.includes("service.add_invoice");
   const navigate = useNavigate();
@@ -227,7 +227,7 @@ const Dashboard = () => {
               <tr>
                 <th className="text-left  px-4 py-2 border-b">Client Name</th>
                 <th className="text-center px-4 py-2 border-b">Client ID</th>
-                <th className="text-left  px-4 py-2 border-b">Mobile</th>
+                <th className="text-left px-4 py-2 border-b">Mobile</th>
                 <th className="text-left  px-4 py-2 border-b">Email</th>
                 <th className="text-center px-4 py-2 border-b">Company Name</th>
                 <th className="text-center  px-4 py-2 border-b">Country</th>
@@ -254,7 +254,7 @@ const Dashboard = () => {
                       disabled={rowHide[client.client_id]?.disabled}
                     />
                     <img
-                      src={`https://admin.zgs.co.com${client.photo}`}
+                      src={`${url}${client.photo}`}
                       alt="client"
                       style={{
                         width: "20px",
@@ -266,13 +266,13 @@ const Dashboard = () => {
                     {client.name || "N/A"}
                   </td>
                   <td className="text-center">{client.client_id}</td>
-                  <td className="flex  gap-2">
+                  <td className="flex  gap-2 items-center">
                     <IoIosCall className="text-green-500" />
                     {client.contact}
                   </td>
 
                   <td>
-                    <div className="flex  gap-2">
+                    <div className="flex  gap-2 items-center">
                       <MdOutlineMail className="text-red-500" />
                       {client.email}
                     </div>

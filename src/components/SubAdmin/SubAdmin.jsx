@@ -140,7 +140,7 @@ const SubAdmin = () => {
                     />
                     {user.photo && (
                       <img
-                        src={`https://admin.zgs.co.com${user.photo}`}
+                        src={`${url}${user.photo}`}
                         alt="user"
                         className="w-5 sm:w-6 h-5 sm:h-6 rounded-full mr-1 sm:mr-2"
                       />

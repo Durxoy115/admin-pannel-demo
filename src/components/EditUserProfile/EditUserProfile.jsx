@@ -14,6 +14,7 @@ const EditUserProfile = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [checkEmail, setCheckEmail] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null); // State for API error messages
   const { id } = useParams();
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
@@ -31,7 +32,7 @@ const EditUserProfile = () => {
         });
         const data = await response.json();
         if (response.ok && data.success) {
-          setCheckEmail(data?.data?.email)
+          setCheckEmail(data?.data?.email);
           setEditProfile({
             first_name: data?.data?.first_name || "",
             last_name: data?.data?.last_name || "",
@@ -40,12 +41,13 @@ const EditUserProfile = () => {
             photo: null,
           });
           if (data?.data?.photo) {
-            setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
+            setImagePreview(`${url}${data.data.photo}`);
           }
         } else {
-          console.error("Failed to fetch client details:", data.message);
+          setErrorMessage(data.data.message || "Failed to fetch client details");
         }
       } catch (error) {
+        setErrorMessage("An error occurred while fetching client data");
         console.error("Error fetching client data:", error);
       }
     };
@@ -68,11 +70,13 @@ const EditUserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(null); // Clear previous error messages
+
     const formData = new FormData();
     formData.append("first_name", editProfile.first_name);
     formData.append("last_name", editProfile.last_name);
     formData.append("contact", editProfile.contact);
-    if (checkEmail != editProfile.email){
+    if (checkEmail !== editProfile.email) {
       formData.append("email", editProfile.email);
     }
     if (editProfile.photo) {
@@ -80,7 +84,7 @@ const EditUserProfile = () => {
     }
 
     try {
-      const response = await fetch(`${url}/auth/user/?user_id=${id}`, {
+      const response = await fetch(`${url}/auth/profile/?user_id=${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Token ${token}`,
@@ -91,31 +95,34 @@ const EditUserProfile = () => {
       const result = await response.json();
       if (response.ok && result.success) {
         alert("Profile updated successfully!");
-        navigate("/profile");
+        // navigate("/profile"); // Redirect to profile page
       } else {
-        console.error("Failed to update profile:", result.message);
-        alert(
-          "Failed to update profile: " + (result.message || "Unknown error")
-        );
+        setErrorMessage(result.message || "Failed to update profile");
       }
     } catch (error) {
+      setErrorMessage("An error occurred while updating the profile");
       console.error("Error updating profile:", error);
-      alert("An error occurred while updating the profile.");
     }
   };
 
   return (
     <div className="px-1 sm:px-2 md:px-24 py-2 bg-gray-100 min-h-screen">
-      <div className="relative  mx-auto">
-        {/* <button
+      <div className="relative mx-auto">
+        <button
           className="absolute top-0 left-0 p-2 text-2xl sm:text-3xl text-black"
           onClick={() => navigate(-1)}
         >
-          <IoArrowBack />
-        </button> */}
+          {/* <IoArrowBack /> */}
+        </button>
         <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 mt-16">
           Edit Profile
         </h2>
+        {/* Display error message */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {errorMessage}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="w-full flex flex-col">
           <div className="w-full bg-white p-1 sm:p-6 md:p-8 rounded-lg shadow-md">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 items-start">

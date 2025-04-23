@@ -55,7 +55,7 @@ const ListOrder = () => {
 
   const confirmDelete = () => {
     if (orderToDelete) {
-      fetch(`https://admin.zgs.co.com/service/order/?order_id=${orderToDelete}`, {
+      fetch(`${url}/service/order/?order_id=${orderToDelete}`, {
         method: "DELETE",
         headers: {
           Authorization: `Token ${token}`,

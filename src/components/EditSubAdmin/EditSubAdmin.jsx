@@ -47,7 +47,7 @@ const EditSubAdmin = () => {
             [];
           setSelectedGroups(groupIds);
           if (data?.data?.photo) {
-            setImagePreview(`https://admin.zgs.co.com${data.data.photo}`);
+            setImagePreview(`${url}${data.data.photo}`);
           }
         } else {
           console.error("Failed to fetch user details.");
