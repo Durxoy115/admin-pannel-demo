@@ -205,7 +205,7 @@ const EditSubAdmin = () => {
   return (
     <div className="w-full flex justify-center bg-gray-100 min-h-screen">
       <div className="w-full sm:px-6 md:px-24 sm:pt-6">
-        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 md:mt-20 sm:mt-4">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8 mt-20 md:mt-20 sm:mt-4">
           Member Profile
         </h2>
         <form

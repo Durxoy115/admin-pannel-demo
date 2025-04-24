@@ -241,7 +241,7 @@ const AddUser = () => {
     <div className="">
       <div className="w-full flex justify-center bg-gray-100 min-h-screen mt-10">
         <div className="w-full px-1 sm:px-6 md:px-24 pt-4 sm:pt-6">
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-8 sm:mt-8">
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-8 mt-3 sm:mt-8">
             Add New Member
           </h2>
           {message.general && (

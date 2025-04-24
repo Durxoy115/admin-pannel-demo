@@ -81,14 +81,14 @@ const Header = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-4 sm:px-6 md:px-8 py-2">
+    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-2 sm:px-2 md:px-7 py-2">
       {/* Logo Section */}
       <div className="flex-shrink-0">
         <img
           onClick={() => handleNavigation("dashboard")}
           src="/assets/Images/Images-nav/logo-image.jpg"
           alt="Company Logo"
-          className="h-10 sm:h-12 w-auto ml-4 sm:ml-8 md:ml-24 cursor-pointer"
+          className="h-10 sm:h-12 w-auto  cursor-pointer"
         />
       </div>
 

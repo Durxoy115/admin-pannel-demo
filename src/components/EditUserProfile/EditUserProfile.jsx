@@ -97,7 +97,7 @@ const EditUserProfile = () => {
         alert("Profile updated successfully!");
         // navigate("/profile"); // Redirect to profile page
       } else {
-        setErrorMessage(result.message || "Failed to update profile");
+        setErrorMessage(result?.data?.message || "Failed to update profile");
       }
     } catch (error) {
       setErrorMessage("An error occurred while updating the profile");

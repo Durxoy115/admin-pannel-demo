@@ -147,7 +147,7 @@ const Dashboard = () => {
       canViewClient && 
       <div className="mx-auto p-1 md:p-10">
       <div>
-        <h1 className="text-3xl font-semibold mt-12">Clients Information</h1>
+        <h1 className="text-3xl font-semibold mt-16 md:mt-12">Clients Information</h1>
       </div>
 
       <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mt-4 min-h-[4rem]">

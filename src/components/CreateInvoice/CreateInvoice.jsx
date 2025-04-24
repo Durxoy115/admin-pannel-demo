@@ -40,6 +40,7 @@ const CreateInvoice = () => {
     services: [],
     discount: 0.0,
     vat: 0.0,
+    
   });
 
   const [url, getTokenLocalStorage] = useToken();
@@ -123,10 +124,10 @@ const CreateInvoice = () => {
         if (data.success) {
           setBillingAddresses(data.data);
         } else {
-          setGlobalError("Error fetching billing addresses: " + data.message);
+          setGlobalError("Error fetching billing addresses: " + data?.data.message);
         }
       } catch (error) {
-        setGlobalError("Error fetching billing addresses: " + error.message);
+        setGlobalError("Error fetching billing addresses: " + error?.data.message);
       }
     };
     fetchAddress();
@@ -336,7 +337,7 @@ const CreateInvoice = () => {
 
   return (
     <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
-      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-2 mb-2 sm:mt-4 md:mt-12 pl-4 sm:pl-12 md:pl-24">
+      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-4 mb-2 sm:mt-4 md:mt-12 pl-2 sm:pl-10 md:pl-24">
         Create Invoice
       </h1>
       {globalError && (

@@ -140,7 +140,7 @@ const EditSupportContact = () => {
   return (
     <div className="p-1 sm:p-6 lg:p-8 min-h-screen bg-gray-100 flex">
       <div className="w-full mt-8 sm:mt-10 rounded-md">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 px-4 sm:px-8 pt-6 sm:pt-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-8   pt-8 md:pt-6 sm:pt-8">
           Edit Support Contact
         </h2>
         {/* Display Success/Error Message */}

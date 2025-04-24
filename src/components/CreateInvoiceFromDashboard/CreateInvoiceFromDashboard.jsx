@@ -346,8 +346,8 @@ const CreateInvoiceFromDashboard = () => {
         }
       }
     } catch (error) {
-      console.error("Error creating invoice:", error.message);
-      alert("Failed to create invoice: " + error.message);
+      console.error("Error creating invoice:", error.data.message);
+      alert("Failed to create invoice: " + error.data.message);
     }
   };
 
@@ -357,7 +357,7 @@ const CreateInvoiceFromDashboard = () => {
 
   return (
     <div className="bg-gray-100 p-1 mt-4">
-      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-16 pl-24">
+      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-12 md:mt-20 mb-2 pl-1  md:pl-24">
         Create Invoice
       </h1>
       <form className="p-1 sm:p-1 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">

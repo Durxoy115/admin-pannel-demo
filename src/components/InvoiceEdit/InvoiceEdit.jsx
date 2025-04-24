@@ -386,7 +386,7 @@ const InvoiceEdit = () => {
   }
 console.log("object",formData.authority_signature, formData.invoice_date)
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col mt-20 md:px-24">
+    <div className="min-h-screen bg-gray-100 flex flex-col mt-16 md:mt-20 md:px-24">
     <div className="flex justify-between items-center mb-2 sm:mb-6">
       <h1 className="text-xl sm:text-2xl p-1 md:text-3xl font-semibold text-gray-800">
         Edit Invoice
