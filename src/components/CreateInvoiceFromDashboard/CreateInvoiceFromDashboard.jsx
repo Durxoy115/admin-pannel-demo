@@ -12,6 +12,9 @@ const CreateInvoiceFromDashboard = () => {
   const [addresses, setAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [author, setAuthor] = useState([]);
+  const [currency, setCurrency] = useState([]);
+  const [globalError, setGlobalError] = useState("");
+
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [clientData, setClientData] = useState(null);
@@ -41,6 +44,7 @@ const CreateInvoiceFromDashboard = () => {
     services: [],
     discount: 0.0,
     vat: 0.0,
+    currency:"",
   });
 
   const [url, getTokenLocalStorage] = useToken();
@@ -212,6 +216,27 @@ const CreateInvoiceFromDashboard = () => {
     };
     fetchAddress();
   }, [url, token]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/config/currency/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCurrency(data?.data);
+        } else {
+          setGlobalError("Error fetching company addresses: " + data?.data?.message);
+        }
+      } catch (error) {
+        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -303,6 +328,12 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
+      if(currency){
+        const findCurrency = currency.find(c => c.id == formData.currency )
+         formDataPayload.append("currency", findCurrency.currency)
+         formDataPayload.append("sign", findCurrency.sign)
+         
+       }
       formDataPayload.append("services", JSON.stringify(formData.services));
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
@@ -603,6 +634,28 @@ const CreateInvoiceFromDashboard = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             />
+          </div>
+          <div>
+            <label htmlFor="currency" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Currency
+            </label>
+            <select
+              id="currency"
+              name="currency"
+              onChange={handleChange}
+              required
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.currency}
+            >
+              <option value="" disabled>
+                Select Currency
+              </option>
+              {currency.map((c) => (
+                <option key={c.id} value={parseInt(c.id)}>
+                  {c.currency}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

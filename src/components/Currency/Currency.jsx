@@ -4,8 +4,8 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
 
-const UserPermissionGroup = () => {
-  const [userRole, setuserRole] = useState([]);
+const Currency = () => {
+  const [currency, setCurrency] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [message, setMessage] = useState(""); // For success/error messages
@@ -14,24 +14,24 @@ const UserPermissionGroup = () => {
   const token = getTokenLocalStorage();
   const {permissions} = useUserPermission();
 
-  const canAddUserPermissionGroup = permissions.includes("auth.add_group");
-  const canEditUserPermissionGroup = permissions.includes("auth.change_group");
-  const canDeleteUserPermissionGroup = permissions.includes("auth.delete_group");
+  const canAddUserPermissionGroup = permissions.includes("configuration.add_currency");
+  const canEditUserPermissionGroup = permissions.includes("configuration.change_currency");
+  const canDeleteUserPermissionGroup = permissions.includes("configuration.delete_currency");
 
 
   const fetchAddress = async () => {
     try {
-      const response = await fetch(`${url}/user-group/`, {
+      const response = await fetch(`${url}/config/currency/`, {
         headers: {
           Authorization: `Token ${token}`,
         },
       });
       const data = await response.json();
       if (data.success) {
-        setuserRole(data.data);
+        setCurrency(data.data);
       } else {
-        setMessage(`Failed to fetch contacts: ${data.message}`);
-        console.error("API Error:", data.message);
+        setMessage(`Failed to fetch contacts: ${data?.data?.message}`);
+        console.error("API Error:", data?.data?.message);
       }
     } catch (error) {
       setMessage("Error fetching contacts. Please try again.");
@@ -48,7 +48,7 @@ const UserPermissionGroup = () => {
 
     try {
       const response = await fetch(
-        `${url}/user-group/?user_group_id=${selectedContactId}`,
+        `${url}/config/currency/?currency_id=${selectedContactId}`,
         {
           method: "DELETE",
           headers: {
@@ -59,14 +59,14 @@ const UserPermissionGroup = () => {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        setuserRole(userRole.filter((contact) => contact.id !== selectedContactId));
-        setMessage("Contact deleted successfully!");
+        setCurrency(currency.filter((contact) => contact.id !== selectedContactId));
+        setMessage("Currency deleted successfully!");
         setIsModalOpen(false);
         setSelectedContactId(null);
         // Clear success message after 3 seconds
         setTimeout(() => setMessage(""), 3000);
       } else {
-        setMessage(`Failed to delete contact: ${data.message || "Unknown error"}`);
+        setMessage(`Failed to delete contact: ${data?.data?.message || "Unknown error"}`);
       }
     } catch (error) {
       setMessage("Error deleting contact. Please try again.");
@@ -85,11 +85,11 @@ const UserPermissionGroup = () => {
   };
 
   const handleUserRole = () => {
-    navigate("/add-user-role");
+    navigate("/add-currency");
   };
 
   const handleEdit = (id) => {
-    navigate(`/edit-user-role/${id}`);
+    navigate(`/edit-currency/${id}`);
   };
   
 
@@ -98,7 +98,7 @@ const UserPermissionGroup = () => {
       <div className="mt-12 sm:mt-16">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
-            User Role List
+            Currency
           </h1>
           {
             canAddUserPermissionGroup && 
@@ -132,17 +132,23 @@ const UserPermissionGroup = () => {
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Name
                 </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                  Sign
+                </th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-end border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {userRole.map((contact) => (
+              {currency.map((contact) => (
                 <tr key={contact.id} className="hover:bg-gray-50">
               
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
-                    {contact.name}
+                    {contact.currency}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.sign}
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-end gap-2 sm:gap-3">
@@ -200,4 +206,4 @@ const UserPermissionGroup = () => {
   );
 };
 
-export default UserPermissionGroup;
+export default Currency;

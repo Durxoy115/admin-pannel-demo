@@ -86,7 +86,7 @@ const Header = () => {
       <div className="flex-shrink-0">
         <img
           onClick={() => handleNavigation("dashboard")}
-          src="/assets/Images/Images-nav/logo-image.jpg"
+          src="/assets/Images/Images-nav/logo-image.jpeg"
           alt="Company Logo"
           className="h-10 sm:h-12 w-auto  cursor-pointer"
         />

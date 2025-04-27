@@ -11,6 +11,7 @@ import CompanyAddress from "../CompanyAddress/CompanyAddress";
 import Signature from "../Signature/Signature";
 import useUserPermission from "../hooks/usePermission";
 import UserPermissionGroup from "../UserPermissionGroup/UserPermissionGroup";
+import Currency from "../Currency/Currency";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const MyProfile = () => {
   const canViewUserPermissionGroup = permissions.includes("company.view_billingaddress");
   const canViewAuthoritySign = permissions.includes("company.view_authoritysignature");
   const CanViewSupportContact = permissions.includes("company.view_supportcontact");
+  const CanViewCurrency = permissions.includes("configuration.view_currency");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -270,6 +272,9 @@ const MyProfile = () => {
       <div className="bg-white rounded-md p-2 sm:p-4 mt-4 sm:mt-6">
         {canViewUser && <SubAdmin />}
         {canViewUserPermissionGroup && <UserPermissionGroup />}
+        {
+          CanViewCurrency && <Currency></Currency>
+        }
         {viewServices && <Products />}
         {viewCompany && <CompanyAddress />}
         {viewCompanyBillingAddress && <AddressBook />}

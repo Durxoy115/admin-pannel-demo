@@ -11,9 +11,11 @@ const InvoiceEdit = () => {
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const fileInputRef = useRef(null);
+  const [globalError, setGlobalError] = useState(""); 
   const [addresses, setAddresses] = useState([]); // State for company addresses
   const [billingAddresses, setBillingAddresses] = useState([]); // State for billing addresses
   const [author, setAuthor] = useState([]);
+  const [currency, setCurrency] = useState([]);
 
   const [formData, setFormData] = useState({
     client_invoice_id: "",
@@ -38,6 +40,7 @@ const InvoiceEdit = () => {
     services: [],
     company_logo: null,
     company_logo_name: "",
+    currency:"",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -221,6 +224,27 @@ const InvoiceEdit = () => {
     };
     fetchAddress();
   }, [url, token]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/config/currency/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCurrency(data?.data);
+        } else {
+          setGlobalError("Error fetching company addresses: " + data?.data?.message);
+        }
+      } catch (error) {
+        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -340,6 +364,12 @@ const InvoiceEdit = () => {
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
+      if(currency){
+        const findCurrency = currency.find(c => c.id == formData.currency )
+         formDataPayload.append("currency", findCurrency.currency)
+         formDataPayload.append("sign", findCurrency.sign)
+         
+       }
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
       }
@@ -586,6 +616,28 @@ console.log("object",formData.authority_signature, formData.invoice_date)
           />
         </div>
         <div>
+            <label htmlFor="currency" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Currency
+            </label>
+            <select
+              id="currency"
+              name="currency"
+              onChange={handleChange}
+              required
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.currency}
+            >
+              <option value="" disabled>
+                Select Currency
+              </option>
+              {currency.map((c) => (
+                <option key={c.id} value={parseInt(c.id)}>
+                  {c.currency}
+                </option>
+              ))}
+            </select>
+          </div>
+        <div>
           <label
             htmlFor="company_logo"
             className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
@@ -609,6 +661,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
             </div>
           </div>
           
+          
         </div>
 
         <div className="col-span-1 sm:col-span-2 lg:col-span-3">
@@ -628,6 +681,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
             rows="3"
           />
         </div>
+        
       </div>
 
       <div className="bg-gray-100 p-4 sm:p-6 rounded-2xl">
@@ -638,7 +692,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                 <th className="py-2 px-2 sm:px-4">#</th>
                 <th className="py-2 px-2 sm:px-4">Item Name</th>
                 <th className="py-2 px-2 sm:px-4">Quantity</th>
-                <th className="py-2 px-2 sm:px-4">Currency</th>
+                {/* <th className="py-2 px-2 sm:px-4">Currency</th> */}
                 <th className="py-2 px-2 sm:px-4">Rate</th>
                 <th className="py-2 px-2 sm:px-4">Time Duration</th>
                 <th className="py-2 px-2 sm:px-4">Price</th>
@@ -681,7 +735,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                       required
                     />
                   </td>
-                  <td className="py-2 px-2 sm:px-4">
+                  {/* <td className="py-2 px-2 sm:px-4">
                     <select
                       value={service.currency}
                       onChange={(e) =>
@@ -696,7 +750,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                         </option>
                       ))}
                     </select>
-                  </td>
+                  </td> */}
                   <td className="py-2 px-2 sm:px-4">
                     <select
                       value={service.rate}

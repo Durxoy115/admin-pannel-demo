@@ -40,6 +40,8 @@ import AddSignature from "./components/AddSignature/AddSignature";
 import EditSignature from "./components/EditSignature/EditSignature";
 import AddUserRole from "./components/AddUserRole/AddUserRole";
 import EditUserRole from "./components/EditUserRole/EditUserRole";
+import AddCurrency from "./components/AddCurrency/AddCurrency";
+import EditCurrency from "./components/EditCurrency/EditCurrency";
 
 
 // import Test from "./components/Test";
@@ -95,6 +97,8 @@ const App = () => {
           <Route path="edit-signature/:id" element={<EditSignature></EditSignature>} />
           <Route path="add-user-role" element={<AddUserRole></AddUserRole>} />
           <Route path="edit-user-role/:id" element={<EditUserRole></EditUserRole>} />
+          <Route path="edit-currency/:id" element={<EditCurrency></EditCurrency>} />
+          <Route path="add-currency" element={<AddCurrency></AddCurrency>} />
         </Route>
       </Route>
     </Routes>

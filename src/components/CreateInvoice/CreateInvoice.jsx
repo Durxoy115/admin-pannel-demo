@@ -12,6 +12,7 @@ const CreateInvoice = () => {
   const [addresses, setAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [author, setAuthor] = useState([]);
+  const [currency, setCurrency] = useState([]);
   const [vat, setVat] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [errors, setErrors] = useState({}); // State for field-specific errors
@@ -40,6 +41,7 @@ const CreateInvoice = () => {
     services: [],
     discount: 0.0,
     vat: 0.0,
+    currency:"",
     
   });
 
@@ -55,6 +57,7 @@ const CreateInvoice = () => {
     if (!formData.client_id) newErrors.client_id = "Client ID is required";
     if (!formData.client_name) newErrors.client_name = "Client Name is required";
     if (!formData.date) newErrors.date = "Date is required";
+    if (!formData.currency) newErrors.date = "Currency is required";
     if (!formData.payment_status) newErrors.payment_status = "Payment Status is required";
     if (!formData.client_email) newErrors.client_email = "Client Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.client_email)) newErrors.client_email = "Invalid email format";
@@ -170,19 +173,42 @@ const CreateInvoice = () => {
         if (data.success) {
           setAddresses(data.data);
         } else {
-          setGlobalError("Error fetching company addresses: " + data.message);
+          setGlobalError("Error fetching company addresses: " + data?.data?.message);
         }
       } catch (error) {
-        setGlobalError("Error fetching company addresses: " + error.message);
+        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
+      }
+    };
+    fetchAddress();
+  }, [url, token]);
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await fetch(`${url}/config/currency/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCurrency(data?.data);
+        } else {
+          setGlobalError("Error fetching company addresses: " + data?.data?.message);
+        }
+      } catch (error) {
+        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
       }
     };
     fetchAddress();
   }, [url, token]);
 
+  // console.log("currency---", d)
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error on change
+    setErrors((prev) => ({ ...prev, [name]: "" })); 
 
     if (name === "vat") setVat(parseFloat(value) || 0);
     if (name === "discount") setDiscount(parseFloat(value) || 0);
@@ -282,7 +308,15 @@ const CreateInvoice = () => {
       formDataPayload.append("total_amount", formData.total_amount);
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
-      formDataPayload.append("vat", formData.vat);
+      formDataPayload.append("discount", formData.discount);
+      if(currency){
+       const findCurrency = currency.find(c => c.id == formData.currency )
+        formDataPayload.append("currency", findCurrency.currency)
+        formDataPayload.append("sign", findCurrency.sign)
+        
+      }
+      
+      
       formDataPayload.append("services", JSON.stringify(formData.services));
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
@@ -306,7 +340,7 @@ const CreateInvoice = () => {
           throw new Error(data.message || "Failed to create invoice.");
         } else {
           alert("Invoice created successfully!");
-          navigate("/invoice-list");
+          // navigate("/invoice-list");
         }
       } else if (action === "preview") {
         const response = await fetch(`${url}/service/invoice-pdf/`, {
@@ -622,6 +656,28 @@ const CreateInvoice = () => {
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             />
           </div>
+          <div>
+            <label htmlFor="currency" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Currency
+            </label>
+            <select
+              id="currency"
+              name="currency"
+              onChange={handleChange}
+              required
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              value={formData.currency}
+            >
+              <option value="" disabled>
+                Select Currency
+              </option>
+              {currency.map((c) => (
+                <option key={c.id} value={parseInt(c.id)}>
+                  {c.currency}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="bg-gray-100 p-3 sm:p-4 rounded-2xl overflow-x-auto">
@@ -632,7 +688,7 @@ const CreateInvoice = () => {
                 <th className="py-1 sm:py-2 px-2 sm:px-4">#</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Item Name</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Quantity</th>
-                <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th>
+                {/* <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th> */}
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Rate</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Time Duration</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Price</th>
@@ -679,7 +735,7 @@ const CreateInvoice = () => {
                     />
                     {errors[`quantity_${index}`] && <p className="text-red-500 text-xs mt-1">{errors[`quantity_${index}`]}</p>}
                   </td>
-                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                  {/* <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
                       value={service.currency}
                       onChange={(e) =>
@@ -694,7 +750,7 @@ const CreateInvoice = () => {
                         </option>
                       ))}
                     </select>
-                  </td>
+                  </td> */}
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
                       value={service.rate}
@@ -721,7 +777,7 @@ const CreateInvoice = () => {
                         handleServiceChange(
                           index,
                           "duration",
-                          parseInt(e.target.value, 10) || 0
+                          parseInt(e.target.value, 10) || ""
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
