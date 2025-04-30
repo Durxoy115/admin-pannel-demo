@@ -78,7 +78,7 @@ const InvoiceEdit = () => {
         }
       } catch (error) {
         console.error("Error fetching services:", error);
-        setServicesError(`Failed to load services: ${error.message}`);
+        setServicesError(`Failed to load services: ${error?.data?.message}`);
       } finally {
         setIsServicesLoading(false);
       }
@@ -88,7 +88,52 @@ const InvoiceEdit = () => {
   }, []);
 
   useEffect(() => {
+    const fetchSignature = async () => {
+      try {
+        const response = await fetch(`${url}/company/authority-signature/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setAuthor(data.data);
+        } else {
+          console.error("Error fetching billing addresses:", data?.data?.message);
+        }
+      } catch (error) {
+        console.error("Error fetching billing addresses:", error);
+      }
+    };
+    fetchSignature();
+  }, [url, token]);
+
+  useEffect(() => {
+    const fetchCurrency = async () => {
+      try {
+        const response = await fetch(`${url}/config/currency/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCurrency(data?.data);
+        } else {
+          setGlobalError("Error fetching company addresses: " + data?.data?.message);
+        }
+      } catch (error) {
+        setGlobalError("Error fetching company addresses: " + error?.data?.message);
+      }
+    };
+    fetchCurrency();
+  }, [url, token]);
+
+  useEffect(() => {
     const fetchInvoiceData = async () => {
+      // console.log("autor,", author)
       try {
         const response = await fetch(
           `${url}/service/invoice/?invoice_id=${id}`,
@@ -107,7 +152,7 @@ const InvoiceEdit = () => {
             id: service.id,
             service_name: service.service_name,
             quantity: service.quantity,
-            currency: "USD",
+            // currency: "USD",
             rate: service.rate,
             duration: service.duration,
             price: parseFloat(service.amount) / service.quantity || 0,
@@ -124,22 +169,23 @@ const InvoiceEdit = () => {
             address: data.data.address || "",
             client_email: data.data.client_email || "",
             client_phone: data.data.client_phone || "",
-            billing_address: data.data.billing_address || "",
-            company_address: data.data.company_address || "",
-            authority_signature: data.data.authority_signature || "",
-            invoice_date: data.data.invoice_date || "",
+            billing_address: data?.data?.billing_address || "",
+            company_address: data?.data?.company_address || "", 
+            invoice_date: data?.data?.invoice_date || "",
             service_name:
-              data.data.service_name ||
-              (services.length > 0 ? services[0].name : ""),
+            data.data.service_name ||
+            (services.length > 0 ? services[0].name : ""),
             sub_total: parseFloat(data.data.sub_total) || 0,
             discount: parseFloat(data.data.discount) || 0,
             vat: parseFloat(data.data.vat) || 0,
             total_amount: parseFloat(data.data.total_amount) || 0,
+            authority_signature : data?.data?.authority_signature || "",
             services: services,
             company_logo: null,
             company_logo_name: data.data.company_logo
               ? data.data.company_logo.split("/").slice(-1)[0]
               : "",
+            currency: data?.data?.currency || ""
           };
           setFormData(fetchedData);
         } else {
@@ -158,6 +204,24 @@ const InvoiceEdit = () => {
     fetchInvoiceData();
   }, [id]);
 
+const handleAuthorChange =(e)=> {
+  const findAuthorName = author?.find( a => a.signature === e.target.value)
+  // console.log(findAuthorName, author, e.target.value)
+  setFormData((prev) => ({
+    ...prev,
+    authority_signature: findAuthorName?.signature,
+  }));
+};
+
+const handleCurrencyChange =(e)=> {
+  const findCurrencyName = currency?.find( a => a.currency === e.target.value)
+  // console.log(findCurrencyName, currency, e.target.value)
+  setFormData((prev) => ({
+    ...prev,
+    currency: findCurrencyName?.currency,
+  }));
+};
+  
   // Fetch billing addresses
   useEffect(() => {
     const fetchAddress = async () => {
@@ -203,48 +267,7 @@ const InvoiceEdit = () => {
     };
     fetchAddress();
   }, [url, token]);
-  useEffect(() => {
-    const fetchAddress = async () => {
-      try {
-        const response = await fetch(`${url}/company/authority-signature/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setAuthor(data.data);
-        } else {
-          console.error("Error fetching billing addresses:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching billing addresses:", error);
-      }
-    };
-    fetchAddress();
-  }, [url, token]);
-  useEffect(() => {
-    const fetchAddress = async () => {
-      try {
-        const response = await fetch(`${url}/config/currency/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setCurrency(data?.data);
-        } else {
-          setGlobalError("Error fetching company addresses: " + data?.data?.message);
-        }
-      } catch (error) {
-        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
-      }
-    };
-    fetchAddress();
-  }, [url, token]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -304,7 +327,7 @@ const InvoiceEdit = () => {
           id: null,
           service_name: defaultService,
           quantity: 0,
-          currency: "USD",
+          // currency: "USD",
           rate: "Monthly",
           duration: 0,
           price: 0,
@@ -354,7 +377,7 @@ const InvoiceEdit = () => {
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
       formDataPayload.append("client_name", formData.client_name);
-      formDataPayload.append("authority_signature", formData.authority_signature);
+      // formDataPayload.append("authority_signature", formData.authority_signature);
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("date", formData.date);
       formDataPayload.append("payment_status", formData.payment_status);
@@ -364,12 +387,18 @@ const InvoiceEdit = () => {
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
       formDataPayload.append("vat", formData.vat);
+
       if(currency){
-        const findCurrency = currency.find(c => c.id == formData.currency )
-         formDataPayload.append("currency", findCurrency.currency)
-         formDataPayload.append("sign", findCurrency.sign)
-         
+        const findCurrency = currency.find(c => c.currency == formData.currency )
+         formDataPayload.append("currency", findCurrency?.currency);
+         formDataPayload.append("sign", findCurrency?.sign);
        }
+
+      if(author){
+        const findCurrency = author.find(c => c.signature == formData.authority_signature )
+         formDataPayload.append("authority_signature", findCurrency?.id);
+       }
+
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
       }
@@ -389,10 +418,10 @@ const InvoiceEdit = () => {
         },
         body: formDataPayload,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(data.message);
+      const data = await response.json();
+      if (response.ok && data.success) {
+        
+        alert(data?.message);
         navigate("/invoice-list");
       } else {
         throw new Error(`Failed to update invoice. Status: ${response.status}`);
@@ -414,7 +443,7 @@ const InvoiceEdit = () => {
   if (servicesError) {
     return <p className="text-red-500 text-center py-8">{servicesError}</p>;
   }
-console.log("object",formData.authority_signature, formData.invoice_date)
+// console.log("object",formData.authority_signature, formData.invoice_date)
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col mt-16 md:mt-20 md:px-24">
     <div className="flex justify-between items-center mb-2 sm:mb-6">
@@ -588,7 +617,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
             id="authority_signature"
             name="authority_signature"
 
-            onChange={handleChange}
+            onChange={handleAuthorChange}
             className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             value={formData.authority_signature}
           >
@@ -596,7 +625,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
               Select Author
             </option>
             {author.map((a) => (
-              <option key={a.id} value={parseInt(a.id)}>
+              <option key={a.id} value={a.signature}>
                 {a.title}
               </option>
             ))}
@@ -622,7 +651,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
             <select
               id="currency"
               name="currency"
-              onChange={handleChange}
+              onChange={handleCurrencyChange}
               required
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.currency}
@@ -631,7 +660,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                 Select Currency
               </option>
               {currency.map((c) => (
-                <option key={c.id} value={parseInt(c.id)}>
+                <option key={c.id} value={c.currency}>
                   {c.currency}
                 </option>
               ))}
@@ -722,12 +751,12 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                   <td className="py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.quantity}
+                      value={service.quantity  || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
                           "quantity",
-                          parseInt(e.target.value, 10),
+                          parseInt(e.target.value, 10) || "",
                           service.id
                         )
                       }
@@ -770,12 +799,12 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                   <td className="py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.duration}
+                      value={service.duration || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
                           "duration",
-                          parseInt(e.target.value, 10),
+                          parseInt(e.target.value, 10) || "",
                           service.id
                         )
                       }
@@ -787,7 +816,7 @@ console.log("object",formData.authority_signature, formData.invoice_date)
                     <input
                       type="number"
                       step="0.01"
-                      value={service.price}
+                      value={service.price || ""}
                       onChange={(e) =>
                         handleServiceChange(index, "price", e.target.value, service.id)
                       }

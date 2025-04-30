@@ -10,6 +10,7 @@ const ClientProfile = ({ id }) => {
   const token = getTokenLocalStorage();
   const fileInputRef = useRef(null);
   const docInputRef = useRef(null);
+  const [checkEmail, setCheckEmail] = useState()
 
   const [clientData, setClientData] = useState({
     name: "",
@@ -27,6 +28,8 @@ const ClientProfile = ({ id }) => {
   const [photoFile, setPhotoFile] = useState(null);
   const [docFile, setDocFile] = useState(null);
   const [docFileName, setDocFileName] = useState("");
+  const [error, setError] = useState(null); // State for API errors
+  const [fieldErrors, setFieldErrors] = useState({}); // State for field-specific errors
 
   useEffect(() => {
     const fetchClientDetails = async () => {
@@ -36,22 +39,30 @@ const ClientProfile = ({ id }) => {
             Authorization: `Token ${token}`,
           },
         });
-
+        const data = await response.json();
         if (response.ok) {
-          const data = await response.json();
+          
           const fetchedData = {
             ...data?.data,
             photo: data?.data?.photo ? `${url}${data.data.photo}` : null,
             contact_doc: data?.data?.contact_doc ? data.data.contact_doc : null,
           };
           setClientData(fetchedData);
+          setCheckEmail(data?.data?.email);
           setDocFileName(
-            data?.data?.contact_doc ? data.data.contact_doc.split('/').slice(-1)[0] : ""
+            data?.data?.contact_doc
+              ? data.data.contact_doc.split("/").slice(-1)[0]
+              : ""
           );
         } else {
-          console.error("Failed to fetch client details.", response.message);
+          const errorData = await response.json();
+          setError(
+            errorData?.message ||
+              `Failed to fetch client details (Status: ${response.status})`
+          );
         }
       } catch (error) {
+        setError("Network error or server is unreachable. Please try again.");
         console.error("Error fetching client data:", error);
       } finally {
         setIsLoading(false);
@@ -64,6 +75,10 @@ const ClientProfile = ({ id }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setClientData((prevData) => ({ ...prevData, [name]: value }));
+    // Clear field-specific error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: null }));
+    }
   };
 
   const handlePhotoChange = (e) => {
@@ -71,8 +86,12 @@ const ClientProfile = ({ id }) => {
     if (file && file.type.startsWith("image/")) {
       setPhotoFile(file);
       setClientData((prev) => ({ ...prev, photo: URL.createObjectURL(file) }));
+      setFieldErrors((prev) => ({ ...prev, photo: null }));
     } else {
-      alert("Please upload a valid image file (e.g., .jpg, .png)");
+      setFieldErrors((prev) => ({
+        ...prev,
+        photo: "Please upload a valid image file (e.g., .jpg, .png)",
+      }));
       setPhotoFile(null);
       setClientData((prev) => ({ ...prev, photo: null }));
     }
@@ -80,12 +99,27 @@ const ClientProfile = ({ id }) => {
 
   const handleDocChange = (e) => {
     const file = e.target.files[0];
-    if (file && ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
+    if (
+      file &&
+      [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ].includes(file.type)
+    ) {
       setDocFile(file);
       setDocFileName(file.name);
-      setClientData((prev) => ({ ...prev, contact_doc: URL.createObjectURL(file) }));
+      setClientData((prev) => ({
+        ...prev,
+        contact_doc: URL.createObjectURL(file),
+      }));
+      setFieldErrors((prev) => ({ ...prev, contact_doc: null }));
     } else {
-      alert("Please upload a valid document file (e.g., .pdf, .doc, .docx)");
+      setFieldErrors((prev) => ({
+        ...prev,
+        contact_doc:
+          "Please upload a valid document file (e.g., .pdf, .doc, .docx)",
+      }));
       setDocFile(null);
       setDocFileName("");
       setClientData((prev) => ({ ...prev, contact_doc: null }));
@@ -94,11 +128,17 @@ const ClientProfile = ({ id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Clear previous errors
+    setFieldErrors({}); // Clear previous field errors
+
     try {
       const formData = new FormData();
       formData.append("name", clientData.name);
       formData.append("contact", clientData.contact);
-      formData.append("email", clientData.email);
+      if (checkEmail != clientData.email) {
+        formData.append("email", clientData.email);
+      }
+      
       formData.append("company_name", clientData.company_name || "");
       formData.append("country", clientData.country);
       formData.append("website_url", clientData.website_url || "");
@@ -118,18 +158,26 @@ const ClientProfile = ({ id }) => {
         },
         body: formData,
       });
-
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         alert("Client details updated successfully!");
         navigate("/dashboard", { state: { reload: true } });
       } else {
         const errorData = await response.json();
-        console.error("Error updating client details:", errorData);
-        alert("Failed to update client details.");
+        // Handle field-specific errors (e.g., { "email": "Invalid email format" })
+        if (errorData.errors && typeof errorData.errors === "object") {
+          setFieldErrors(errorData.errors);
+          setError("Please correct the errors in the form.");
+        } else {
+          setError(
+            errorData.message ||
+              `Failed to update client details (Status: ${response.status})`
+          );
+        }
       }
     } catch (error) {
+      setError("Network error or server is unreachable. Please try again.");
       console.error("Error during client update:", error);
-      alert("An error occurred. Please try again.");
     }
   };
 
@@ -140,10 +188,25 @@ const ClientProfile = ({ id }) => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex-grow flex items-center justify-center py-4 sm:py-6 md:py-8">
-        <div className="w-full  px-2 sm:px-6 lg:px-24">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 mt-12">Client Profile</h2>
+        <div className="w-full px-2 sm:px-6 lg:px-24">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6 mt-12">
+            Client Profile
+          </h2>
+
+          {/* Display General Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg flex justify-between items-center">
+              <span>{error}</span>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-700 hover:text-red-900"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {/* Image Uploader and Form Fields in Flex Container */}
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Image Uploader */}
               <div className="mb-4 sm:mb-0 lg:w-40">
@@ -177,10 +240,15 @@ const ClientProfile = ({ id }) => {
                       className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-lg bg-gray-200 flex items-center justify-center border border-gray-300 cursor-pointer hover:bg-gray-300 transition-colors duration-300"
                       onClick={() => fileInputRef.current.click()}
                     >
-                      <span className="text-gray-500 text-xs text-center px-2">Upload Image</span>
+                      <span className="text-gray-500 text-xs text-center px-2">
+                        Upload Image
+                      </span>
                     </div>
                   )}
                 </div>
+                {fieldErrors.photo && (
+                  <p className="text-red-600 text-xs mt-1">{fieldErrors.photo}</p>
+                )}
               </div>
 
               {/* Form Fields */}
@@ -195,7 +263,10 @@ const ClientProfile = ({ id }) => {
                   { label: "Contact Person", name: "contact_person", type: "text" },
                 ].map(({ label, name, type, required }) => (
                   <div key={name}>
-                    <label htmlFor={name} className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
+                    <label
+                      htmlFor={name}
+                      className="block mb-1 font-medium text-xs sm:text-sm md:text-base"
+                    >
                       {label}
                     </label>
                     <input
@@ -204,15 +275,23 @@ const ClientProfile = ({ id }) => {
                       name={name}
                       value={clientData[name] || ""}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className={`w-full px-3 py-2 border ${
+                        fieldErrors[name] ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                       required={required}
                     />
+                    {fieldErrors[name] && (
+                      <p className="text-red-600 text-xs mt-1">{fieldErrors[name]}</p>
+                    )}
                   </div>
                 ))}
 
                 {/* Document Upload Field */}
                 <div>
-                  <label htmlFor="contact_doc" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
+                  <label
+                    htmlFor="contact_doc"
+                    className="block mb-1 font-medium text-xs sm:text-sm md:text-base"
+                  >
                     Contact Document
                   </label>
                   <div className="relative">
@@ -226,17 +305,25 @@ const ClientProfile = ({ id }) => {
                       accept=".pdf,.doc,.docx"
                     />
                     <div
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                      className={`w-full px-3 py-2 border ${
+                        fieldErrors.contact_doc ? "border-red-500" : "border-gray-300"
+                      } rounded-lg bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                       onClick={() => docInputRef.current.click()}
                     >
                       {docFileName || "Choose Document"}
                     </div>
                   </div>
+                  {fieldErrors.contact_doc && (
+                    <p className="text-red-600 text-xs mt-1">{fieldErrors.contact_doc}</p>
+                  )}
                 </div>
 
                 {/* Address Field */}
                 <div className="col-span-1 sm:col-span-2">
-                  <label htmlFor="address" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
+                  <label
+                    htmlFor="address"
+                    className="block mb-1 font-medium text-xs sm:text-sm md:text-base"
+                  >
                     Address
                   </label>
                   <textarea
@@ -245,23 +332,36 @@ const ClientProfile = ({ id }) => {
                     value={clientData.address || ""}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    className={`w-full px-3 py-2 border ${
+                      fieldErrors.address ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                   ></textarea>
+                  {fieldErrors.address && (
+                    <p className="text-red-600 text-xs mt-1">{fieldErrors.address}</p>
+                  )}
                 </div>
 
                 {/* Notes Field */}
                 <div className="col-span-1 sm:col-span-2">
-                  <label htmlFor="notes" className="block mb-1 font-medium text-xs sm:text-sm md:text-base">
+                  <label
+                    htmlFor="notes"
+                    className="block mb-1 font-medium text-xs sm:text-sm md:text-base"
+                  >
                     Notes
                   </label>
                   <textarea
                     id="notes"
                     name="notes"
-                    value={clientData.address || ""}
+                    value={clientData.notes || ""}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    className={`w-full px-3 py-2 border ${
+                      fieldErrors.notes ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base`}
                   ></textarea>
+                  {fieldErrors.notes && (
+                    <p className="text-red-600 text-xs mt-1">{fieldErrors.notes}</p>
+                  )}
                 </div>
               </div>
             </div>

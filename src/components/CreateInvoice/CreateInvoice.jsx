@@ -308,7 +308,7 @@ const CreateInvoice = () => {
       formDataPayload.append("total_amount", formData.total_amount);
       formDataPayload.append("sub_total", formData.sub_total);
       formDataPayload.append("discount", formData.discount);
-      formDataPayload.append("discount", formData.discount);
+      formDataPayload.append("vat", formData.vat);
       if(currency){
        const findCurrency = currency.find(c => c.id == formData.currency )
         formDataPayload.append("currency", findCurrency.currency)

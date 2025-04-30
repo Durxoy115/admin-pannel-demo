@@ -30,11 +30,11 @@ const Currency = () => {
       if (data.success) {
         setCurrency(data.data);
       } else {
-        setMessage(`Failed to fetch contacts: ${data?.data?.message}`);
+        setMessage(`Failed to fetch currency: ${data?.data?.message}`);
         console.error("API Error:", data?.data?.message);
       }
     } catch (error) {
-      setMessage("Error fetching contacts. Please try again.");
+      setMessage("Error fetching Currency. Please try again.");
       console.error("Error fetching contacts:", error);
     }
   };

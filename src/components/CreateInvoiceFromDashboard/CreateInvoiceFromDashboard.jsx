@@ -666,7 +666,7 @@ const CreateInvoiceFromDashboard = () => {
                 <th className="py-1 sm:py-2 px-2 sm:px-4">#</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Item Name</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Quantity</th>
-                <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th>
+                {/* <th className="py-1 sm:py-2 px-2 sm:px-4">Currency</th> */}
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Rate</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Time Duration</th>
                 <th className="py-1 sm:py-2 px-2 sm:px-4">Price</th>
@@ -699,19 +699,19 @@ const CreateInvoiceFromDashboard = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.quantity}
+                      value={service.quantity || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
                           "quantity",
-                          parseInt(e.target.value, 10) || 0
+                          parseInt(e.target.value, 10) || ""
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                       required
                     />
                   </td>
-                  <td className="py-1 sm:py-2 px-2 sm:px-4">
+                  {/* <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
                       value={service.currency}
                       onChange={(e) =>
@@ -728,7 +728,7 @@ const CreateInvoiceFromDashboard = () => {
                         )
                       )}
                     </select>
-                  </td>
+                  </td> */}
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
                       value={service.rate}
@@ -750,12 +750,12 @@ const CreateInvoiceFromDashboard = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.duration}
+                      value={service.duration || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
                           "duration",
-                          parseInt(e.target.value, 10) || 0
+                          parseInt(e.target.value, 10) || ""
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
@@ -765,12 +765,12 @@ const CreateInvoiceFromDashboard = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service.price}
+                      value={service.price || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
                           "price",
-                          parseInt(e.target.value, 10) || 0
+                          parseInt(e.target.value, 10) || ""
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
