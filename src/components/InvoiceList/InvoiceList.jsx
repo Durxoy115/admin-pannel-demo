@@ -36,20 +36,21 @@ const InvoiceList = () => {
       const response = await axios.get(`${url}/service/invoice/`, {
         headers: { Authorization: `Token ${token}` },
       });
-      const invoiceData = response.data.data.map((invoice) => ({
+      console.log("data-----------", response.data.data)
+      const invoiceData = response?.data?.data.map((invoice) => ({
         id: invoice.id,
         invoiceId: invoice.client_invoice_id,
         clientId: invoice.client_id,
         clientName: invoice.client_name,
-       billingCompanyAddress: invoice.billing_company_name,
+        billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
         amount: invoice.total_amount,
         date: invoice.date.split("T")[0],
         paymentMethod: invoice.gateway,
         accountNumber: invoice.account_number,
         paymentStatus: invoice.payment_status,
-        
       }));
+      console.log("invoiceData-------",invoiceData);
       setInvoices(invoiceData);
       setFilteredInvoices(invoiceData);
     } catch (error) {

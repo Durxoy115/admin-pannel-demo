@@ -80,7 +80,7 @@ const CreateInvoiceFromDashboard = () => {
             company_name: fetchedData.company_name || "",
           }));
         } else {
-          console.error("Failed to fetch client details.", response.message);
+          console.error("Failed to fetch client details.", response?.message);
         }
       } catch (error) {
         console.error("Error fetching client data:", error);
@@ -104,7 +104,7 @@ const CreateInvoiceFromDashboard = () => {
         if (data.success) {
           setAuthor(data.data);
         } else {
-          console.error("Error fetching billing addresses:", data.message);
+          console.error("Error fetching billing addresses:", data?.message);
         }
       } catch (error) {
         console.error("Error fetching billing addresses:", error);
@@ -129,9 +129,9 @@ const CreateInvoiceFromDashboard = () => {
             Authorization: `Token ${token}`,
           },
         });
-
-        if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
+        if (response.ok && data.success) {
+          
           setServices(data?.data);
           if (data.data.length > 0) {
             setFormData((prev) => ({
@@ -180,7 +180,7 @@ const CreateInvoiceFromDashboard = () => {
             }));
           }
         } else {
-          console.error("Error fetching billing addresses:", data.message);
+          console.error("Error fetching billing addresses:", data?.data?.message);
         }
       } catch (error) {
         console.error("Error fetching billing addresses:", error);
@@ -229,10 +229,10 @@ const CreateInvoiceFromDashboard = () => {
         if (data.success) {
           setCurrency(data?.data);
         } else {
-          setGlobalError("Error fetching company addresses: " + data?.data?.message);
+          setGlobalError("Error fetching company addresses: " + data?.message);
         }
       } catch (error) {
-        setGlobalError("Error fetching company addresses: " + error?.daya?.message);
+        setGlobalError("Error fetching company addresses: " + error?.message);
       }
     };
     fetchAddress();
@@ -342,7 +342,7 @@ const CreateInvoiceFromDashboard = () => {
       if (action === "save" || action === "sent") {
         let req_url = `${url}/service/invoice/`;
         if (action === "sent") {
-          req_url += "&sent=true";
+          req_url += "?sent=true";
         }
         const response = await fetch(req_url, {
           method: "POST",
@@ -377,8 +377,8 @@ const CreateInvoiceFromDashboard = () => {
         }
       }
     } catch (error) {
-      console.error("Error creating invoice:", error.data.message);
-      alert("Failed to create invoice: " + error.data.message);
+      console.error("Error creating invoice:", error?.message);
+      alert("Failed to create invoice: " + error?.message);
     }
   };
 

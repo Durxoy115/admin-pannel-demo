@@ -17,6 +17,7 @@ const InvoiceEdit = () => {
   const [author, setAuthor] = useState([]);
   const [currency, setCurrency] = useState([]);
 
+
   const [formData, setFormData] = useState({
     client_invoice_id: "",
     client_id: "",
@@ -85,7 +86,7 @@ const InvoiceEdit = () => {
     };
 
     fetchServiceData();
-  }, []);
+  }, [url, token]);
 
   useEffect(() => {
     const fetchSignature = async () => {
@@ -107,7 +108,7 @@ const InvoiceEdit = () => {
       }
     };
     fetchSignature();
-  }, [url, token]);
+  }, []);
 
   useEffect(() => {
     const fetchCurrency = async () => {
@@ -131,6 +132,7 @@ const InvoiceEdit = () => {
     fetchCurrency();
   }, [url, token]);
 
+
   useEffect(() => {
     const fetchInvoiceData = async () => {
       // console.log("autor,", author)
@@ -146,7 +148,6 @@ const InvoiceEdit = () => {
         );
 
         const data = await response.json();
-
         if (data.success) {
           const services = data?.data?.services.map((service) => ({
             id: service.id,
@@ -158,6 +159,9 @@ const InvoiceEdit = () => {
             price: parseFloat(service.amount) / service.quantity || 0,
             total_amount: parseFloat(service.amount) || 0,
           }));
+          const findAuthor = author.find(a=>a.title==data?.data?.authority_title)
+          console.log("signature--",data?.data?.authority_signature, "suhfshhjkjh", author, "findAuthor", findAuthor?.id)
+
           const fetchedData = {
             client_invoice_id: data.data.client_invoice_id || "",
             client_id: data.data.client_id || "",
@@ -179,7 +183,7 @@ const InvoiceEdit = () => {
             discount: parseFloat(data.data.discount) || 0,
             vat: parseFloat(data.data.vat) || 0,
             total_amount: parseFloat(data.data.total_amount) || 0,
-            authority_signature : data?.data?.authority_signature || "",
+            authority_signature : findAuthor?.id || "",
             services: services,
             company_logo: null,
             company_logo_name: data.data.company_logo
@@ -202,16 +206,8 @@ const InvoiceEdit = () => {
     };
 
     fetchInvoiceData();
-  }, [id]);
+  }, [url, token, id, author]);
 
-const handleAuthorChange =(e)=> {
-  const findAuthorName = author?.find( a => a.signature === e.target.value)
-  // console.log(findAuthorName, author, e.target.value)
-  setFormData((prev) => ({
-    ...prev,
-    authority_signature: findAuthorName?.signature,
-  }));
-};
 
 const handleCurrencyChange =(e)=> {
   const findCurrencyName = currency?.find( a => a.currency === e.target.value)
@@ -377,7 +373,7 @@ const handleCurrencyChange =(e)=> {
       formDataPayload.append("website_url", formData.website_url);
       formDataPayload.append("address", formData.address);
       formDataPayload.append("client_name", formData.client_name);
-      // formDataPayload.append("authority_signature", formData.authority_signature);
+      formDataPayload.append("authority_signature", formData.authority_signature);
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("date", formData.date);
       formDataPayload.append("payment_status", formData.payment_status);
@@ -394,10 +390,10 @@ const handleCurrencyChange =(e)=> {
          formDataPayload.append("sign", findCurrency?.sign);
        }
 
-      if(author){
-        const findCurrency = author.find(c => c.signature == formData.authority_signature )
-         formDataPayload.append("authority_signature", findCurrency?.id);
-       }
+      // if(author){
+      //   const findCurrency = author.find(c => c.signature == formData.authority_signature )
+      //    formDataPayload.append("authority_signature", findCurrency?.id);
+      //  }
 
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
@@ -617,7 +613,7 @@ const handleCurrencyChange =(e)=> {
             id="authority_signature"
             name="authority_signature"
 
-            onChange={handleAuthorChange}
+            onChange={handleChange}
             className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             value={formData.authority_signature}
           >
@@ -625,7 +621,7 @@ const handleCurrencyChange =(e)=> {
               Select Author
             </option>
             {author.map((a) => (
-              <option key={a.id} value={a.signature}>
+              <option key={a.id} value={a.id}>
                 {a.title}
               </option>
             ))}
@@ -816,7 +812,7 @@ const handleCurrencyChange =(e)=> {
                     <input
                       type="number"
                       step="0.01"
-                      value={service.price || ""}
+                      value={service?.price || ""}
                       onChange={(e) =>
                         handleServiceChange(index, "price", e.target.value, service.id)
                       }
