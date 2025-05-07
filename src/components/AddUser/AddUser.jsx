@@ -95,7 +95,7 @@ const AddUser = () => {
     }
     if (!data.userContact) newErrors.userContact = "Contact is required.";
     if (!data.password) newErrors.password = "Password is required.";
-    else if (data.password.length < 8) newErrors.password = "Password must be at least 8 characters.";
+    else if (data.password.length < 6) newErrors.password = "Password must be at least 6 characters.";
     if (!data.dob) newErrors.dob = "Date of birth is required.";
     if (!data.user_type) newErrors.user_type = "Member type is required.";
     return newErrors;
@@ -161,7 +161,7 @@ const AddUser = () => {
     apiFormData.append("dob", formData.dob);
 
     if (groups.length) {
-      apiFormData.append("groups", JSON.stringify(groups));
+      apiFormData.append("groups", groups);
     }
     if (image) {
       apiFormData.append("photo", image);
@@ -225,10 +225,12 @@ const AddUser = () => {
   };
 
   const handleToGroups = (e) => {
-    const newGroups = Array.from(e.target.selectedOptions)
-      .filter((option) => option.value !== "" && !isNaN(parseInt(option.value)))
-      .map((option) => parseInt(option.value));
-    setGroups(newGroups);
+    const groupId = parseInt(e.target.value, 10);
+    if (e.target.checked) {
+      setGroups((prev) => [...prev, groupId].filter(id => !isNaN(id)));
+    } else {
+      setGroups((prev) => prev.filter((id) => id !== groupId));
+    }
     setErrors((prev) => ({ ...prev, groups: "" }));
     setMessage((prev) => ({ ...prev, groups: "" }));
   };
@@ -298,12 +300,11 @@ const AddUser = () => {
                   {
                     id: "groups",
                     label: "User Permission Group",
-                    type: "select",
-                    multiple: true,
+                    type: "checkbox",
                     options: userGroups,
                   },
                   { id: "dob", label: "Date of Birth", type: "date", required: true },
-                ].map(({ id, label, type, required, options, multiple }) => (
+                ].map(({ id, label, type, required, options }) => (
                   <div key={id}>
                     <label
                       htmlFor={id}
@@ -315,9 +316,8 @@ const AddUser = () => {
                       <select
                         id={id}
                         name={id}
-                        multiple={multiple}
-                        value={id === "groups" ? groups : formData[id]}
-                        onChange={id === "groups" ? handleToGroups : handleChange}
+                        value={formData[id]}
+                        onChange={handleChange}
                         className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${
                           errors[id] || message[id] ? "border-red-500" : "border-gray-300"
                         } rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -332,6 +332,27 @@ const AddUser = () => {
                           </option>
                         ))}
                       </select>
+                    ) : type === "checkbox" ? (
+                      <div className="w-full max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
+                        {options?.map((opt) => (
+                          <div key={opt.id} className="flex items-center mb-2">
+                            <input
+                              type="checkbox"
+                              id={`${id}-${opt.id}`}
+                              value={opt.id}
+                              checked={groups.includes(opt.id)}
+                              onChange={handleToGroups}
+                              className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <label
+                              htmlFor={`${id}-${opt.id}`}
+                              className="text-sm sm:text-base text-gray-700"
+                            >
+                              {opt.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <input
                         type={type}

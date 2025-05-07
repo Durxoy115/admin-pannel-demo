@@ -45,12 +45,12 @@ const InvoiceList = () => {
         billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
         amount: invoice.total_amount,
-        date: invoice.date.split("T")[0],
+        date: invoice?.date?.split("T")[0],
         paymentMethod: invoice.gateway,
         accountNumber: invoice.account_number,
-        paymentStatus: invoice.payment_status,
+        // paymentStatus: invoice.payment_status,
       }));
-      console.log("invoiceData-------",invoiceData);
+      console.log("invoiceData-----",invoiceData);
       setInvoices(invoiceData);
       setFilteredInvoices(invoiceData);
     } catch (error) {
@@ -309,7 +309,7 @@ const InvoiceList = () => {
                 "Amount (BDT)",
                 "Date",
                 "Payment Method",
-                "Payment Status",
+               
                 "Actions",
               ].map((heading) => (
                 <th
@@ -345,7 +345,7 @@ const InvoiceList = () => {
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.paymentMethod}-{invoice.accountNumber}
                 </td>
-                <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
+                {/* <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   <span
                     className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
                       invoice.paymentStatus === "Paid"
@@ -355,7 +355,7 @@ const InvoiceList = () => {
                   >
                     {invoice.paymentStatus}
                   </span>
-                </td>
+                </td> */}
                 <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3">
                   {
                     canEditInvoice && 

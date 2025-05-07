@@ -14,6 +14,7 @@ const EditUserProfile = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [checkEmail, setCheckEmail] = useState(null);
+  const [checkContact, setChekContact] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null); // State for API error messages
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,10 +34,12 @@ const EditUserProfile = () => {
         const data = await response.json();
         if (response.ok && data.success) {
           setCheckEmail(data?.data?.email);
+          setChekContact(data?.data?.contact),
           setEditProfile({
             first_name: data?.data?.first_name || "",
             last_name: data?.data?.last_name || "",
             email: data?.data?.email || "",
+           
             contact: data?.data?.contact || "",
             photo: null,
           });
@@ -75,7 +78,10 @@ const EditUserProfile = () => {
     const formData = new FormData();
     formData.append("first_name", editProfile.first_name);
     formData.append("last_name", editProfile.last_name);
-    formData.append("contact", editProfile.contact);
+    if(checkContact !== editProfile.contact){
+      formData.append("contact", editProfile.contact);
+    }
+    
     if (checkEmail !== editProfile.email) {
       formData.append("email", editProfile.email);
     }

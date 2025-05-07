@@ -129,7 +129,7 @@ const Products = () => {
               </ul>
 
               <p className="mt-2 sm:mt-4 text-base sm:text-lg font-semibold text-gray-700">
-                Price: {product?.price ? `$${product.price} USD` : "Contact us"}
+                Price: {product?.price ? `$ ${product.price} ` : "Contact us"}
               </p>
               {
                 canUpdateService && 

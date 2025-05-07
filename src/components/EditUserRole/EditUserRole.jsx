@@ -32,11 +32,17 @@ const EditUserRole = () => {
           const data = await response.json();
           const roleData = data?.data;
           setFormData({ name: roleData.name || "" });
-          // Ensure permissions are strings to match <select> value
-          const permissions =
-            roleData.permissions?.map((perm) => String(perm)) || [];
+          // Handle various permission formats (array of IDs, strings, or objects)
+          const permissions = roleData.permissions
+            ?.map((perm) => {
+              if (typeof perm === "object" && perm?.id) {
+                return parseInt(perm.id, 10);
+              }
+              return parseInt(perm, 10);
+            })
+            ?.filter((id) => !isNaN(id)) || [];
           setSelectedPermissions(permissions);
-          console.log("Fetched permissions:", permissions); // Debug
+          console.log("Fetched role permissions:", permissions); // Debug
         } else {
           setErrors((prev) => ({
             ...prev,
@@ -96,12 +102,14 @@ const EditUserRole = () => {
   };
 
   const handlePermissionChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions)
-      .filter((option) => option.value !== "")
-      .map((option) => option.value); // Keep as strings to match <select> value
-    setSelectedPermissions(selected);
+    const permissionId = parseInt(e.target.value, 10);
+    if (e.target.checked) {
+      setSelectedPermissions((prev) => [...prev, permissionId].filter(id => !isNaN(id)));
+    } else {
+      setSelectedPermissions((prev) => prev.filter((id) => id !== permissionId));
+    }
     setErrors((prev) => ({ ...prev, permissions: null }));
-    console.log("Selected permissions:", selected); // Debug
+    console.log("Updated selected permissions:", selectedPermissions); // Debug
   };
 
   const validateForm = () => {
@@ -125,7 +133,7 @@ const EditUserRole = () => {
 
     const payload = {
       name: formData.name,
-      permissions_id: selectedPermissions.map((perm) => parseInt(perm)), // Convert to integers for API
+      permissions_id: selectedPermissions,
     };
 
     try {
@@ -142,7 +150,7 @@ const EditUserRole = () => {
       console.log("Success:", response.data);
       setErrors({});
       alert("User role updated successfully!");
-      // navigate("/roles"); // Adjust the navigation path as needed
+      navigate("/profile");
     } catch (error) {
       console.error("Error:", error);
       const errorData = error.response?.data;
@@ -173,7 +181,7 @@ const EditUserRole = () => {
   return (
     <div className="p-1 sm:p-6 lg:p-8 min-h-screen bg-gray-100 flex">
       <div className="w-full mt-8 sm:mt-10 rounded-md">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 px-2  pt-8 md:pt-6 sm:pt-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 px-2 pt-8 md:pt-6 sm:pt-8">
           Edit User Role
         </h2>
         {errors.general && (
@@ -207,20 +215,23 @@ const EditUserRole = () => {
               <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                 User Role Permission<span className="text-red-500">*</span>
               </label>
-              <select
-                name="permissions_id"
-                multiple
-                value={selectedPermissions}
-                onChange={handlePermissionChange}
-                className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
-              >
-                <option value="">Select Permissions</option>
+              <div className="w-full max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
                 {userGroupPermission.map((opt) => (
-                  <option key={opt.id} value={String(opt.id)}>
-                    {opt.name}
-                  </option>
+                  <div key={opt.id} className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id={`permission-${opt.id}`}
+                      value={opt.id}
+                      checked={selectedPermissions.includes(opt.id)}
+                      onChange={handlePermissionChange}
+                      className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor={`permission-${opt.id}`} className="text-sm sm:text-base text-gray-700">
+                      {opt.name}
+                    </label>
+                  </div>
                 ))}
-              </select>
+              </div>
               {errors.permissions && (
                 <p className="text-red-500 text-xs mt-1">{errors.permissions}</p>
               )}
@@ -229,7 +240,7 @@ const EditUserRole = () => {
           <div className="flex justify-center space-x-4">
             <button
               type="button"
-              onClick={() => navigate("/roles")} // Adjust the navigation path as needed
+              onClick={() => navigate("/profile")}
               className="w-full sm:w-48 bg-red-600 text-white py-2 sm:py-3 px-4 rounded-full hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-sm sm:text-base transition-colors duration-200"
             >
               Cancel

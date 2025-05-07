@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
-import useUserPermission from "../hooks/usePermission";
 
 const AddUserRole = () => {
   const [selectedPermissions, setSelectedPermissions] = useState([]);
@@ -10,8 +9,7 @@ const AddUserRole = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
-  const token = getTokenLocalStorage(); 
-
+  const token = getTokenLocalStorage();
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -44,48 +42,36 @@ const AddUserRole = () => {
     fetchPermissions();
   }, [url, token]);
 
-
-
   const handlePermissionChange = (e) => {
-    const selected = Array.from(e.target.selectedOptions)
-      .filter((option) => option.value !== "" && !isNaN(parseInt(option.value)))
-      .map((option) => parseInt(option.value));
-    setSelectedPermissions(selected);
+    const permissionId = parseInt(e.target.value);
+    if (e.target.checked) {
+      setSelectedPermissions((prev) => [...prev, permissionId]);
+    } else {
+      setSelectedPermissions((prev) => prev.filter((id) => id !== permissionId));
+    }
     setErrors((prev) => ({ ...prev, permissions: null }));
   };
-
-//   const validateForm = () => {
-//     const newErrors = {};
-//     if (!formData.name.trim()) {
-//       newErrors.name = "Role name is required.";
-//     }
-//     if (selectedPermissions.length === 0) {
-//       newErrors.permissions = "At least one permission is required.";
-//     }
-//     return newErrors;
-//   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!e.target.name) {
+    if (!e.target.name.value.trim()) {
       newErrors.name = "Role name is required.";
     }
     if (selectedPermissions.length === 0) {
       newErrors.permissions = "At least one permission is required.";
     }
 
-    // const validationErrors = validateForm();
-    // if (Object.keys(validationErrors).length > 0) {
-    //   setErrors(validationErrors);
-    //   return;
-    // }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-   const payload = {
-    name : e.target.name.value,
-    permission_id : selectedPermissions
-   }
-    console.log("payload", payload)
+    const payload = {
+      name: e.target.name.value,
+      permission_id: selectedPermissions,
+    };
+    console.log("payload", payload);
     try {
       const response = await axios.post(`${url}/user-group/`, payload, {
         headers: {
@@ -96,9 +82,8 @@ const AddUserRole = () => {
       console.log("Success:", response.data);
       setErrors({});
       alert("User role added successfully!");
-    //   setFormData({ name: "" });
       setSelectedPermissions([]);
-    //   navigate("/roles"); 
+      navigate("/profile");
     } catch (error) {
       console.error("Error:", error);
       const errorData = error.response?.data;
@@ -121,7 +106,7 @@ const AddUserRole = () => {
   return (
     <div className="p-1 sm:p-6 lg:p-8 min-h-screen bg-gray-100 flex">
       <div className="w-full mt-8 sm:mt-10 rounded-md">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-8 px-2  pt-8 md:mt-6 sm:pt-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-8 px-2 pt-8 md:mt-6 sm:pt-8">
           Add User Role
         </h2>
         {errors.general && (
@@ -153,20 +138,22 @@ const AddUserRole = () => {
               <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                 User Role Permission<span className="text-red-500">*</span>
               </label>
-              <select
-                name="permissions_id"
-                multiple
-                value={selectedPermissions}
-                onChange={handlePermissionChange}
-                className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
-              >
-                <option value="">Select Permissions</option>
+              <div className="w-full max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
                 {userGroupPermission.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.name}
-                  </option>
+                  <div key={opt.id} className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      value={opt.id}
+                      checked={selectedPermissions.includes(opt.id)}
+                      onChange={handlePermissionChange}
+                      className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label className="text-sm sm:text-base text-gray-700">
+                      {opt.name}
+                    </label>
+                  </div>
                 ))}
-              </select>
+              </div>
               {errors.permissions && (
                 <p className="text-red-500 text-xs mt-1">{errors.permissions}</p>
               )}
@@ -175,7 +162,7 @@ const AddUserRole = () => {
           <div className="flex justify-center space-x-4">
             <button
               type="button"
-              onClick={() => navigate("/roles")} // Adjust the navigation path as needed
+              onClick={() => navigate("/profile")}
               className="w-full sm:w-48 bg-red-600 text-white py-2 sm:py-3 px-4 rounded-full hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 text-sm sm:text-base transition-colors duration-200"
             >
               Cancel

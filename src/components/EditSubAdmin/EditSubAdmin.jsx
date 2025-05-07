@@ -43,7 +43,7 @@ const EditSubAdmin = () => {
           setUserData(data?.data);
           // Ensure groups is an array of IDs
           const groupIds =
-            data?.data?.groups?.map((group) => parseInt(group.id || group)) ||
+            data?.data?.groups?.map((group) => parseInt(group.id || group, 10))?.filter(id => !isNaN(id)) ||
             [];
           setSelectedGroups(groupIds);
           if (data?.data?.photo) {
@@ -117,7 +117,7 @@ const EditSubAdmin = () => {
     if (name === "user_type") {
       setUserData((prevData) => ({
         ...prevData,
-        user_type: { ...prevData.user_type, id: value },
+        user_type: { ...prevData?.user_type, id: value },
       }));
     } else {
       setUserData((prevData) => ({ ...prevData, [name]: value }));
@@ -138,32 +138,30 @@ const EditSubAdmin = () => {
   };
 
   const handleToGroups = (e) => {
-    const newGroups = Array.from(e.target.selectedOptions)
-      .filter((option) => option.value !== "" && !isNaN(parseInt(option.value)))
-      .map((option) => parseInt(option.value));
-    setSelectedGroups(newGroups);
+    const groupId = parseInt(e.target.value, 10);
+    if (e.target.checked) {
+      setSelectedGroups((prev) => [...prev, groupId].filter(id => !isNaN(id)));
+    } else {
+      setSelectedGroups((prev) => prev.filter((id) => id !== groupId));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append("first_name", userData.first_name);
-      formData.append("last_name", userData.last_name);
+      formData.append("first_name", userData?.first_name);
+      formData.append("last_name", userData?.last_name);
       if (checkEmail != userData.email) {
-        formData.append("email", userData.email);
+        formData.append("email", userData?.email);
       }
       if (checkPassword != userData.password) {
-        formData.append("password", userData.password);
+        formData.append("password", userData?.password);
       }
-      formData.append("username", userData.username);
-      formData.append("contact", userData.contact);
-      formData.append("dob", userData.dob);
-      formData.append("user_type", userData.user_type.id);
-
-      // if (userData.password) {
-      //   formData.append("password", userData.password);
-      // }
+      formData.append("username", userData?.username);
+      formData.append("contact", userData?.contact);
+      formData.append("dob", userData?.dob);
+      formData.append("user_type", userData?.user_type?.id);
 
       if (image) {
         formData.append("photo", image);
@@ -184,7 +182,7 @@ const EditSubAdmin = () => {
 
       if (response.ok) {
         alert("User details updated successfully!");
-        // navigate("/profile", { state: { reload: true } });
+        navigate("/profile", { state: { reload: true } });
       } else {
         const errorData = await response.json();
         console.error("Error updating user details:", errorData);
@@ -328,26 +326,30 @@ const EditSubAdmin = () => {
               </div>
               <div>
                 <label
-                  htmlFor="groups"
                   className="block mb-1 sm:mb-2 font-medium text-sm sm:text-base"
                 >
                   User Permission Group
                 </label>
-                <select
-                  id="groups"
-                  name="groups"
-                  multiple
-                  value={selectedGroups}
-                  onChange={handleToGroups}
-                  className="w-full px-3 sm:px-4 py-1 sm:py-2 border rounded-lg text-sm sm:text-base"
-                >
-                  <option value="">Select Group</option>
+                <div className="w-full max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
                   {userGroups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
-                    </option>
+                    <div key={group.id} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={`group-${group.id}`}
+                        value={group.id}
+                        checked={selectedGroups.includes(group.id)}
+                        onChange={handleToGroups}
+                        className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor={`group-${group.id}`}
+                        className="text-sm sm:text-base text-gray-700"
+                      >
+                        {group.name}
+                      </label>
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
             </div>
           </div>

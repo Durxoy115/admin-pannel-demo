@@ -40,7 +40,7 @@ const ClientProfile = ({ id }) => {
           },
         });
         const data = await response.json();
-        if (response.ok) {
+        if (response.ok && data.success) {
           
           const fetchedData = {
             ...data?.data,
@@ -58,11 +58,11 @@ const ClientProfile = ({ id }) => {
           const errorData = await response.json();
           setError(
             errorData?.message ||
-              `Failed to fetch client details (Status: ${response.status})`
+              `Failed to fetch client details (Status: ${response?.status})`
           );
         }
       } catch (error) {
-        setError("Network error or server is unreachable. Please try again.");
+        setError(error?.data?.message);
         console.error("Error fetching client data:", error);
       } finally {
         setIsLoading(false);
@@ -163,20 +163,13 @@ const ClientProfile = ({ id }) => {
         alert("Client details updated successfully!");
         navigate("/dashboard", { state: { reload: true } });
       } else {
-        const errorData = await response.json();
-        // Handle field-specific errors (e.g., { "email": "Invalid email format" })
-        if (errorData.errors && typeof errorData.errors === "object") {
-          setFieldErrors(errorData.errors);
-          setError("Please correct the errors in the form.");
-        } else {
-          setError(
-            errorData.message ||
-              `Failed to update client details (Status: ${response.status})`
-          );
-        }
+        console.log("erorrrrr")
+        setError(data?.message);
+    
       }
     } catch (error) {
-      setError("Network error or server is unreachable. Please try again.");
+      console.log("ewrorrrr",error)
+      setError(error?.message);
       console.error("Error during client update:", error);
     }
   };
