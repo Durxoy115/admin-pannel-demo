@@ -154,7 +154,7 @@ const InvoiceEdit = () => {
         if (data.success) {
           const services = data?.data?.services.map((service) => ({
             id: service.id,
-            service_name: service.service_name,
+            service_name: service?.service_name,
             quantity: service.quantity,
             service_package: service?.service_package,
             duration: service.duration,
@@ -178,7 +178,7 @@ const InvoiceEdit = () => {
             billing_address: data?.data?.billing_address || "",
             company_address: data?.data?.company_address || "",
             invoice_date: data?.data?.invoice_date || "",
-            service_name: data.data.service_name || (services.length > 0 ? services[0].name : ""),
+            service_name: data?.data?.service_name || (services.length > 0 ? services[0].name : ""),
             sub_total: parseFloat(data.data.sub_total) || 0,
             discount: parseFloat(data.data.discount) || 0,
             payment_terms: (data.data.payment_terms) || 0,
@@ -366,7 +366,7 @@ const InvoiceEdit = () => {
     if (!formData.client_phone) newErrors.client_phone = "Client Phone No. is required";
     if (formData.services.length === 0) newErrors.services = "At least one service is required";
     formData.services.forEach((service, index) => {
-      if (!service.service_name) newErrors[`service_name_${index}`] = "Service Name is required";
+      // if (!service.service_name) newErrors[`service_name_${index}`] = "Service Name is required";
       if (service.quantity <= 0) newErrors[`quantity_${index}`] = "Quantity must be greater than 0";
       if (service.price <= 0) newErrors[`price_${index}`] = "Price must be greater than 0";
     });
@@ -379,7 +379,7 @@ const InvoiceEdit = () => {
 
     try {
       const formDataPayload = new FormData();
-      formDataPayload.append("service_name", formData.service_name);
+      // formDataPayload.append("service_name", formData.service_name);
       formDataPayload.append("company_name", formData.company_name);
       formDataPayload.append("company_address", formData.company_address);
       formDataPayload.append("billing_address", formData.billing_address);
@@ -588,7 +588,7 @@ const InvoiceEdit = () => {
           </div>
           <div>
             <label htmlFor="authority_signature" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-              Company Author
+              Company Author <span className="text-red-500">*</span>
             </label>
             <select
               id="authority_signature"
@@ -596,6 +596,7 @@ const InvoiceEdit = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.authority_signature}
+              required
             >
               <option value="" disabled>Select Author</option>
               {author.map((a) => (

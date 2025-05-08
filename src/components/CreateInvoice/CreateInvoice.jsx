@@ -566,7 +566,7 @@ const CreateInvoice = () => {
               htmlFor="authority_signature"
               className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
             >
-              Company Author
+              Company Author <span className="text-red-500">*</span>
             </label>
             <select
               id="authority_signature"
@@ -574,6 +574,7 @@ const CreateInvoice = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.authority_signature}
+              required
             >
               <option value="" disabled>
                 Select Author
