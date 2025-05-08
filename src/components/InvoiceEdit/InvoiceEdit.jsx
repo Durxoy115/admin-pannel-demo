@@ -44,6 +44,7 @@ const InvoiceEdit = () => {
     company_logo: null,
     company_logo_name: "",
     currency: "",
+    payment_terms:"",
     notes: "",
     paid_amount: 0.0,
     due_amount: 0.0,
@@ -155,7 +156,7 @@ const InvoiceEdit = () => {
             id: service.id,
             service_name: service.service_name,
             quantity: service.quantity,
-            rate: service.rate,
+            service_package: service?.service_package,
             duration: service.duration,
             price: parseFloat(service.amount) / service.quantity || 0,
             amount: parseFloat(service.amount) || 0,
@@ -180,6 +181,7 @@ const InvoiceEdit = () => {
             service_name: data.data.service_name || (services.length > 0 ? services[0].name : ""),
             sub_total: parseFloat(data.data.sub_total) || 0,
             discount: parseFloat(data.data.discount) || 0,
+            payment_terms: (data.data.payment_terms) || 0,
             vat: parseFloat(data.data.vat) || 0,
             total_amount: parseFloat(data.data.total_amount) || 0,
             authority_signature: findAuthor?.id || "",
@@ -313,7 +315,7 @@ const InvoiceEdit = () => {
           id: null,
           service_name: defaultService,
           quantity: 0,
-          rate: "Monthly",
+          service_package: "Monthly",
           duration: 0,
           price: 0.0,
           amount: 0,
@@ -391,13 +393,15 @@ const InvoiceEdit = () => {
       formDataPayload.append("due_date", formData.due_date);
       formDataPayload.append("client_email", formData.client_email);
       formDataPayload.append("client_phone", formData.client_phone);
-      formDataPayload.append("total_amount", formData.total_amount);
-      formDataPayload.append("sub_total", formData.sub_total);
+      formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
+      formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
+      formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("vat", formData.vat);
       formDataPayload.append("notes", formData.notes);
       formDataPayload.append("paid_amount", formData.paid_amount);
-      formDataPayload.append("due_amount", formData.due_amount);
+      formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
+      formDataPayload.append("paid_amount", +(+formData.paid_amount).toFixed(2));
 
       if (currency) {
         const findCurrency = currency.find((c) => c.currency === formData.currency);
@@ -612,6 +616,18 @@ const InvoiceEdit = () => {
             />
           </div>
           <div>
+            <label htmlFor="invoice_date" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+              Payment Terms
+            </label>
+            <input
+              id="payment_terms"
+              name="payment_terms"
+              value={formData?.payment_terms}
+              onChange={handleChange}
+              className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            />
+          </div>
+          <div>
             <label htmlFor="client_name" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
               Client Name <span className="text-red-500">*</span>
             </label>
@@ -671,7 +687,7 @@ const InvoiceEdit = () => {
           </div>
           <div>
             <label htmlFor="client_phone" className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-              Client Phone No. <span className="text-red-500">*</span>
+              Client Phone No. <span className="text-red-500"></span>
             </label>
             <input
               id="client_phone"
@@ -680,7 +696,7 @@ const InvoiceEdit = () => {
               value={formData.client_phone}
               onChange={handleChange}
               className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${errors.client_phone ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
-              required
+              
             />
             {errors.client_phone && <p className="text-red-500 text-xs mt-1">{errors.client_phone}</p>}
           </div>
@@ -801,13 +817,13 @@ const InvoiceEdit = () => {
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
-                      value={service.rate}
-                      onChange={(e) => handleServiceChange(index, "rate", e.target.value, service.id)}
+                      value={service?.service_package}
+                      onChange={(e) => handleServiceChange(index, "service_package", e.target.value, service.id)}
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                       required
                     >
-                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((rate) => (
-                        <option key={rate} value={rate}>{rate}</option>
+                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((service_package) => (
+                        <option key={service_package} value={service_package}>{service_package}</option>
                       ))}
                     </select>
                   </td>
@@ -817,14 +833,14 @@ const InvoiceEdit = () => {
                       value={service.duration || ""}
                       onChange={(e) => handleServiceChange(index, "duration", parseInt(e.target.value, 10) || 0, service.id)}
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      required
+                      
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
                       step="0.01"
-                      value={service.price || ""}
+                      value={+(+service.price.toFixed(2)) || ""}
                       onChange={(e) => handleServiceChange(index, "price", parseFloat(e.target.value) || 0, service.id)}
                       className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${errors[`price_${index}`] ? "border-red-500" : "border-gray-300"} rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
                       required

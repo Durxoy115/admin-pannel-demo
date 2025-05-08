@@ -84,7 +84,7 @@ const CompanyAddress = () => {
     <div>
       <div className="mt-4 sm:mt-6 md:mt-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between   mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0">Company  </h1>
+          <h1 className="text-2xl sm:text-2xl font-bold mb-2 sm:mb-0">Company  </h1>
 
           {
             addCompany && 

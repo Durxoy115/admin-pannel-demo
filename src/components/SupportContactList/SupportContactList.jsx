@@ -97,7 +97,7 @@ const SupportContactList = () => {
     <div className="sm:p-2 lg:p-1 min-h-screen bg-white">
       <div className="mt-12 sm:mt-16">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
+          <h1 className="text-xl sm:text-2xl md:text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
             Support Contact List
           </h1>
           {
