@@ -157,7 +157,7 @@ const CreateInvoiceFromDashboard = () => {
                   quantity: 0,
                   currency: "USD",
                   service_package: "Monthly",
-                  duration: 0,
+                  duration: "",
                   price: 0,
                   amount: 0,
                   description: "",
@@ -335,7 +335,7 @@ const CreateInvoiceFromDashboard = () => {
           quantity: 0,
           currency: "USD",
           service_package: "Monthly",
-          duration: 0,
+          duration: "",
           price: 0,
           amount: 0,
           description: "",
@@ -392,10 +392,9 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
       // formDataPayload.append("address", formData.address);
-      formDataPayload.append(
-        "authority_signature",
-        formData.authority_signature
-      );
+      if (formData.authority_signature) {
+        formDataPayload.append("authority_signature", formData.authority_signature);
+      }
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("client_name", formData.client_name);
       formDataPayload.append("date", formData.date);
@@ -627,7 +626,7 @@ const CreateInvoiceFromDashboard = () => {
               htmlFor="authority_signature"
               className="block text-gray-700 font-medium mb-2 text-sm sm:text-base"
             >
-              Company Author <span className="text-red-500">*</span>
+              Company Author <span className="text-red-500"></span>
             </label>
             <select
               id="authority_signature"
@@ -635,7 +634,7 @@ const CreateInvoiceFromDashboard = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.authority_signature}
-              required
+              
             >
               <option value="" disabled>
                 Select Author
@@ -973,7 +972,7 @@ const CreateInvoiceFromDashboard = () => {
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={service?.duration ? parseInt(service?.duration, 10) || 0 : ""}
+                      value={service?.duration || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
