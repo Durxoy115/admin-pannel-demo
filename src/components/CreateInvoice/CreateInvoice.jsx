@@ -307,6 +307,7 @@ const CreateInvoice = () => {
     const discountAmount = (subTotal * discountPercentage) / 100; // Calculate discount as a percentage of subtotal
     const vatAmount = (subTotal * (parseFloat(data?.vat) || 0)) / 100;
     const total = subTotal - discountAmount + vatAmount;
+    // const discountAmount = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
 
     return { sub_total: subTotal, total_amount: total };
   };
@@ -320,7 +321,8 @@ const CreateInvoice = () => {
       setGlobalError("Please correct the errors in the form.");
       return;
     }
-
+    const discountAmount_s = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
+    const vatAmount_s = ((formData.sub_total - discountAmount_s) * (parseFloat(formData.vat) || 0)) / 100;
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("company_name", formData.company_name);
@@ -341,6 +343,9 @@ const CreateInvoice = () => {
       formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
+      formDataPayload.append("discount_amount",discountAmount_s.toFixed(2));
+      formDataPayload.append("vat", formData.vat);
+      formDataPayload.append("vat_amount", vatAmount_s.toFixed(2));
       formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("notes", formData.notes);
       formDataPayload.append("paid_amount", +(+formData.paid_amount).toFixed(2));
@@ -972,7 +977,7 @@ const CreateInvoice = () => {
           <div className="flex justify-between items-center">
             <span className="text-sm sm:text-base text-red-500">Discount ({formData.discount}%):</span>
             <span className="text-red-500 text-sm sm:text-base">
-              - {discountAmount.toFixed(2)}
+              - {discountAmount?.toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between items-center border-b-2 border-dashed pb-2">

@@ -6,6 +6,7 @@ import { PiUserListLight } from "react-icons/pi";
 import { CgNotes } from "react-icons/cg";
 import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
+import { VscFilePdf } from "react-icons/vsc";
 import useToken from "../hooks/useToken";
 import { useNavigate } from "react-router-dom";
 import useUserPermission from "../hooks/usePermission";
@@ -48,6 +49,7 @@ const InvoiceList = () => {
         date: invoice?.date?.split("T")[0],
         paymentMethod: invoice.gateway,
         accountNumber: invoice.account_number,
+        invoice_pdf: invoice?.invoice_pdf
         // paymentStatus: invoice.payment_status,
       }));
       console.log("invoiceData-----",invoiceData);
@@ -58,6 +60,7 @@ const InvoiceList = () => {
     } finally {
       setLoading(false);
     }
+    
   };
 
   useEffect(() => {
@@ -116,6 +119,8 @@ const InvoiceList = () => {
   const handleDashboard = () => navigate("/dashboard");
   const handleCreateInvoice = () => navigate("/create-invoice");
   const handleEditInvoice = (id) => navigate(`/edit-invoice/${id}`);
+ 
+  
 
   if (loading) return <div className="p-4">Loading invoices...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -163,6 +168,13 @@ const InvoiceList = () => {
     unpaidInvoices,
     cancelledInvoices,
   } = getSummaryData();
+
+  const previewPDF = (invoice_pdf) => {
+    window.open(`${url}${invoice_pdf}`, '_blank')
+    console.log("previewPDF--------",invoice_pdf)
+  }
+  
+  
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full">
@@ -357,6 +369,12 @@ const InvoiceList = () => {
                   </span>
                 </td> */}
                 <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3">
+                  {
+                    canEditInvoice && 
+                    <button onClick={() => previewPDF(invoice?.invoice_pdf)}>
+                    <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                  </button>
+                  }
                   {
                     canEditInvoice && 
                     <button onClick={() => handleEditInvoice(invoice.id)}>

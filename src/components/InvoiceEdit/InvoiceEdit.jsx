@@ -376,7 +376,8 @@ const InvoiceEdit = () => {
       setGlobalError("Please correct the errors in the form.");
       return;
     }
-
+    const discountAmount_s = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
+    const vatAmount_s = ((formData.sub_total - discountAmount_s) * (parseFloat(formData.vat) || 0)) / 100;
     try {
       const formDataPayload = new FormData();
       // formDataPayload.append("service_name", formData.service_name);
@@ -398,8 +399,10 @@ const InvoiceEdit = () => {
       formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
+      formDataPayload.append("discount_amount", discountAmount_s);
       formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("vat", formData.vat);
+      formDataPayload.append("vat_amount", (vatAmount_s.toFixed(2)));
       formDataPayload.append("notes", formData.notes);
       formDataPayload.append("paid_amount", formData.paid_amount);
       formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
