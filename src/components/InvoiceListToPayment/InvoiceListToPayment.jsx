@@ -1,14 +1,15 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
-const PaymentAdd = () => {
+const InvoiceListToPayment = () => {
   const navigate = useNavigate();
+  const { invoice_id } = useParams(); // Extract client_invoice_id from URL
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
   const [formData, setFormData] = useState({
-    invoice_id: "",
+    invoice_id: invoice_id || "", // Initialize with URL param
     client_id: "",
     client_name: "",
     client_bank_name: "",
@@ -30,11 +31,14 @@ const PaymentAdd = () => {
   const [successMessage, setSuccessMessage] = useState(null);
 
   const fetchInvoiceDetails = async () => {
-    if (!formData.invoice_id) return;
+    if (!formData.invoice_id) {
+      setError("Please provide an Invoice ID");
+      return;
+    }
 
     try {
       const response = await fetch(
-        `${url}/service/invoice/?invoice_id=${formData.invoice_id}`, // Adjusted to client_invoice_id
+        `${url}/service/invoice/?client_invoice_id=${formData.invoice_id}`,
         {
           method: "GET",
           headers: {
@@ -44,14 +48,16 @@ const PaymentAdd = () => {
       );
 
       const data = await response.json();
-      console.log("API Response:", data); // Debug log
+      console.log("API Response:", data); // Debug log to show data
 
       if (response.ok) {
-        const invoiceData = data?.data;
+        // Handle both single object and array responses
+        const invoiceData = data.data && Array.isArray(data.data) ? data.data[0] : data;
 
         if (invoiceData && Object.keys(invoiceData).length > 0) {
           setFormData((prev) => ({
             ...prev,
+            invoice_id: invoiceData.client_invoice_id || prev.invoice_id,
             client_id: invoiceData?.client_id || prev.client_id,
             client_name: invoiceData?.client_name || prev.client_name,
             client_bank_name: invoiceData?.gateway || prev.client_bank_name,
@@ -72,6 +78,14 @@ const PaymentAdd = () => {
     }
   };
 
+  // Automatically fetch invoice details when component mounts
+  useEffect(() => {
+    if (invoice_id) {
+      setFormData((prev) => ({ ...prev, invoice_id })); // Update formData with URL param
+      fetchInvoiceDetails();
+    }
+  }, [invoice_id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -80,10 +94,8 @@ const PaymentAdd = () => {
     }));
   };
 
-  const handleInvoiceIdBlur = () => {
-    if (formData?.invoice_id) {
-      fetchInvoiceDetails();
-    }
+  const handleFetchInvoice = () => {
+    fetchInvoiceDetails();
   };
 
   const handleSubmit = async (e) => {
@@ -152,9 +164,8 @@ const PaymentAdd = () => {
                     {
                       label: "Invoice ID",
                       name: "invoice_id",
-                      type: "text", // Changed to text
+                      type: "text",
                       required: true,
-                      onBlur: handleInvoiceIdBlur,
                     },
                     { label: "Client Name", name: "client_name", type: "text", required: false },
                     { label: "Client ID", name: "client_id", type: "text", required: true },
@@ -176,12 +187,18 @@ const PaymentAdd = () => {
                         name={field.name}
                         value={formData[field.name]}
                         onChange={handleChange}
-                        onBlur={field.onBlur}
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required={field.required}
                       />
                     </div>
                   ))}
+                  <button
+                    type="button"
+                    onClick={handleFetchInvoice}
+                    className="mt-4 px-4 py-2 bg-blue-200 text-blue-700 rounded-md hover:bg-blue-300"
+                  >
+                    Fetch Invoice
+                  </button>
                 </div>
               </div>
               <div>
@@ -233,4 +250,4 @@ const PaymentAdd = () => {
   );
 };
 
-export default PaymentAdd;
+export default InvoiceListToPayment;

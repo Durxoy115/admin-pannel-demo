@@ -383,9 +383,11 @@ const CreateInvoiceFromDashboard = () => {
       setGlobalError("Please correct the errors in the form.");
       return;
     }
-    const discountAmount_s = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
+    const discountAmount_s = (
+      (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100
+    ).toFixed(2);
     const vatAmount_s = ((formData.sub_total - discountAmount_s) * (parseFloat(formData.vat) || 0)) / 100;
-
+    
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("company_name", formData.company_name);
@@ -406,7 +408,7 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
-      formDataPayload.append("discount_amount",discountAmount_s.toFixed(2));
+      formDataPayload.append("discount_amount",+(+discountAmount_s));
       formDataPayload.append("vat", formData.vat);
       formDataPayload.append("vat_amount", vatAmount_s.toFixed(2));
       formDataPayload.append("payment_terms", formData.payment_terms);
@@ -423,7 +425,7 @@ const CreateInvoiceFromDashboard = () => {
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
       }
-      
+     
 
       if (action === "save" || action === "sent") {
         let req_url = `${url}/service/invoice/`;
@@ -467,7 +469,7 @@ const CreateInvoiceFromDashboard = () => {
       setGlobalError("Failed to create invoice: " + error.message);
     }
   };
-
+  // console.log("discount_amount", typeof(discountAmount_s));
   return (
     <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-4 mb-2 sm:mt-4 md:mt-12 pl-2 sm:pl-10 md:pl-24">

@@ -21,7 +21,7 @@ const AddAddress = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors((prev) => ({ ...prev, [e.target.name]: null }));
+    setErrors((prev) => ({ ...prev, [e.target.name]: null, general: null }));
   };
 
   const validateForm = () => {
@@ -66,25 +66,45 @@ const AddAddress = () => {
         }
       );
 
-      console.log("Success:", response.data);
-      setErrors({});
-      navigate("/profile");
+      const data = response.data;
+      if (data.success) {
+        console.log("Success:", data);
+        setErrors({}); // Clear all errors on success
+        navigate("/profile");
+      } else {
+        const newErrors = {};
+        if (data.message) newErrors.general = data.message;
+        // Map field-specific errors if present
+        if (data.errors) {
+          if (data.errors.gateway) newErrors.gateway = Array.isArray(data.errors.gateway) ? data.errors.gateway.join(", ") : data.errors.gateway;
+          if (data.errors.bank_name) newErrors.bank_name = Array.isArray(data.errors.bank_name) ? data.errors.bank_name.join(", ") : data.errors.bank_name;
+          if (data.errors.branch_name) newErrors.branch_name = Array.isArray(data.errors.branch_name) ? data.errors.branch_name.join(", ") : data.errors.branch_name;
+          if (data.errors.account_name) newErrors.account_name = Array.isArray(data.errors.account_name) ? data.errors.account_name.join(", ") : data.errors.account_name;
+          if (data.errors.account_number) newErrors.account_number = Array.isArray(data.errors.account_number) ? data.errors.account_number.join(", ") : data.errors.account_number;
+          if (data.errors.routing_number) newErrors.routing_number = Array.isArray(data.errors.routing_number) ? data.errors.routing_number.join(", ") : data.errors.routing_number;
+          if (data.errors.company_address) newErrors.company_address = Array.isArray(data.errors.company_address) ? data.errors.company_address.join(", ") : data.errors.company_address;
+          if (data.errors.non_field_errors) newErrors.general = Array.isArray(data.errors.non_field_errors) ? data.errors.non_field_errors.join(", ") : data.errors.non_field_errors;
+        }
+        setErrors(newErrors);
+      }
     } catch (error) {
       console.error("Error adding address:", error);
       const errorData = error.response?.data;
       const newErrors = {};
       if (errorData) {
+        if (errorData.message) newErrors.general = errorData.message;
         // Map field-specific errors
-        if (errorData.gateway) newErrors.gateway = errorData.gateway.join(", ");
-        if (errorData.bank_name) newErrors.bank_name = errorData.bank_name.join(", ");
-        if (errorData.branch_name) newErrors.branch_name = errorData.branch_name.join(", ");
-        if (errorData.account_name) newErrors.account_name = errorData.account_name.join(", ");
-        if (errorData.account_number) newErrors.account_number = errorData.account_number.join(", ");
-        if (errorData.routing_number) newErrors.routing_number = errorData.routing_number.join(", ");
-        if (errorData.company_address) newErrors.company_address = errorData.company_address.join(", ");
+        if (errorData.gateway) newErrors.gateway = Array.isArray(errorData.gateway) ? errorData.gateway.join(", ") : errorData.gateway;
+        if (errorData.bank_name) newErrors.bank_name = Array.isArray(errorData.bank_name) ? errorData.bank_name.join(", ") : errorData.bank_name;
+        if (errorData.branch_name) newErrors.branch_name = Array.isArray(errorData.branch_name) ? errorData.branch_name.join(", ") : errorData.branch_name;
+        if (errorData.account_name) newErrors.account_name = Array.isArray(errorData.account_name) ? errorData.account_name.join(", ") : errorData.account_name;
+        if (errorData.account_number) newErrors.account_number = Array.isArray(errorData.account_number) ? errorData.account_number.join(", ") : errorData.account_number;
+        if (errorData.routing_number) newErrors.routing_number = Array.isArray(errorData.routing_number) ? errorData.routing_number.join(", ") : errorData.routing_number;
+        if (errorData.company_address) newErrors.company_address = Array.isArray(errorData.company_address) ? errorData.company_address.join(", ") : errorData.company_address;
         if (errorData.detail) newErrors.general = errorData.detail;
+        if (errorData.non_field_errors) newErrors.general = Array.isArray(errorData.non_field_errors) ? errorData.non_field_errors.join(", ") : errorData.non_field_errors;
       } else {
-        newErrors.general = "An error occurred. Please try again.";
+        newErrors.general = "An error occurred while adding the address. Please try again.";
       }
       setErrors(newErrors);
     } finally {

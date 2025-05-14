@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { data, useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
 const EditCompany = () => {
   const [formData, setFormData] = useState({
     name: "",
-    logo: null, // For file upload
+    logo: null,
     email: "",
     contact: "",
   });
-  const [existingLogo, setExistingLogo] = useState(""); // To display current logo URL
+  const [existingLogo, setExistingLogo] = useState("");
+  const fileInputRef = useRef(null);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,16 +26,16 @@ const EditCompany = () => {
           },
         });
         const data = await response.json();
+        console.log("API Response:", data?.data);
         if (data.success) {
-          // Assuming API returns something like { name, logo (URL), email, contact }
-          const fetchedData = data.data;
+          const fetchedData = data?.data;
           setFormData({
             name: fetchedData?.name || "",
-            logo: null, // Reset logo for file input (file can't be pre-set)
+            logo: null,
             email: fetchedData?.email || "",
             contact: fetchedData?.contact || "",
           });
-          setExistingLogo(fetchedData.logo || ""); // Store logo URL separately
+          setExistingLogo(fetchedData.logo || "");
         } else {
           alert("Failed to fetch company data: " + data.message);
         }
@@ -47,24 +48,22 @@ const EditCompany = () => {
     fetchAddress();
   }, [id, url, token]);
 
-  // console.log("company id__________",formData)
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
     setFormData({ ...formData, logo: e.target.files[0] });
-    setExistingLogo(""); // Clear existing logo preview when a new file is selected
+    setExistingLogo("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formDataPayload = new FormData(); // Use FormData for file upload
+      const formDataPayload = new FormData();
       formDataPayload.append("name", formData.name);
       if (formData.logo) {
-        formDataPayload.append("logo", formData.logo); // Only append if a new file is selected
+        formDataPayload.append("logo", formData.logo);
       }
       formDataPayload.append("email", formData.email);
       formDataPayload.append("contact", formData.contact);
@@ -74,7 +73,7 @@ const EditCompany = () => {
         headers: {
           Authorization: `Token ${token}`,
         },
-        body: formDataPayload, // Send as FormData instead of JSON
+        body: formDataPayload,
       });
 
       const data = await response.json();
@@ -116,21 +115,23 @@ const EditCompany = () => {
             <label className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Company Logo <span className="text-red-500">*</span>
             </label>
-            {existingLogo && !formData.logo && (
-              <div className="mb-2">
-                <img
-                  src={existingLogo}
-                  alt="Current Logo"
-                  className="w-20 h-20 object-cover rounded-md"
-                />
+            <div className="relative">
+              <input
+                id="company_logo"
+                type="file"
+                name="company_logo"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer file:hidden"
+              />
+              <div
+                className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 truncate cursor-pointer hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base"
+                onClick={() => fileInputRef.current.click()}
+              >
+                {formData.logo ? formData.logo.name : existingLogo ? existingLogo.split('/').pop() : "Choose a file"}
               </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-            />
+            </div>
           </div>
           <div>
             <label htmlFor="email" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">

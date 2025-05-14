@@ -42,6 +42,7 @@ import AddUserRole from "./components/AddUserRole/AddUserRole";
 import EditUserRole from "./components/EditUserRole/EditUserRole";
 import AddCurrency from "./components/AddCurrency/AddCurrency";
 import EditCurrency from "./components/EditCurrency/EditCurrency";
+import InvoiceListToPayment from "./components/InvoiceListToPayment/InvoiceListToPayment";
 
 
 // import Test from "./components/Test";
@@ -89,6 +90,7 @@ const App = () => {
           <Route path="add-payment" element={<PaymentAdd />} />
           <Route path="add-support-contact" element={<AddContact />} />
           <Route path="client-invoice-create/:clientId" element={<CreateInvoiceFromDashboard />} />
+          <Route path="invoice-to-payment/:invoice_id" element={<InvoiceListToPayment/>} />
           <Route path="company-address" element={<CompanyAddress></CompanyAddress>} />
           <Route path="add-company-address" element={<AddCompanyAddress></AddCompanyAddress>} />
           <Route path="edit-company-address/:id" element={<EditCompany></EditCompany>} />

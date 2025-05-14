@@ -7,6 +7,7 @@ import { CgNotes } from "react-icons/cg";
 import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
 import { VscFilePdf } from "react-icons/vsc";
+import { GrNotes } from "react-icons/gr";
 import useToken from "../hooks/useToken";
 import { useNavigate } from "react-router-dom";
 import useUserPermission from "../hooks/usePermission";
@@ -42,6 +43,7 @@ const InvoiceList = () => {
         id: invoice.id,
         invoiceId: invoice.client_invoice_id,
         clientId: invoice.client_id,
+        client_invoice_id: invoice.client_invoice_id,
         clientName: invoice.client_name,
         billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
@@ -118,7 +120,16 @@ const InvoiceList = () => {
 
   const handleDashboard = () => navigate("/dashboard");
   const handleCreateInvoice = () => navigate("/create-invoice");
-  const handleEditInvoice = (id) => navigate(`/edit-invoice/${id}`);
+  const handleEditInvoice = (id) => {
+    // console.log("idddddd",id)
+    navigate(`/edit-invoice/${id}`
+
+    )};
+  const handleInvoiceListToPayment = (invoice_id) => {
+    // console.log("idddddd",id)
+    navigate(`/invoice-to-payment/${invoice_id}`
+
+    )};
  
   
 
@@ -377,7 +388,13 @@ const InvoiceList = () => {
                   }
                   {
                     canEditInvoice && 
-                    <button onClick={() => handleEditInvoice(invoice.id)}>
+                    <button onClick={() => handleInvoiceListToPayment(invoice?.client_invoice_id)}>
+                    <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                  </button>
+                  }
+                  {
+                    canEditInvoice && 
+                    <button onClick={() => handleEditInvoice(invoice?.client_invoice_id)}>
                     <AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                   </button>
                   }
