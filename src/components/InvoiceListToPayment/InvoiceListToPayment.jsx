@@ -38,7 +38,7 @@ const InvoiceListToPayment = () => {
 
     try {
       const response = await fetch(
-        `${url}/service/invoice/?client_invoice_id=${formData.invoice_id}`,
+        `${url}/service/invoice/?invoice_id=${formData.invoice_id}`,
         {
           method: "GET",
           headers: {
@@ -52,7 +52,7 @@ const InvoiceListToPayment = () => {
 
       if (response.ok) {
         // Handle both single object and array responses
-        const invoiceData = data.data && Array.isArray(data.data) ? data.data[0] : data;
+        const invoiceData = data.data;
 
         if (invoiceData && Object.keys(invoiceData).length > 0) {
           setFormData((prev) => ({
