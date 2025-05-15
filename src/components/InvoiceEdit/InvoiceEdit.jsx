@@ -48,6 +48,7 @@ const InvoiceEdit = () => {
     notes: "",
     paid_amount: 0.0,
     due_amount: 0.0,
+    remove_service:"",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -192,6 +193,7 @@ const InvoiceEdit = () => {
             notes: data.data.notes || "",
             paid_amount: parseFloat(data.data.paid_amount) || 0,
             due_amount: parseFloat(data.data.due_amount) || 0,
+            remove_service: data?.data?.remove_service || "",
           };
           setFormData(fetchedData);
         } else {
@@ -315,7 +317,7 @@ const InvoiceEdit = () => {
           id: null,
           service_name: defaultService,
           quantity: 0,
-          service_package: "Monthly",
+          service_package: "",
           duration: 0,
           price: 0.0,
           amount: 0,
@@ -325,10 +327,12 @@ const InvoiceEdit = () => {
     }));
   };
 
-  const removeServiceItem = (index) => {
+  const removeServiceItem = (index, id) => {
     const updatedServices = formData.services.filter((_, i) => i !== index);
     setFormData((prev) => {
-      const newFormData = { ...prev, services: updatedServices };
+      const removeId = (formData.remove_service || "") + `${id},`
+    console.log("id-------",formData)
+      const newFormData = { ...prev, services: updatedServices,remove_service : removeId };
       const totals = calculateTotals(newFormData);
       return { ...newFormData, ...totals };
     });
@@ -409,6 +413,8 @@ const InvoiceEdit = () => {
       formDataPayload.append("paid_amount", formData.paid_amount);
       formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
       formDataPayload.append("paid_amount", +(+formData.paid_amount).toFixed(2));
+      formDataPayload.append("remove_service", formData.remove_service);
+
 
       if (currency) {
         const findCurrency = currency.find((c) => c.currency === formData.currency);
@@ -825,14 +831,26 @@ const InvoiceEdit = () => {
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
-                      value={service?.service_package}
-                      onChange={(e) => handleServiceChange(index, "service_package", e.target.value, service.id)}
+                      value={service?.service_package || ""} 
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "service_package",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      required
                     >
-                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((service_package) => (
-                        <option key={service_package} value={service_package}>{service_package}</option>
-                      ))}
+                      <option value="" disabled>
+                        Select Package
+                      </option>
+                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
+                        (service_package) => (
+                          <option key={service_package} value={service_package}>
+                            {service_package}
+                          </option>
+                        )
+                      )}
                     </select>
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
@@ -857,7 +875,7 @@ const InvoiceEdit = () => {
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">{service.amount.toFixed(2)}</td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
-                    <button type="button" onClick={() => removeServiceItem(index)} className="text-red-500 hover:text-red-700">
+                    <button type="button" onClick={() => removeServiceItem(index,service.id)} className="text-red-500 hover:text-red-700">
                       <svg className="h-4 sm:h-5 w-4 sm:w-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>

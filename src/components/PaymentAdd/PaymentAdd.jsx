@@ -24,6 +24,7 @@ const PaymentAdd = () => {
     trans_type: "",
     paid_amount: 0.0,
     due_amount: 0.0,
+    total_amount: 0.0,
   });
 
   const [error, setError] = useState(null);
@@ -34,7 +35,7 @@ const PaymentAdd = () => {
 
     try {
       const response = await fetch(
-        `${url}/service/invoice/?invoice_id=${formData.invoice_id}`, // Adjusted to client_invoice_id
+        `${url}/service/invoice/?invoice_id=${formData.invoice_id}`,
         {
           method: "GET",
           headers: {
@@ -44,7 +45,7 @@ const PaymentAdd = () => {
       );
 
       const data = await response.json();
-      console.log("API Response:", data); // Debug log
+      console.log("API Response:", data);
 
       if (response.ok) {
         const invoiceData = data?.data;
@@ -60,6 +61,7 @@ const PaymentAdd = () => {
             contact: invoiceData?.client_phone || prev.contact,
             paid_amount: parseFloat(invoiceData?.paid_amount) || prev.paid_amount,
             due_amount: parseFloat(invoiceData?.due_amount) || prev.due_amount,
+            total_amount: parseFloat(invoiceData?.total_amount) || prev.total_amount,
           }));
         } else {
           setError("No invoice found for the provided ID");
@@ -86,7 +88,7 @@ const PaymentAdd = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, action) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
@@ -109,23 +111,43 @@ const PaymentAdd = () => {
         trans_type: formData.trans_type || "",
         paid_amount: parseFloat(formData.paid_amount) || 0.0,
         due_amount: parseFloat(formData.due_amount) || 0.0,
+        total_amount: parseFloat(formData.total_amount) || 0.0,
       };
 
-      const response = await fetch(`${url}/service/payment/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      if (action === "save") {
+        const response = await fetch(`${url}/service/payment/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
 
-      const data = await response.json();
+        if (response.ok && data.success) {
+          setSuccessMessage(data.message);
+        } else {
+          throw new Error(data.message || "Failed to add payment details");
+        }
+      } else if (action === "preview") {
+        const response = await fetch(`${url}/service/payment-pdf/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (response.ok && data.success) {
-        setSuccessMessage(data.message);
-      } else {
-        throw new Error(data.message || "Failed to add payment details");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to generate preview.");
+        } else {
+          const blob = await response.blob();
+          const fileURL = window.URL.createObjectURL(blob);
+          window.open(fileURL, "_blank");
+        }
       }
     } catch (err) {
       setError(err.message || "An error occurred while adding payment details");
@@ -141,7 +163,7 @@ const PaymentAdd = () => {
       </div>
       <div className="flex-1 flex items-center justify-center px-1 sm:px-6 lg:px-8">
         <div className="bg-white p-1 md:p-8 sm:p-1 rounded-lg shadow-lg w-full">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={(e) => handleSubmit(e, "save")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h2 className="text-lg font-medium text-gray-700 mb-4">
@@ -152,7 +174,7 @@ const PaymentAdd = () => {
                     {
                       label: "Invoice ID",
                       name: "invoice_id",
-                      type: "text", // Changed to text
+                      type: "text",
                       required: true,
                       onBlur: handleInvoiceIdBlur,
                     },
@@ -165,7 +187,8 @@ const PaymentAdd = () => {
                     { label: "Date", name: "date", type: "date", required: true },
                     { label: "Contact", name: "contact", type: "text", required: false },
                     { label: "Paid Amount", name: "paid_amount", type: "number", required: false },
-                    { label: "Due Amount", name: "due_amount", type: "number", required: false },
+                    { label: "Due Amount", name: "due_amount", type: "number", required: false, readOnly: true },
+                    { label: "Total Amount", name: "total_amount", type: "number", required: false },
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-600">
@@ -179,6 +202,7 @@ const PaymentAdd = () => {
                         onBlur={field.onBlur}
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required={field.required}
+                        readOnly={field.readOnly}
                       />
                     </div>
                   ))}
@@ -224,6 +248,12 @@ const PaymentAdd = () => {
                 className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
               >
                 Save
+              </button>
+              <button
+                onClick={(e) => handleSubmit(e, "preview")}
+                className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+              >
+                Preview
               </button>
             </div>
           </form>

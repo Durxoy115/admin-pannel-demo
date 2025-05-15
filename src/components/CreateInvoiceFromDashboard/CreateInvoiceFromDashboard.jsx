@@ -41,16 +41,16 @@ const CreateInvoiceFromDashboard = () => {
     due_date: "",
     client_email: "",
     client_phone: "",
-    sub_total: 0.00,
-    total_amount: 0.00,
+    sub_total: 0.0,
+    total_amount: 0.0,
     services: [],
     discount: 0.0,
     vat: 0.0,
-    payment_terms:"",
+    payment_terms: "",
     currency: "",
     notes: "",
-    paid_amount: 0.00,
-    due_amount: 0.00,
+    paid_amount: 0.0,
+    due_amount: 0.0,
   });
 
   const [url, getTokenLocalStorage] = useToken();
@@ -156,7 +156,7 @@ const CreateInvoiceFromDashboard = () => {
                   service_name: data?.data[0]?.name,
                   quantity: 0,
                   currency: "USD",
-                  service_package: "Monthly",
+                  service_package: "",
                   duration: "",
                   price: 0,
                   amount: 0,
@@ -334,7 +334,7 @@ const CreateInvoiceFromDashboard = () => {
           service_name: defaultService,
           quantity: 0,
           currency: "USD",
-          service_package: "Monthly",
+          service_package: "",
           duration: "",
           price: 0,
           amount: 0,
@@ -384,10 +384,14 @@ const CreateInvoiceFromDashboard = () => {
       return;
     }
     const discountAmount_s = (
-      (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100
+      (formData.sub_total * (parseFloat(formData.discount) || 0)) /
+      100
     ).toFixed(2);
-    const vatAmount_s = ((formData.sub_total - discountAmount_s) * (parseFloat(formData.vat) || 0)) / 100;
-    
+    const vatAmount_s =
+      ((formData.sub_total - discountAmount_s) *
+        (parseFloat(formData.vat) || 0)) /
+      100;
+
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("company_name", formData.company_name);
@@ -397,7 +401,10 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("website_url", formData.website_url);
       // formDataPayload.append("address", formData.address);
       if (formData.authority_signature) {
-        formDataPayload.append("authority_signature", formData.authority_signature);
+        formDataPayload.append(
+          "authority_signature",
+          formData.authority_signature
+        );
       }
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("client_name", formData.client_name);
@@ -405,16 +412,22 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("due_date", formData.due_date);
       formDataPayload.append("client_email", formData.client_email);
       formDataPayload.append("client_phone", formData.client_phone);
-      formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
+      formDataPayload.append(
+        "total_amount",
+        +(+formData.total_amount).toFixed(2)
+      );
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
-      formDataPayload.append("discount_amount",+(+discountAmount_s));
+      formDataPayload.append("discount_amount", +(+discountAmount_s));
       formDataPayload.append("vat", formData.vat);
       formDataPayload.append("vat_amount", vatAmount_s.toFixed(2));
       formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("notes", formData.notes);
-      formDataPayload.append("paid_amount", +(+formData?.paid_amount)?.toFixed(2));
-      
+      formDataPayload.append(
+        "paid_amount",
+        +(+formData?.paid_amount)?.toFixed(2)
+      );
+
       formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
       if (currency) {
         const findCurrency = currency.find((c) => c.id == formData.currency);
@@ -425,7 +438,6 @@ const CreateInvoiceFromDashboard = () => {
       if (formData.company_logo) {
         formDataPayload.append("company_logo", formData.company_logo);
       }
-     
 
       if (action === "save" || action === "sent") {
         let req_url = `${url}/service/invoice/`;
@@ -640,7 +652,6 @@ const CreateInvoiceFromDashboard = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.authority_signature}
-              
             >
               <option value="" disabled>
                 Select Author
@@ -780,7 +791,6 @@ const CreateInvoiceFromDashboard = () => {
               className={`w-full px-3 sm:px-4 py-1 sm:py-2 border ${
                 errors.client_phone ? "border-red-500" : "border-gray-300"
               } rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base`}
-             
             />
             {errors.client_phone && (
               <p className="text-red-500 text-xs mt-1">{errors.client_phone}</p>
@@ -959,13 +969,19 @@ const CreateInvoiceFromDashboard = () => {
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
-                      value={service?.service_package}
+                      value={service?.service_package || ""} 
                       onChange={(e) =>
-                        handleServiceChange(index, "service_package", e.target.value)
+                        handleServiceChange(
+                          index,
+                          "service_package",
+                          e.target.value
+                        )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      required
                     >
+                      <option value="" disabled>
+                        Select Package
+                      </option>
                       {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
                         (service_package) => (
                           <option key={service_package} value={service_package}>
@@ -987,13 +1003,12 @@ const CreateInvoiceFromDashboard = () => {
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
-                      value={+(+service.price ).toFixed(2)|| ""}
+                      value={+(+service.price).toFixed(2) || ""}
                       onChange={(e) =>
                         handleServiceChange(
                           index,
@@ -1015,7 +1030,7 @@ const CreateInvoiceFromDashboard = () => {
                     )}
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
-                    {+(+(service?.amount)?.toFixed(2))}
+                    {+(+service?.amount?.toFixed(2))}
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <button

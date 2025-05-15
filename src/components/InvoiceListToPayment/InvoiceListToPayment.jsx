@@ -4,12 +4,12 @@ import useToken from "../hooks/useToken";
 
 const InvoiceListToPayment = () => {
   const navigate = useNavigate();
-  const { invoice_id } = useParams(); // Extract client_invoice_id from URL
+  const { invoice_id } = useParams();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
   const [formData, setFormData] = useState({
-    invoice_id: invoice_id || "", // Initialize with URL param
+    invoice_id: invoice_id || "",
     client_id: "",
     client_name: "",
     client_bank_name: "",
@@ -25,6 +25,7 @@ const InvoiceListToPayment = () => {
     trans_type: "",
     paid_amount: 0.0,
     due_amount: 0.0,
+    total_amount: 0.0,
   });
 
   const [error, setError] = useState(null);
@@ -48,10 +49,9 @@ const InvoiceListToPayment = () => {
       );
 
       const data = await response.json();
-      console.log("API Response:", data); // Debug log to show data
+      console.log("fetchInvoiceDetails API Response:", data);
 
       if (response.ok) {
-        // Handle both single object and array responses
         const invoiceData = data.data;
 
         if (invoiceData && Object.keys(invoiceData).length > 0) {
@@ -66,6 +66,7 @@ const InvoiceListToPayment = () => {
             contact: invoiceData?.client_phone || prev.contact,
             paid_amount: parseFloat(invoiceData?.paid_amount) || prev.paid_amount,
             due_amount: parseFloat(invoiceData?.due_amount) || prev.due_amount,
+            total_amount: parseFloat(invoiceData?.total_amount) || prev.total_amount,
           }));
         } else {
           setError("No invoice found for the provided ID");
@@ -75,13 +76,13 @@ const InvoiceListToPayment = () => {
       }
     } catch (err) {
       setError("An error occurred while fetching invoice details");
+      console.error("fetchInvoiceDetails Error:", err.message);
     }
   };
 
-  // Automatically fetch invoice details when component mounts
   useEffect(() => {
     if (invoice_id) {
-      setFormData((prev) => ({ ...prev, invoice_id })); // Update formData with URL param
+      setFormData((prev) => ({ ...prev, invoice_id }));
       fetchInvoiceDetails();
     }
   }, [invoice_id]);
@@ -98,7 +99,7 @@ const InvoiceListToPayment = () => {
     fetchInvoiceDetails();
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, action) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
@@ -121,26 +122,54 @@ const InvoiceListToPayment = () => {
         trans_type: formData.trans_type || "",
         paid_amount: parseFloat(formData.paid_amount) || 0.0,
         due_amount: parseFloat(formData.due_amount) || 0.0,
+        total_amount: parseFloat(formData.total_amount) || 0.0,
       };
 
-      const response = await fetch(`${url}/service/payment/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      console.log("handleSubmit Payload:", payload);
+      console.log("Action:", action);
 
-      const data = await response.json();
+      if (action === "save") {
+        console.log("Making POST request to:", `${url}/service/payment/`);
+        const response = await fetch(`${url}/service/payment/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (response.ok && data.success) {
-        setSuccessMessage(data.message);
-      } else {
-        throw new Error(data.message || "Failed to add payment details");
+        const data = await response.json();
+        console.log("Save API Response:", data);
+
+        if (response.ok && data.success) {
+          setSuccessMessage(data.message || "Payment added successfully");
+        } else {
+          throw new Error(data.message || "Failed to add payment details");
+        }
+      } else if (action === "preview") {
+        console.log("Making PUT request to:", `${url}/service/payment-pdf/`);
+        const response = await fetch(`${url}/service/payment-pdf/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to generate preview.");
+        } else {
+          const blob = await response.blob();
+          const fileURL = window.URL.createObjectURL(blob);
+          window.open(fileURL, "_blank");
+        }
       }
     } catch (err) {
       setError(err.message || "An error occurred while adding payment details");
+      console.error("handleSubmit Error:", err.message);
     }
   };
 
@@ -153,7 +182,7 @@ const InvoiceListToPayment = () => {
       </div>
       <div className="flex-1 flex items-center justify-center px-1 sm:px-6 lg:px-8">
         <div className="bg-white p-1 md:p-8 sm:p-1 rounded-lg shadow-lg w-full">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={(e) => handleSubmit(e, "save")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h2 className="text-lg font-medium text-gray-700 mb-4">
@@ -177,6 +206,7 @@ const InvoiceListToPayment = () => {
                     { label: "Contact", name: "contact", type: "text", required: false },
                     { label: "Paid Amount", name: "paid_amount", type: "number", required: false },
                     { label: "Due Amount", name: "due_amount", type: "number", required: false },
+                    { label: "Total Amount", name: "total_amount", type: "number", required: false },
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-600">
@@ -192,13 +222,6 @@ const InvoiceListToPayment = () => {
                       />
                     </div>
                   ))}
-                  <button
-                    type="button"
-                    onClick={handleFetchInvoice}
-                    className="mt-4 px-4 py-2 bg-blue-200 text-blue-700 rounded-md hover:bg-blue-300"
-                  >
-                    Fetch Invoice
-                  </button>
                 </div>
               </div>
               <div>
@@ -238,9 +261,17 @@ const InvoiceListToPayment = () => {
             <div className="flex justify-center mt-6">
               <button
                 type="submit"
+                onClick={() => navigate("/payment-history")}
                 className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
               >
                 Save
+              </button>
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e, "preview")}
+                className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+              >
+                Preview
               </button>
             </div>
           </form>

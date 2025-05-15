@@ -41,7 +41,7 @@ const CreateInvoice = () => {
     services: [],
     discount: 0.0,
     vat: 0.0,
-    payment_terms:"",
+    payment_terms: "",
     currency: "",
     paid_amount: 0.0,
     due_amount: 0.0,
@@ -104,8 +104,8 @@ const CreateInvoice = () => {
                 {
                   service_name: data?.data[0]?.name,
                   quantity: 0,
-                  currency: "USD",
-                  service_package: "Monthly",
+                  currency: "",
+                  service_package: "",
                   duration: 0,
                   price: 0.0,
                   amount: 0.0,
@@ -235,7 +235,10 @@ const CreateInvoice = () => {
     if (name === "vat") setVat(parseFloat(value) || 0);
     if (name === "discount") setDiscount(parseFloat(value) || 0);
     if (name === "paid_amount") {
-      const dueAmount = Math.max(0, formData.total_amount - parseFloat(value) || 0);
+      const dueAmount = Math.max(
+        0,
+        formData.total_amount - parseFloat(value) || 0
+      );
       setFormData((prev) => ({
         ...prev,
         paid_amount: parseFloat(value) || 0,
@@ -271,9 +274,9 @@ const CreateInvoice = () => {
         {
           service_name: defaultService,
           quantity: 0,
-          currency: "USD",
-          service_package: "Monthly",
-          duration: 0,
+          currency: "",
+          service_package: "",
+          duration: "",
           price: 0.0,
           amount: 0.0,
         },
@@ -321,8 +324,12 @@ const CreateInvoice = () => {
       setGlobalError("Please correct the errors in the form.");
       return;
     }
-    const discountAmount_s = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
-    const vatAmount_s = ((formData.sub_total - discountAmount_s) * (parseFloat(formData.vat) || 0)) / 100;
+    const discountAmount_s =
+      (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
+    const vatAmount_s =
+      ((formData.sub_total - discountAmount_s) *
+        (parseFloat(formData.vat) || 0)) /
+      100;
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("company_name", formData.company_name);
@@ -330,7 +337,10 @@ const CreateInvoice = () => {
       formDataPayload.append("billing_address", formData.billing_address);
       formDataPayload.append("client_id", formData.client_id);
       if (formData.authority_signature) {
-        formDataPayload.append("authority_signature", formData.authority_signature);
+        formDataPayload.append(
+          "authority_signature",
+          formData.authority_signature
+        );
       }
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("website_url", formData.website_url);
@@ -340,15 +350,21 @@ const CreateInvoice = () => {
       formDataPayload.append("due_date", formData.due_date);
       formDataPayload.append("client_email", formData.client_email);
       formDataPayload.append("client_phone", formData.client_phone);
-      formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
+      formDataPayload.append(
+        "total_amount",
+        +(+formData.total_amount).toFixed(2)
+      );
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("discount", formData.discount);
-      formDataPayload.append("discount_amount",discountAmount_s.toFixed(2));
+      formDataPayload.append("discount_amount", discountAmount_s.toFixed(2));
       formDataPayload.append("vat", formData.vat);
       formDataPayload.append("vat_amount", vatAmount_s.toFixed(2));
       formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("notes", formData.notes);
-      formDataPayload.append("paid_amount", +(+formData.paid_amount).toFixed(2));
+      formDataPayload.append(
+        "paid_amount",
+        +(+formData.paid_amount).toFixed(2)
+      );
       formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
       if (currency) {
         const findCurrency = currency.find((c) => c.id == formData.currency);
@@ -408,7 +424,8 @@ const CreateInvoice = () => {
     navigate("/invoice-list");
   };
 
-  const discountAmount = (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
+  const discountAmount =
+    (formData.sub_total * (parseFloat(formData.discount) || 0)) / 100;
 
   return (
     <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
@@ -578,7 +595,6 @@ const CreateInvoice = () => {
               onChange={handleChange}
               className="w-full px-3 sm:px-4 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={formData.authority_signature}
-             
             >
               <option value="" disabled>
                 Select Author
@@ -889,13 +905,20 @@ const CreateInvoice = () => {
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
-                      value={service?.service_package}
+                      value={service?.service_package || ""} // Default to empty string if undefined/null
                       onChange={(e) =>
-                        handleServiceChange(index, "service_package", e.target.value)
+                        handleServiceChange(
+                          index,
+                          "service_package",
+                          e.target.value
+                        )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      r
+                     
                     >
+                      <option value="" disabled>
+                        Select Package
+                      </option>
                       {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
                         (service_package) => (
                           <option key={service_package} value={service_package}>
@@ -917,7 +940,6 @@ const CreateInvoice = () => {
                         )
                       }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
-                      
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
@@ -975,7 +997,9 @@ const CreateInvoice = () => {
             <span>{formData.sub_total.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm sm:text-base text-red-500">Discount ({formData.discount}%):</span>
+            <span className="text-sm sm:text-base text-red-500">
+              Discount ({formData.discount}%):
+            </span>
             <span className="text-red-500 text-sm sm:text-base">
               - {discountAmount?.toFixed(2)}
             </span>
@@ -991,60 +1015,64 @@ const CreateInvoice = () => {
             </span>
           </div>
           <div>
-          
-          <div className="flex flex-col sm:flex-row gap-3 mt-6">
-  {/* Notes Section */}
-  <div className="w-full sm:w-3/4">
-    <label
-      htmlFor="notes"
-      className="block font-medium mb-1 text-sm sm:text-base text-start"
-    >
-      Notes
-    </label>
-    <textarea
-      id="notes"
-      name="notes"
-      placeholder="Notes – any relevant information not already covered"
-      value={formData?.notes}
-      onChange={handleChange}
-      rows={2}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2  text-sm sm:text-base resize-none"
-    />
-  </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              {/* Notes Section */}
+              <div className="w-full sm:w-3/4">
+                <label
+                  htmlFor="notes"
+                  className="block font-medium mb-1 text-sm sm:text-base text-start"
+                >
+                  Notes
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  placeholder="Notes – any relevant information not already covered"
+                  value={formData?.notes}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md  focus:outline-none focus:ring-2  text-sm sm:text-base resize-none"
+                />
+              </div>
 
-  {/* Paid / Due Section */}
-  <div className="w-full sm:w-1/4 flex flex-col justify-between gap-2">
-    <div className="flex items-center gap-2">
-      <label htmlFor="paid" className="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">
-        Paid
-      </label>
-      <input
-        type="number"
-        id="paid_amount"
-        name="paid_amount"
-        placeholder="Paid Amount"
-        value={formData?.paid_amount?.toFixed(2)}
-        onChange={handleChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  text-sm sm:text-base"
-      />
-    </div>
-    <div className="flex items-center gap-2">
-      <label htmlFor="due" className="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap">
-        Due
-      </label>
-      <input
-        type="number"
-        id="due_amount"
-        name="due_amount"
-        placeholder="Due Amount"
-        value={formData?.due_amount}
-        readOnly
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  text-sm sm:text-base bg-gray-200"
-      />
-    </div>
-  </div>
-</div>
-
+              {/* Paid / Due Section */}
+              <div className="w-full sm:w-1/4 flex flex-col justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="paid"
+                    className="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap"
+                  >
+                    Paid
+                  </label>
+                  <input
+                    type="number"
+                    id="paid_amount"
+                    name="paid_amount"
+                    placeholder="Paid Amount"
+                    value={formData?.paid_amount?.toFixed(2)}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  text-sm sm:text-base"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="due"
+                    className="text-sm sm:text-base font-medium text-gray-700 whitespace-nowrap"
+                  >
+                    Due
+                  </label>
+                  <input
+                    type="number"
+                    id="due_amount"
+                    name="due_amount"
+                    placeholder="Due Amount"
+                    value={formData?.due_amount}
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  text-sm sm:text-base bg-gray-200"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

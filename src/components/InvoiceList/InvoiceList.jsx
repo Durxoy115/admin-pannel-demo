@@ -320,7 +320,7 @@ const InvoiceList = () => {
       </div>
 
       {/* Invoice Table */}
-      <div className="overflow-x-auto bg-white shadow-lg rounded-lg mt-6">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-lg mt-6 ">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
@@ -379,17 +379,17 @@ const InvoiceList = () => {
                     {invoice.paymentStatus}
                   </span>
                 </td> */}
-                <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3">
+                <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center">
                   {
                     canEditInvoice && 
                     <button onClick={() => previewPDF(invoice?.invoice_pdf)}>
-                    <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                    <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </button>
                   }
                   {
                     canEditInvoice && 
                     <button onClick={() => handleInvoiceListToPayment(invoice?.client_invoice_id)}>
-                    <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                    <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   </button>
                   }
                   {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { AiOutlineEdit } from "react-icons/ai";
+import { VscFilePdf } from "react-icons/vsc";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
@@ -12,10 +14,10 @@ const PaymentHistory = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
-  const {permissions} = useUserPermission();
+  const { permissions } = useUserPermission();
 
   const canAddPayment = permissions.includes("service.add_payment");
-  // const canUpdatePayment = permissions.includes("service.change_payment");
+  const canUpdatePayment = permissions.includes("service.change_payment");
   const canDeletePayment = permissions.includes("service.delete_payment");
 
   const fetchUsers = async () => {
@@ -29,10 +31,10 @@ const PaymentHistory = () => {
       if (data.success) {
         setPayment(data.data);
       } else {
-        console.error("Error fetching users:", data.message);
+        console.error("Error fetching payments:", data.message);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching payments:", error);
     }
   };
 
@@ -45,7 +47,7 @@ const PaymentHistory = () => {
   };
 
   const handleDeleteSubAdmin = async () => {
-    if (!selectedPaymentId) return; // Fixed typo: `setSelectedPaymentId` → `selectedPaymentId`
+    if (!selectedPaymentId) return;
 
     try {
       const response = await fetch(
@@ -81,6 +83,35 @@ const PaymentHistory = () => {
     setSelectedPaymentId(null);
   };
 
+  const handlePaymentHistory = (id) => {
+    navigate(`/edit-payment-history/${id}`);
+    console.log("paymentId___________", id);
+  };
+
+  const previewPDF = async (id) => {
+    try {
+      const response = await fetch(`${url}/service/payment-pdf/?payment_id=${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("PDF Error:", errorData);
+        throw new Error(errorData.message || "Failed to generate PDF preview");
+      }
+
+      const blob = await response.blob();
+      const pdfUrl = window.URL.createObjectURL(blob);
+      window.open(pdfUrl, "_blank");
+    } catch (error) {
+      console.error("Error generating PDF preview:", error.message);
+    }
+  };
+
   return (
     <div className="p-1 sm:p-1 md:p-8 lg:p-10 min-h-screen bg-gray-50 mt-16">
       {/* Header */}
@@ -98,20 +129,18 @@ const PaymentHistory = () => {
             className="w-full sm:w-auto bg-white text-black px-3 py-1.5 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        {
-          canAddPayment && 
+        {canAddPayment && (
           <button
-          className="text-white text-2xl sm:text-3xl hover:text-gray-300 transition-colors"
-          onClick={handleAddPayment}
-        >
-          <IoMdAddCircleOutline />
-        </button>
-        }
-       
+            className="text-white text-2xl sm:text-3xl hover:text-gray-300 transition-colors"
+            onClick={handleAddPayment}
+          >
+            <IoMdAddCircleOutline />
+          </button>
+        )}
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto mx-auto ">
+      <div className="overflow-x-auto mx-auto">
         <table className="min-w-full bg-white rounded-lg shadow-md">
           <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm">
             <tr>
@@ -136,16 +165,30 @@ const PaymentHistory = () => {
                   <td className="p-3 sm:p-4">{payment.trans_id || "N/A"}</td>
                   <td className="p-3 sm:p-4">{payment.date || "N/A"}</td>
                   <td className="p-3 sm:p-4 flex gap-2">
-                    {
-                      canDeletePayment && 
+                    {canUpdatePayment && (
                       <button
-                      className="p-1.5 rounded-md bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
-                      onClick={() => openDeleteModal(payment.id)}
-                    >
-                      <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    }
-                   
+                        className="p-1.5 rounded-md text-green-500 hover:bg-green-200 hover:text-green-700 transition-colors"
+                        onClick={() => previewPDF(payment.id)}
+                      >
+                        <VscFilePdf className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    )}
+                    {canUpdatePayment && (
+                      <button
+                        className="p-1.5 rounded-md text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-colors"
+                        onClick={() => handlePaymentHistory(payment.id)}
+                      >
+                        <AiOutlineEdit className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    )}
+                    {canDeletePayment && (
+                      <button
+                        className="p-1.5 rounded-md bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
+                        onClick={() => openDeleteModal(payment.id)}
+                      >
+                        <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
