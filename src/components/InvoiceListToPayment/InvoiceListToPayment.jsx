@@ -36,7 +36,7 @@ const InvoiceListToPayment = () => {
       setError("Please provide an Invoice ID");
       return;
     }
-
+  
     try {
       const response = await fetch(
         `${url}/service/invoice/?invoice_id=${formData.invoice_id}`,
@@ -47,13 +47,13 @@ const InvoiceListToPayment = () => {
           },
         }
       );
-
+  
       const data = await response.json();
       console.log("fetchInvoiceDetails API Response:", data);
-
+  
       if (response.ok) {
         const invoiceData = data.data;
-
+  
         if (invoiceData && Object.keys(invoiceData).length > 0) {
           setFormData((prev) => ({
             ...prev,
@@ -67,6 +67,11 @@ const InvoiceListToPayment = () => {
             paid_amount: parseFloat(invoiceData?.paid_amount) || prev.paid_amount,
             due_amount: parseFloat(invoiceData?.due_amount) || prev.due_amount,
             total_amount: parseFloat(invoiceData?.total_amount) || prev.total_amount,
+            // Add receiver details
+            receiver_bank_name: invoiceData?.receiver?.bank_name || prev.receiver_bank_name,
+            receiver_branch: invoiceData?.receiver?.branch_name || prev.receiver_branch,
+            receiver_account_name: invoiceData?.receiver?.account_name || prev.receiver_account_name,
+            receiver_account_no: invoiceData?.receiver?.account_number || prev.receiver_account_no,
           }));
         } else {
           setError("No invoice found for the provided ID");

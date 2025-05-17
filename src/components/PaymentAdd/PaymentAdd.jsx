@@ -32,7 +32,7 @@ const PaymentAdd = () => {
 
   const fetchInvoiceDetails = async () => {
     if (!formData.invoice_id) return;
-
+  
     try {
       const response = await fetch(
         `${url}/service/invoice/?invoice_id=${formData.invoice_id}`,
@@ -43,13 +43,13 @@ const PaymentAdd = () => {
           },
         }
       );
-
+  
       const data = await response.json();
       console.log("API Response:", data);
-
+  
       if (response.ok) {
         const invoiceData = data?.data;
-
+  
         if (invoiceData && Object.keys(invoiceData).length > 0) {
           setFormData((prev) => ({
             ...prev,
@@ -62,6 +62,11 @@ const PaymentAdd = () => {
             paid_amount: parseFloat(invoiceData?.paid_amount) || prev.paid_amount,
             due_amount: parseFloat(invoiceData?.due_amount) || prev.due_amount,
             total_amount: parseFloat(invoiceData?.total_amount) || prev.total_amount,
+            // Receiver details
+            receiver_bank_name: invoiceData?.receiver?.bank_name || prev.receiver_bank_name,
+            receiver_branch: invoiceData?.receiver?.branch_name || prev.receiver_branch,
+            receiver_account_name: invoiceData?.receiver?.account_name || prev.receiver_account_name,
+            receiver_account_no: invoiceData?.receiver?.account_number || prev.receiver_account_no,
           }));
         } else {
           setError("No invoice found for the provided ID");
@@ -251,7 +256,7 @@ const PaymentAdd = () => {
               </button>
               <button
                 onClick={(e) => handleSubmit(e, "preview")}
-                className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+                className="px-6 py-2 bg-blue-200 text-black rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
               >
                 Preview
               </button>
