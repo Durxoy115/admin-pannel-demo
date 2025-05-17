@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 
@@ -22,20 +22,23 @@ const PaymentAdd = () => {
     receiver_account_no: "",
     trans_id: "",
     trans_type: "",
-    paid_amount: 0.0,
+    paid_amount: 0.0, // Previously Paid (sum of previous_payment amounts)
+    current_paid: 0.0, // Current Paid
     due_amount: 0.0,
     total_amount: 0.0,
   });
 
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [previousPayments, setPreviousPayments] = useState([]);
+  const [totalPaid, setTotalPaid] = useState(0.0);
 
   const fetchInvoiceDetails = async () => {
     if (!formData.invoice_id) return;
-  
+
     try {
       const response = await fetch(
-        `${url}/service/invoice/?invoice_id=${formData.invoice_id}`,
+        `${url}/service/payment-invoice/?invoice_id=${formData.invoice_id}`,
         {
           method: "GET",
           headers: {
@@ -43,23 +46,32 @@ const PaymentAdd = () => {
           },
         }
       );
-  
+
       const data = await response.json();
       console.log("API Response:", data);
-  
+
       if (response.ok) {
         const invoiceData = data?.data;
-  
+
         if (invoiceData && Object.keys(invoiceData).length > 0) {
+          const previousPaymentList = invoiceData?.previous_payment || [];
+          const totalPreviousPaid = previousPaymentList.reduce(
+            (sum, payment) => sum + parseFloat(payment.amount || 0),
+            0
+          );
+
+          setPreviousPayments(previousPaymentList);
+          setTotalPaid(totalPreviousPaid);
+
           setFormData((prev) => ({
             ...prev,
             client_id: invoiceData?.client_id || prev.client_id,
             client_name: invoiceData?.client_name || prev.client_name,
-            client_bank_name: invoiceData?.gateway || prev.client_bank_name,
-            client_account_no: invoiceData?.account_number || prev.client_account_no,
+            client_bank_name: invoiceData?.receiver?.client_bank_name || prev.client_bank_name,
+            client_account_no: invoiceData?.receiver?.client_account_no || prev.client_account_no,
             date: invoiceData.date ? invoiceData.date.split("T")[0] : prev.date,
             contact: invoiceData?.client_phone || prev.contact,
-            paid_amount: parseFloat(invoiceData?.paid_amount) || prev.paid_amount,
+            paid_amount: totalPreviousPaid, // Set Previously Paid
             due_amount: parseFloat(invoiceData?.due_amount) || prev.due_amount,
             total_amount: parseFloat(invoiceData?.total_amount) || prev.total_amount,
             // Receiver details
@@ -93,6 +105,17 @@ const PaymentAdd = () => {
     }
   };
 
+  // Calculate due_amount when current_paid or totalPaid changes
+  useEffect(() => {
+    const totalPaidWithCurrent = parseFloat(totalPaid) + parseFloat(formData.current_paid || 0);
+    const newDueAmount = parseFloat(formData.total_amount || 0) - totalPaidWithCurrent;
+
+    setFormData((prev) => ({
+      ...prev,
+      due_amount: newDueAmount >= 0 ? newDueAmount.toFixed(2) : 0.0,
+    }));
+  }, [formData.current_paid, formData.total_amount, totalPaid]);
+
   const handleSubmit = async (e, action) => {
     e.preventDefault();
     setError(null);
@@ -114,7 +137,7 @@ const PaymentAdd = () => {
         receiver_account_no: formData.receiver_account_no,
         trans_id: formData.trans_id,
         trans_type: formData.trans_type || "",
-        paid_amount: parseFloat(formData.paid_amount) || 0.0,
+        paid_amount: parseFloat(formData.current_paid) || 0.0, // Send current_paid as paid_amount
         due_amount: parseFloat(formData.due_amount) || 0.0,
         total_amount: parseFloat(formData.total_amount) || 0.0,
       };
@@ -185,15 +208,16 @@ const PaymentAdd = () => {
                     },
                     { label: "Client Name", name: "client_name", type: "text", required: false },
                     { label: "Client ID", name: "client_id", type: "text", required: true },
-                    { label: "Transaction ID", name: "trans_id", type: "text", required: true },
+                    { label: "Transaction ID", name: "trans_id", type: "text", required: false },
                     { label: "Transaction Type", name: "trans_type", type: "text", required: false },
                     { label: "Bank Name", name: "client_bank_name", type: "text", required: false },
-                    { label: "Account Number", name: "client_account_no", type: "text", required: true },
+                    { label: "Account Number", name: "client_account_no", type: "text", required: false },
                     { label: "Date", name: "date", type: "date", required: true },
                     { label: "Contact", name: "contact", type: "text", required: false },
-                    { label: "Paid Amount", name: "paid_amount", type: "number", required: false },
+                    { label: "Previously Total Paid", name: "paid_amount", type: "number", required: false, readOnly: true },
+                    { label: "Current Paid", name: "current_paid", type: "number", required: false },
                     { label: "Due Amount", name: "due_amount", type: "number", required: false, readOnly: true },
-                    { label: "Total Amount", name: "total_amount", type: "number", required: false },
+                    { label: "Total Amount", name: "total_amount", type: "number", required: false, readOnly: true },
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium text-gray-600">
@@ -211,6 +235,47 @@ const PaymentAdd = () => {
                       />
                     </div>
                   ))}
+                </div>
+                {/* Previously Paid Table */}
+                <div className="mt-6">
+                  <h3 className="text-md font-medium text-gray-700 mb-2">Previously Paid</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Date</label>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Amount</label>
+                    </div>
+                    {previousPayments.map((payment, index) => (
+                      <React.Fragment key={index}>
+                        <div>
+                          <input
+                            type="text"
+                            value={payment.date ? payment.date.split("T")[0] : ""}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                            readOnly
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            value={payment.amount}
+                            className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                            readOnly
+                          />
+                        </div>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-600">Total Paid</label>
+                    <input
+                      type="number"
+                      value={(parseFloat(totalPaid) + parseFloat(formData.current_paid || 0)).toFixed(2)}
+                      className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                      readOnly
+                    />
+                  </div>
                 </div>
               </div>
               <div>
@@ -256,7 +321,8 @@ const PaymentAdd = () => {
               </button>
               <button
                 onClick={(e) => handleSubmit(e, "preview")}
-                className="px-6 py-2 bg-blue-200 text-black rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+                className="px-6 py-2 bg-blue-200 text-black rounded-md hover:bg-green-theory
+focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
               >
                 Preview
               </button>

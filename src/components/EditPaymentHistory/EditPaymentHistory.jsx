@@ -23,7 +23,8 @@ const EditPaymentHistory = () => {
     receiver_account_no: "",
     trans_id: "",
     trans_type: "",
-    paid_amount: 0.0,
+    paid_amount: 0.0, // Previously Paid (sum of previous_payment amounts)
+    current_paid: 0.0, // Current Paid (for this payment)
     due_amount: 0.0,
     total_amount: 0.0,
   });
@@ -31,17 +32,10 @@ const EditPaymentHistory = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [previousPayments, setPreviousPayments] = useState([]);
+  const [totalPaid, setTotalPaid] = useState(0.0);
 
-  // Calculate due_amount automatically
-  useEffect(() => {
-    const calculatedDue = parseFloat(formData.total_amount || 0) - parseFloat(formData.paid_amount || 0);
-    setFormData((prev) => ({
-      ...prev,
-      due_amount: isNaN(calculatedDue) ? 0.0 : calculatedDue.toFixed(2),
-    }));
-  }, [formData.total_amount, formData.paid_amount]);
-
-  // Fetch payment details
+  // Fetch payment and invoice details
   const fetchPaymentDetails = async () => {
     if (!paymentId) {
       setError("No payment ID provided");
@@ -55,13 +49,10 @@ const EditPaymentHistory = () => {
       return;
     }
 
-    console.log("Fetching payment details for paymentId:", paymentId);
-    console.log("Using token:", token);
-    console.log("API URL:", `${url}/service/payment/?payment_id=${paymentId}`);
-
     setIsLoading(true);
     try {
-      const response = await fetch(
+      // Fetch payment details
+      const paymentResponse = await fetch(
         `${url}/service/payment/?payment_id=${paymentId}`,
         {
           method: "GET",
@@ -72,34 +63,62 @@ const EditPaymentHistory = () => {
         }
       );
 
-      console.log("Response status:", response.status);
-      const data = await response.json();
-      console.log("API Response:", data);
+      const paymentData = await paymentResponse.json();
+      console.log("Payment API Response:", paymentData);
 
-      if (response.ok && data.success) {
-        const paymentData = data.data;
+      if (!paymentResponse.ok || !paymentData.success) {
+        throw new Error(paymentData.message || "Failed to fetch payment details");
+      }
+
+      const payment = paymentData.data;
+
+      // Fetch invoice details to get previous payments
+      const invoiceResponse = await fetch(
+        `${url}/service/payment-invoice/?invoice_id=${payment.invoice_id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      const invoiceData = await invoiceResponse.json();
+      console.log("Invoice API Response:", invoiceData);
+
+      if (invoiceResponse.ok && invoiceData.data) {
+        const invoice = invoiceData.data;
+        const previousPaymentList = invoice.previous_payment || [];
+        const totalPreviousPaid = previousPaymentList.reduce(
+          (sum, payment) => sum + parseFloat(payment.amount || 0),
+          0
+        );
+
+        setPreviousPayments(previousPaymentList);
+        setTotalPaid(totalPreviousPaid);
+
         setFormData({
-          invoice_id: paymentData.invoice_id || "",
-          client_id: paymentData.client_id || "",
-          client_name: paymentData.client_name || "",
-          client_bank_name: paymentData.client_bank_name || "",
-          client_account_no: paymentData.client_account_no || "",
-          date: paymentData.date ? paymentData.date.split("T")[0] : "",
-          contact: paymentData.contact || "",
-          receiver_name: paymentData.receiver_name || "",
-          receiver_bank_name: paymentData.receiver_bank_name || "",
-          receiver_branch: paymentData.receiver_branch || "",
-          receiver_account_name: paymentData.receiver_account_name || "",
-          receiver_account_no: paymentData.receiver_account_no || "",
-          trans_id: paymentData.trans_id || "",
-          trans_type: paymentData.trans_type || "",
-          paid_amount: parseFloat(paymentData.paid_amount) || 0.0,
-          due_amount: parseFloat(paymentData.due_amount) || 0.0,
-          total_amount: parseFloat(paymentData.total_amount) || 0.0,
+          invoice_id: payment.invoice_id || "",
+          client_id: payment.client_id || "",
+          client_name: payment.client_name || "",
+          client_bank_name: invoice?.receiver?.bank_name || payment.client_bank_name || "",
+          client_account_no: invoice?.receiver?.account_number || payment.client_account_no || "",
+          date: payment.date ? payment.date.split("T")[0] : "",
+          contact: payment.contact || invoice?.client_phone || "",
+          receiver_name: payment.receiver_name || "",
+          receiver_bank_name: invoice?.receiver?.bank_name || payment.receiver_bank_name || "",
+          receiver_branch: invoice?.receiver?.branch_name || payment.receiver_branch || "",
+          receiver_account_name: invoice?.receiver?.account_name || payment.receiver_account_name || "",
+          receiver_account_no: invoice?.receiver?.account_number || payment.receiver_account_no || "",
+          trans_id: payment.trans_id || "",
+          trans_type: payment.trans_type || "",
+          paid_amount: totalPreviousPaid, // Sum of previous payments
+          current_paid: parseFloat(payment.paid_amount) || 0.0, // Current payment amount
+          due_amount: parseFloat(invoice?.due_amount) || 0.0,
+          total_amount: parseFloat(invoice?.total_amount) || 0.0,
         });
       } else {
-        setError(data.message || "Failed to fetch payment details");
-        console.error("API Error:", data.message);
+        throw new Error(invoiceData.message || "Failed to fetch invoice details");
       }
     } catch (err) {
       setError("An error occurred while fetching payment details");
@@ -110,9 +129,19 @@ const EditPaymentHistory = () => {
   };
 
   useEffect(() => {
-    console.log("useEffect triggered with paymentId:", paymentId);
     fetchPaymentDetails();
   }, [paymentId]);
+
+  // Calculate due_amount when current_paid or totalPaid changes
+  useEffect(() => {
+    const totalPaidWithCurrent = parseFloat(totalPaid) + parseFloat(formData.current_paid || 0);
+    const newDueAmount = parseFloat(formData.total_amount || 0) - totalPaidWithCurrent;
+
+    setFormData((prev) => ({
+      ...prev,
+      due_amount: newDueAmount >= 0 ? newDueAmount.toFixed(2) : 0.0,
+    }));
+  }, [formData.current_paid, formData.total_amount, totalPaid]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -123,7 +152,7 @@ const EditPaymentHistory = () => {
     }));
   };
 
-  // Handle form submission to update payment
+  // Handle form submission
   const handleSubmit = async (e, action = "save") => {
     e.preventDefault();
     setError(null);
@@ -137,17 +166,17 @@ const EditPaymentHistory = () => {
         client_id: formData.client_id,
         client_name: formData.client_name || "",
         client_bank_name: formData.client_bank_name || "",
-        client_account_no: formData.client_account_no,
+        client_account_no: formData.client_account_no || "",
         date: formData.date || "",
         contact: formData.contact || "",
-        receiver_name: formData.receiver_name,
-        receiver_bank_name: formData.receiver_bank_name,
-        receiver_branch: formData.receiver_branch,
-        receiver_account_name: formData.receiver_account_name,
-        receiver_account_no: formData.receiver_account_no,
-        trans_id: formData.trans_id,
+        receiver_name: formData.receiver_name || "",
+        receiver_bank_name: formData.receiver_bank_name || "",
+        receiver_branch: formData.receiver_branch || "",
+        receiver_account_name: formData.receiver_account_name || "",
+        receiver_account_no: formData.receiver_account_no || "",
+        trans_id: formData.trans_id || "",
         trans_type: formData.trans_type || "",
-        paid_amount: parseFloat(formData.paid_amount) || 0.0,
+        paid_amount: parseFloat(formData.current_paid) || 0.0, // Send current_paid as paid_amount
         due_amount: parseFloat(formData.due_amount) || 0.0,
         total_amount: parseFloat(formData.total_amount) || 0.0,
       };
@@ -155,7 +184,6 @@ const EditPaymentHistory = () => {
       console.log("Submitting payload:", payload);
 
       if (action === "save") {
-        console.log("Updating payment with PUT request");
         const response = await fetch(
           `${url}/service/payment/?payment_id=${paymentId}`,
           {
@@ -168,31 +196,30 @@ const EditPaymentHistory = () => {
           }
         );
 
-        console.log("Update response status:", response.status);
         const data = await response.json();
         console.log("Update API Response:", data);
 
         if (response.ok && data.success) {
           setSuccessMessage(data.message || "Payment updated successfully");
-          setTimeout(() => navigate("/payment-history"), 2000);
+          setTimeout(() => navigate("/payment-history"), 1500);
         } else {
           throw new Error(data.message || "Failed to update payment details");
         }
       } else if (action === "preview") {
-        console.log("Generating PDF preview with POST request");
-        const response = await fetch(`${url}/service/payment-pdf/?payment_id=${paymentId}&update=true`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify(payload),
-        });
+        const response = await fetch(
+          `${url}/service/payment-pdf/?payment_id=${paymentId}&update=true`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
 
-        console.log("PDF response status:", response.status);
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("PDF Error:", errorData);
           throw new Error(errorData.message || "Failed to generate PDF preview");
         }
 
@@ -221,14 +248,12 @@ const EditPaymentHistory = () => {
         </h1>
       </div>
       <div className="flex-1 flex items-center justify-center px-1 sm:px-6 lg:px-8">
-        <div className=" p-1 md:p-8 sm:p-1 rounded-lg shadow-lg w-full">
+        <div className="bg-white p-1 md:p-8 sm:p-1 rounded-lg shadow-lg w-full">
           { (
             <form onSubmit={(e) => handleSubmit(e, "save")}>
-              <div className="grid grid-cols-12 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h2 className="text-lg font-medium text-gray-700 mb-4">
-                    Client Details
-                  </h2>
+                  <h2 className="text-lg font-medium text-gray-700 mb-4">Client Details</h2>
                   <div className="space-y-4">
                     {[
                       {
@@ -236,18 +261,20 @@ const EditPaymentHistory = () => {
                         name: "invoice_id",
                         type: "text",
                         required: true,
+                        readOnly: true,
                       },
                       { label: "Client Name", name: "client_name", type: "text", required: false },
                       { label: "Client ID", name: "client_id", type: "text", required: true },
-                      { label: "Transaction ID", name: "trans_id", type: "text", required: true },
+                      { label: "Transaction ID", name: "trans_id", type: "text", required: false },
                       { label: "Transaction Type", name: "trans_type", type: "text", required: false },
                       { label: "Bank Name", name: "client_bank_name", type: "text", required: false },
-                      { label: "Account Number", name: "client_account_no", type: "text", required: true },
+                      { label: "Account Number", name: "client_account_no", type: "text", required: false },
                       { label: "Date", name: "date", type: "date", required: true },
                       { label: "Contact", name: "contact", type: "text", required: false },
-                      { label: "Paid Amount", name: "paid_amount", type: "number", required: false },
+                      { label: "Previously Paid", name: "paid_amount", type: "number", required: false, readOnly: true },
+                      { label: "Current Paid", name: "current_paid", type: "number", required: false },
                       { label: "Due Amount", name: "due_amount", type: "number", required: false, readOnly: true },
-                      { label: "Total Amount", name: "total_amount", type: "number", required: false },
+                      { label: "Total Amount", name: "total_amount", type: "number", required: false, readOnly: true },
                     ].map((field) => (
                       <div key={field.name}>
                         <label className="block text-sm font-medium text-gray-600">
@@ -261,15 +288,55 @@ const EditPaymentHistory = () => {
                           className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           required={field.required}
                           readOnly={field.readOnly}
+                          disabled={field.readOnly}
                         />
                       </div>
                     ))}
                   </div>
+                  {/* Previously Paid Table */}
+                  <div className="mt-6">
+                    <h3 className="text-md font-medium text-gray-700 mb-2">Previously Paid</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">Date</label>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">Amount</label>
+                      </div>
+                      {previousPayments.map((payment, index) => (
+                        <React.Fragment key={index}>
+                          <div>
+                            <input
+                              type="text"
+                              value={payment.date ? payment.date.split("T")[0] : ""}
+                              className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                              readOnly
+                            />
+                          </div>
+                          <div>
+                            <input
+                              type="number"
+                              value={payment.amount}
+                              className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                              readOnly
+                            />
+                          </div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-600">Total Paid</label>
+                      <input
+                        type="number"
+                        value={(parseFloat(totalPaid) + parseFloat(formData.current_paid || 0)).toFixed(2)}
+                        className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                        readOnly
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-medium text-gray-700 mb-4">
-                    Receiver Details
-                  </h2>
+                  <h2 className="text-lg font-medium text-gray-700 mb-4">Receiver Details</h2>
                   <div className="space-y-4">
                     {[
                       { label: "Receiver's Name", name: "receiver_name", type: "text" },
@@ -297,32 +364,40 @@ const EditPaymentHistory = () => {
               {successMessage && (
                 <p className="text-green-500 text-center mt-4">{successMessage}</p>
               )}
-              {error && (
-                <p className="text-red-500 text-center mt-4">{error}</p>
-              )}
+              {error && <p className="text-red-500 text-center mt-4">{error}</p>}
               <div className="flex justify-center mt-6 gap-4">
                 <button
                   type="submit"
                   disabled={isLoading}
                   className={`px-6 py-2 rounded-md ${
-                    "bg-green-200 text-green-700 hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    isLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-green-200 text-green-700 hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
                   }`}
                 >
-                 Save
+                  {isLoading ? "Saving..." : "Save"}
                 </button>
                 <button
                   type="button"
                   onClick={(e) => handleSubmit(e, "preview")}
-                 className="bg-blue-200 p-2 rounded-md"
-                 disabled={isLoading}
+                  disabled={isLoading}
+                  className={`px-6 py-2 rounded-md ${
+                    isLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-200 text-black hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  }`}
                 >
-                  Preview PDF
+                  {isLoading ? "Processing..." : "Preview PDF"}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={isLoading}
-                 className="bg-red-200 p-2 rounded-md"
+                  className={`px-6 py-2 rounded-md ${
+                    isLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-red-200 text-black hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  }`}
                 >
                   Cancel
                 </button>
