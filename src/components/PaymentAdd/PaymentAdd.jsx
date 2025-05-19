@@ -56,7 +56,7 @@ const PaymentAdd = () => {
         if (invoiceData && Object.keys(invoiceData).length > 0) {
           const previousPaymentList = invoiceData?.previous_payment || [];
           const totalPreviousPaid = previousPaymentList.reduce(
-            (sum, payment) => sum + parseFloat(payment.amount || 0),
+            (sum, payment) => sum + parseFloat(payment?.amount || 0),
             0
           );
 
@@ -142,14 +142,18 @@ const PaymentAdd = () => {
         total_amount: parseFloat(formData.total_amount) || 0.0,
       };
 
-      if (action === "save") {
-        const response = await fetch(`${url}/service/payment/`, {
+      if (action === "save" || action === "sent" ) {
+        let req_url = `${url}/service/payment/`;
+        if (action === "sent") {
+          req_url += "?sent=true";
+        }
+        const response = await fetch(req_url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Token ${token}`,
           },
-          body: JSON.stringify(payload),
+          body: payload,
         });
         const data = await response.json();
 
@@ -318,6 +322,13 @@ const PaymentAdd = () => {
                 className="px-6 py-2 bg-green-200 text-green-700 rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
               >
                 Save
+              </button>
+              <button
+                onClick={(e) => handleSubmit(e, "sent")}
+                className="px-6 py-2 bg-red-200 text-black rounded-md hover:bg-green-theory
+focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+              >
+               Sent
               </button>
               <button
                 onClick={(e) => handleSubmit(e, "preview")}

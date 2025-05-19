@@ -14,7 +14,6 @@ import useUserPermission from "../hooks/usePermission";
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
-  
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -23,22 +22,43 @@ const InvoiceList = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
+  const [selectedCurrency, setSelectedCurrency] = useState("USD"); // Default to USD
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const navigate = useNavigate();
-  const {permissions} = useUserPermission();
+  const { permissions } = useUserPermission();
 
   const canAddInvoice = permissions.includes("service.add_invoice");
   const canEditInvoice = permissions.includes("service.change_invoice");
   const canDeleteInvoice = permissions.includes("service.delete_invoice");
 
-  // Fetch and filter logic remains unchanged
+  // Fetch currencies from API with token
+  const fetchCurrencies = async () => {
+    try {
+      const response = await axios.get(`${url}/config/currency/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      const currencyData = response?.data?.data.map((currency) => ({
+        code: currency.currency,
+        symbol: currency.sign,
+      }));
+      setCurrencies(currencyData);
+      // Set default currency to USD if available, else first currency
+      const defaultCurrency = currencyData.find((c) => c.code === "USD")?.code || currencyData[0]?.code;
+      setSelectedCurrency(defaultCurrency);
+    } catch (error) {
+      console.error("Failed to fetch currencies:", error);
+      setError("Failed to load currency data.");
+    }
+  };
+
+  // Fetch invoices
   const fetchInvoices = async () => {
     try {
       const response = await axios.get(`${url}/service/invoice/`, {
         headers: { Authorization: `Token ${token}` },
       });
-      console.log("data-----------", response.data.data)
       const invoiceData = response?.data?.data.map((invoice) => ({
         id: invoice.id,
         invoiceId: invoice.client_invoice_id,
@@ -48,13 +68,14 @@ const InvoiceList = () => {
         billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
         amount: invoice.total_amount,
+        paidAmount: invoice.paid_amount,
+        dueAmount: invoice.due_amount,
         date: invoice?.date?.split("T")[0],
         paymentMethod: invoice.gateway,
         accountNumber: invoice.account_number,
-        invoice_pdf: invoice?.invoice_pdf
-        // paymentStatus: invoice.payment_status,
+        invoice_pdf: invoice?.invoice_pdf,
+        sign: invoice?.sign,
       }));
-      console.log("invoiceData-----",invoiceData);
       setInvoices(invoiceData);
       setFilteredInvoices(invoiceData);
     } catch (error) {
@@ -62,22 +83,27 @@ const InvoiceList = () => {
     } finally {
       setLoading(false);
     }
-    
   };
 
   useEffect(() => {
+    fetchCurrencies();
     fetchInvoices();
   }, []);
 
-
-   
   useEffect(() => {
     let filtered = invoices;
-    if (searchQuery) {
+    if (typeof searchQuery === 'string' && searchQuery.trim() !== '') {
       filtered = filtered.filter((invoice) =>
-        [invoice.clientName, invoice.companyName, invoice.invoiceId, invoice.billing_company_address].some(
-          (field) => field.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        [
+          invoice.clientName,
+          invoice.clientId,
+          invoice.companyName,
+          invoice.invoiceId,
+          invoice.billing_company_address,
+        ].some((field) => {
+          const fieldStr = field != null ? String(field) : '';
+          return fieldStr.toLowerCase().includes(searchQuery.toLowerCase());
+        })
       );
     }
     if (startDate)
@@ -121,71 +147,58 @@ const InvoiceList = () => {
   const handleDashboard = () => navigate("/dashboard");
   const handleCreateInvoice = () => navigate("/create-invoice");
   const handleEditInvoice = (id) => {
-    // console.log("idddddd",id)
-    navigate(`/edit-invoice/${id}`
-
-    )};
+    navigate(`/edit-invoice/${id}`);
+  };
   const handleInvoiceListToPayment = (invoice_id) => {
-    // console.log("idddddd",id)
-    navigate(`/invoice-to-payment/${invoice_id}`
-
-    )};
- 
-  
+    navigate(`/invoice-to-payment/${invoice_id}`);
+  };
 
   if (loading) return <div className="p-4">Loading invoices...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   const getSummaryData = () => {
-    const totalAmount = invoices.reduce(
-      (acc, invoice) => acc + Number(invoice.amount),
-      0
-    );
-    const paidAmount = invoices
-      .filter((invoice) => invoice.paymentStatus === "Paid")
-      .reduce((acc, invoice) => acc + Number(invoice.amount), 0);
-    const unpaidAmount = invoices
-      .filter((invoice) => invoice.paymentStatus === "Unpaid")
-      .reduce((acc, invoice) => acc + Number(invoice.amount), 0);
-    const cancelledAmount = invoices
-      .filter((invoice) => invoice.paymentStatus === "Cancelled")
-      .reduce((acc, invoice) => acc + Number(invoice.amount), 0);
+    // Initialize currency-specific totals dynamically
+    const currencyTotals = currencies.reduce((acc, currency) => ({
+      ...acc,
+      [currency.code]: {
+        amount: 0,
+        count: 0,
+        paidAmount: 0,
+        paidCount: 0,
+        dueAmount: 0,
+        dueCount: 0,
+        symbol: currency.symbol,
+      },
+    }), {});
+
+    // Sum amounts by currency for filtered invoices
+    filteredInvoices.forEach((invoice) => {
+      const currencyCode = currencies.find((c) => c.symbol === invoice.sign)?.code || "Unknown";
+      if (currencyTotals[currencyCode]) {
+        currencyTotals[currencyCode].amount += Number(invoice.amount || 0);
+        currencyTotals[currencyCode].count += 1;
+        currencyTotals[currencyCode].paidAmount += Number(invoice.paidAmount || 0);
+        if (Number(invoice.paidAmount) > 0) {
+          currencyTotals[currencyCode].paidCount += 1;
+        }
+        currencyTotals[currencyCode].dueAmount += Number(invoice.dueAmount || 0);
+        if (Number(invoice.dueAmount) > 0) {
+          currencyTotals[currencyCode].dueCount += 1;
+        }
+      }
+    });
 
     return {
-      totalAmount,
-      paidAmount,
-      unpaidAmount,
-      cancelledAmount,
-      totalInvoices: invoices.length,
-      paidInvoices: invoices.filter(
-        (invoice) => invoice.paymentStatus === "Paid"
-      ).length,
-      unpaidInvoices: invoices.filter(
-        (invoice) => invoice.paymentStatus === "Unpaid"
-      ).length,
-      cancelledInvoices: invoices.filter(
-        (invoice) => invoice.paymentStatus === "Cancelled"
-      ).length,
+      currencyTotals,
+      totalInvoices: filteredInvoices.length,
     };
   };
 
-  const {
-    totalAmount,
-    paidAmount,
-    unpaidAmount,
-    cancelledAmount,
-    totalInvoices,
-    paidInvoices,
-    unpaidInvoices,
-    cancelledInvoices,
-  } = getSummaryData();
+  const { currencyTotals, totalInvoices } = getSummaryData();
 
   const previewPDF = (invoice_pdf) => {
-    window.open(`${url}${invoice_pdf}`, '_blank')
-    console.log("previewPDF--------",invoice_pdf)
-  }
-  
-  
+    window.open(`${url}${invoice_pdf}`, '_blank');
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full">
@@ -194,44 +207,99 @@ const InvoiceList = () => {
       </h1>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {[
           {
             title: "INVOICE SENT",
-            amount: totalAmount,
-            count: totalInvoices,
+            amount: currencyTotals[selectedCurrency]?.amount || 0,
+            count: currencyTotals[selectedCurrency]?.count || 0,
             color: "text-blue-600",
+            render: (
+              <div className="relative">
+                {/* <div className="absolute top-0 right-0">
+                  <select
+                    value={selectedCurrency}
+                    onChange={(e) => setSelectedCurrency(e.target.value)}
+                    className="text-black text-xs sm:text-sm border rounded-md p-1"
+                  >
+                    {currencies.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.code}
+                      </option>
+                    ))}
+                  </select>
+                </div> */}
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  {currencyTotals[selectedCurrency]?.symbol || ""}
+                  {(currencyTotals[selectedCurrency]?.amount || 0).toLocaleString()}
+                </h2>
+              </div>
+            ),
           },
           {
-            title: "PAID INVOICE",
-            amount: paidAmount,
-            count: paidInvoices,
+            title: "PAID AMOUNT",
+            amount: currencyTotals[selectedCurrency]?.paidAmount || 0,
+            count: currencyTotals[selectedCurrency]?.paidCount || 0,
             color: "text-blue-600",
+            render: (
+              <div className="relative">
+                {/* <div className="absolute top-0 right-0">
+                  <select
+                    value={selectedCurrency}
+                    onChange={(e) => setSelectedCurrency(e.target.value)}
+                    className="text-black text-xs sm:text-sm border rounded-md p-1"
+                  >
+                    {currencies.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.code}
+                      </option>
+                    ))}
+                  </select>
+                </div> */}
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  {currencyTotals[selectedCurrency]?.symbol || ""}
+                  {(currencyTotals[selectedCurrency]?.paidAmount || 0).toLocaleString()}
+                </h2>
+              </div>
+            ),
           },
           {
-            title: "UNPAID INVOICE",
-            amount: unpaidAmount,
-            count: unpaidInvoices,
+            title: "DUE AMOUNT",
+            amount: currencyTotals[selectedCurrency]?.dueAmount || 0,
+            count: currencyTotals[selectedCurrency]?.dueCount || 0,
             color: "text-red-600",
-          },
-          {
-            title: "CANCELLED INVOICES",
-            amount: cancelledAmount,
-            count: cancelledInvoices,
-            color: "text-blue-600",
+            render: (
+              <div className="relative">
+                <div className="absolute top-0 right-0">
+                  <select
+                    value={selectedCurrency}
+                    onChange={(e) => setSelectedCurrency(e.target.value)}
+                    className="text-black text-xs sm:text-sm border rounded-md p-1"
+                  >
+                    {currencies.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  {currencyTotals[selectedCurrency]?.symbol || ""}
+                  {(currencyTotals[selectedCurrency]?.dueAmount || 0).toLocaleString()}
+                </h2>
+              </div>
+            ),
           },
         ].map((item, index) => (
           <div key={index} className="bg-white shadow p-4 rounded-lg">
-            <h2 className="text-lg sm:text-xl font-semibold">
-              ${item.amount.toLocaleString()}
-            </h2>
+            {item.render}
             <p className="text-xs sm:text-sm text-gray-600">{item.title}</p>
             <div className={`text-xs sm:text-sm font-semibold ${item.color}`}>
               {item.count}{" "}
-              {item.title.toLowerCase().includes("cancelled")
-                ? "Cancelled by clients"
-                : item.title.toLowerCase().includes("unpaid")
+              {item.title.toLowerCase().includes("due")
                 ? "Unpaid by clients"
+                : item.title.toLowerCase().includes("paid")
+                ? "Paid by clients"
                 : "Invoice sent"}
             </div>
           </div>
@@ -241,10 +309,7 @@ const InvoiceList = () => {
       {/* Toolbar */}
       <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4">
         <p className="text-sm sm:text-base">Invoice List</p>
-
         <div className="w-full max-w-96 sm:min-w-64">
-          {" "}
-          {/* Responsive width */}
           <input
             type="text"
             placeholder="Search..."
@@ -253,14 +318,6 @@ const InvoiceList = () => {
             className="w-full text-black px-3 py-1 sm:px-4 sm:py-2 border border-gray-700 rounded-3xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-
-        {/* <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-        
-          className="w-1/4 sm:flex-grow text-black px-4 py-2 border border-gray-700 rounded-3xl h-8 sm:ml-4"
-        /> */}
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <input
             type="date"
@@ -276,19 +333,17 @@ const InvoiceList = () => {
           />
         </div>
         <div className="flex gap-4 sm:ml-auto">
-          {
-            canAddInvoice && 
+          {canAddInvoice && (
             <button
-            className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
-            onClick={handleCreateInvoice}
-          >
-            <CgNotes className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
-              Create Invoice
-            </span>
-          </button>
-          }
-          
+              className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
+              onClick={handleCreateInvoice}
+            >
+              <CgNotes className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                Create Invoice
+              </span>
+            </button>
+          )}
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleDashboard}
@@ -296,11 +351,11 @@ const InvoiceList = () => {
             <PiUserListLight className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
               Dashboard
-            </span> 
+            </span>
           </button>
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
-            onClick={handleDashboard}
+            onClick={fetchInvoices}
           >
             <IoMdRefresh className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
@@ -320,7 +375,7 @@ const InvoiceList = () => {
       </div>
 
       {/* Invoice Table */}
-      <div className="overflow-x-auto bg-white shadow-lg rounded-lg mt-6 ">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-lg mt-6">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-100">
             <tr>
@@ -329,10 +384,9 @@ const InvoiceList = () => {
                 "Client ID",
                 "Client Name",
                 "Company Name",
-                "Amount (BDT)",
+                "Amount",
                 "Date",
                 "Payment Method",
-               
                 "Actions",
               ].map((heading) => (
                 <th
@@ -360,7 +414,7 @@ const InvoiceList = () => {
                   {invoice.companyName}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
-                  {invoice.amount} BDT
+                  {invoice?.sign}{invoice?.amount}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.date}
@@ -368,44 +422,27 @@ const InvoiceList = () => {
                 <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
                   {invoice.paymentMethod}-{invoice.accountNumber}
                 </td>
-                {/* <td className="px-4 py-2 sm:px-6 sm:py-4 text-xs sm:text-sm">
-                  <span
-                    className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                      invoice.paymentStatus === "Paid"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {invoice.paymentStatus}
-                  </span>
-                </td> */}
                 <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center">
-                  {
-                    canEditInvoice && 
+                  {canEditInvoice && (
                     <button onClick={() => previewPDF(invoice?.invoice_pdf)}>
-                    <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                  </button>
-                  }
-                  {
-                    canEditInvoice && 
+                      <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                    </button>
+                  )}
+                  {canEditInvoice && (
                     <button onClick={() => handleInvoiceListToPayment(invoice?.client_invoice_id)}>
-                    <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-                  </button>
-                  }
-                  {
-                    canEditInvoice && 
+                      <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                    </button>
+                  )}
+                  {canEditInvoice && (
                     <button onClick={() => handleEditInvoice(invoice?.client_invoice_id)}>
-                    <AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                  </button>
-                  }
-                  {
-                    canDeleteInvoice &&
+                      <AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                    </button>
+                  )}
+                  {canDeleteInvoice && (
                     <button onClick={() => openDeleteModal(invoice.id)}>
-                    <RiDeleteBin6Line className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-                  </button>
-                  }
-                  
-                  
+                      <RiDeleteBin6Line className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

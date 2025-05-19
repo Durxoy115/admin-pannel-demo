@@ -202,7 +202,7 @@ const CreateInvoice = () => {
     fetchAddress();
   }, [url, token]);
   useEffect(() => {
-    const fetchAddress = async () => {
+    const fetchCurrency = async () => {
       try {
         const response = await fetch(`${url}/config/currency/`, {
           method: "GET",
@@ -224,7 +224,7 @@ const CreateInvoice = () => {
         );
       }
     };
-    fetchAddress();
+    fetchCurrency();
   }, [url, token]);
 
   const handleChange = (e) => {

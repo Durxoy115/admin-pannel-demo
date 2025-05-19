@@ -86,9 +86,17 @@ const Dashboard = () => {
   const handleSearch = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    const filtered = clients.filter((client) =>
-      client.name?.toLowerCase().includes(query.toLowerCase())
-    );
+    const filtered = clients.filter((client) => {
+      // Ensure query is a string and non-empty
+      if (typeof query !== 'string' || query.trim() === '') return false;
+    
+      const queryLower = query.toLowerCase();
+      // Check client.name (handle undefined/null) and client.id (convert to string)
+      return (
+        (client.name?.toLowerCase()?.includes(queryLower) || false) ||
+        String(client.client_id).toLowerCase().includes(queryLower)
+      );
+    });
     setFilteredClients(filtered);
   };
 
