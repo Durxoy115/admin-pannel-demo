@@ -110,7 +110,7 @@ const EditPaymentHistory = () => {
           receiver_branch: invoice?.receiver?.branch_name || payment.receiver_branch || "",
           receiver_account_name: invoice?.receiver?.account_name || payment.receiver_account_name || "",
           receiver_account_no: invoice?.receiver?.account_number || payment.receiver_account_no || "",
-          trans_id: payment.trans_id || "",
+          ...(formData.trans_id && { trans_id: formData.trans_id }),
           trans_type: payment.trans_type || "",
           paid_amount: totalPreviousPaid, // Sum of previous payments
           current_paid: parseFloat(payment.paid_amount) || 0.0, // Current payment amount
@@ -182,6 +182,7 @@ const EditPaymentHistory = () => {
       };
 
       console.log("Submitting payload:", payload);
+      console.log("Action:", action);
 
       if (action === "save") {
         const response = await fetch(
@@ -204,6 +205,28 @@ const EditPaymentHistory = () => {
           setTimeout(() => navigate("/payment-history"), 1500);
         } else {
           throw new Error(data.message || "Failed to update payment details");
+        }
+      } else if (action === "sent") {
+        const response = await fetch(
+          `${url}/service/payment/?sent=true&payment_id=${paymentId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        const data = await response.json();
+        console.log("Sent API Response:", data);
+
+        if (response.ok && data.success) {
+          setSuccessMessage(data.message || "Payment sent successfully");
+          setTimeout(() => navigate("/payment-history"), 1500);
+        } else {
+          throw new Error(data.message || "Failed to send payment details");
         }
       } else if (action === "preview") {
         const response = await fetch(
@@ -229,7 +252,7 @@ const EditPaymentHistory = () => {
       }
     } catch (err) {
       setError(err.message || "An error occurred during the operation");
-      console.error("Submit/Preview Error:", err.message);
+      console.error("Submit/Preview/Sent Error:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -379,12 +402,24 @@ const EditPaymentHistory = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={(e) => handleSubmit(e, "sent")}
+                  disabled={isLoading}
+                  className={`px-6 py-2 rounded-md ${
+                    isLoading
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-red-200 text-black hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  }`}
+                >
+                  {isLoading ? "Processing..." : "Sent"}
+                </button>
+                <button
+                  type="button"
                   onClick={(e) => handleSubmit(e, "preview")}
                   disabled={isLoading}
                   className={`px-6 py-2 rounded-md ${
                     isLoading
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-blue-200 text-black hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      : "bg-blue-200 text-black hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   }`}
                 >
                   {isLoading ? "Processing..." : "Preview PDF"}

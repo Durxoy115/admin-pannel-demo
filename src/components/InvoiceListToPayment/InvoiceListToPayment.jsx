@@ -149,7 +149,7 @@ const InvoiceListToPayment = () => {
         receiver_branch: formData.receiver_branch || "",
         receiver_account_name: formData.receiver_account_name || "",
         receiver_account_no: formData.receiver_account_no || "",
-        trans_id: formData.trans_id || "",
+        ...(formData.trans_id && { trans_id: formData.trans_id }),
         trans_type: formData.trans_type || "",
         paid_amount: parseFloat(formData.current_paid) || 0.0, // Send current_paid as paid_amount
         due_amount: parseFloat(formData.due_amount) || 0.0,
@@ -159,9 +159,10 @@ const InvoiceListToPayment = () => {
       console.log("handleSubmit Payload:", payload);
       console.log("Action:", action);
 
-      if (action === "save") {
-        console.log("Making POST request to:", `${url}/service/payment/`);
-        const response = await fetch(`${url}/service/payment/`, {
+      if (action === "save" || action === "sent") {
+        const req_url = action === "sent" ? `${url}/service/payment/?sent=true` : `${url}/service/payment/`;
+        console.log(`Making POST request to: ${req_url}`);
+        const response = await fetch(req_url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -171,13 +172,13 @@ const InvoiceListToPayment = () => {
         });
 
         const data = await response.json();
-        console.log("Save API Response:", data);
+        console.log(`${action} API Response:`, data);
 
         if (response.ok && data.success) {
-          setSuccessMessage(data.message || "Payment added successfully");
+          setSuccessMessage(data.message || `${action === "sent" ? "Payment sent" : "Payment added"} successfully`);
           setTimeout(() => navigate("/payment-history"), 1500); // Redirect after success
         } else {
-          throw new Error(data.message || "Failed to add payment details");
+          throw new Error(data.message || `Failed to ${action === "sent" ? "send" : "add"} payment details`);
         }
       } else if (action === "preview") {
         console.log("Making PUT request to:", `${url}/service/payment-pdf/`);
@@ -200,7 +201,7 @@ const InvoiceListToPayment = () => {
         }
       }
     } catch (err) {
-      setError(err.message || "An error occurred while adding payment details");
+      setError(err.message || "An error occurred while processing payment details");
       console.error("handleSubmit Error:", err.message);
     }
   };
@@ -339,8 +340,15 @@ const InvoiceListToPayment = () => {
               </button>
               <button
                 type="button"
+                onClick={(e) => handleSubmit(e, "sent")}
+                className="px-6 py-2 bg-red-200 text-black rounded-md hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 mb-6 ml-3"
+              >
+                Sent
+              </button>
+              <button
+                type="button"
                 onClick={(e) => handleSubmit(e, "preview")}
-                className="px-6 py-2 bg-blue-200 text-black rounded-md hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6 ml-3"
+                className="px-6 py-2 bg-blue-200 text-black rounded-md hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 ml-3"
               >
                 Preview
               </button>

@@ -120,7 +120,7 @@ const PaymentAdd = () => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
-
+  
     try {
       const payload = {
         invoice_id: formData.invoice_id,
@@ -135,15 +135,15 @@ const PaymentAdd = () => {
         receiver_branch: formData.receiver_branch,
         receiver_account_name: formData.receiver_account_name,
         receiver_account_no: formData.receiver_account_no,
-        trans_id: formData.trans_id,
+        ...(formData.trans_id && { trans_id: formData.trans_id }),
         trans_type: formData.trans_type || "",
         paid_amount: parseFloat(formData.current_paid) || 0.0, // Send current_paid as paid_amount
         due_amount: parseFloat(formData.due_amount) || 0.0,
         total_amount: parseFloat(formData.total_amount) || 0.0,
       };
-
-      if (action === "save" || action === "sent" ) {
-        let req_url = `${url}/service/payment/`;
+  
+      let req_url = `${url}/service/payment/`;
+      if (action === "save" || action === "sent") {
         if (action === "sent") {
           req_url += "?sent=true";
         }
@@ -153,10 +153,11 @@ const PaymentAdd = () => {
             "Content-Type": "application/json",
             Authorization: `Token ${token}`,
           },
-          body: payload,
+          body: JSON.stringify(payload), // Ensure payload is stringified
         });
+  
         const data = await response.json();
-
+  
         if (response.ok && data.success) {
           setSuccessMessage(data.message);
         } else {
@@ -171,7 +172,7 @@ const PaymentAdd = () => {
           },
           body: JSON.stringify(payload),
         });
-
+  
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || "Failed to generate preview.");
