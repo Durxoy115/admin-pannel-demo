@@ -8,6 +8,7 @@ import { IoMdRefresh } from "react-icons/io";
 import { BsDownload } from "react-icons/bs";
 import { VscFilePdf } from "react-icons/vsc";
 import { GrNotes } from "react-icons/gr";
+import { MdSend } from "react-icons/md";
 import useToken from "../hooks/useToken";
 import { useNavigate } from "react-router-dom";
 import useUserPermission from "../hooks/usePermission";
@@ -23,7 +24,7 @@ const InvoiceList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
   const [currencies, setCurrencies] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState("USD"); // Default to USD
+  const [selectedCurrency, setSelectedCurrency] = useState("");
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
   const navigate = useNavigate();
@@ -44,17 +45,18 @@ const InvoiceList = () => {
         symbol: currency.sign,
       }));
       setCurrencies(currencyData);
-      // Set default currency to USD if available, else first currency
-      const defaultCurrency = currencyData.find((c) => c.code === "USD")?.code || currencyData[0]?.code;
+      const defaultCurrency = currencyData.find((c) => c.code === "USD")?.code || currencyData[0]?.code || "";
       setSelectedCurrency(defaultCurrency);
+      return currencyData;
     } catch (error) {
       console.error("Failed to fetch currencies:", error);
       setError("Failed to load currency data.");
+      return [];
     }
   };
 
   // Fetch invoices
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (currencyData) => {
     try {
       const response = await axios.get(`${url}/service/invoice/`, {
         headers: { Authorization: `Token ${token}` },
@@ -75,21 +77,33 @@ const InvoiceList = () => {
         accountNumber: invoice.account_number,
         invoice_pdf: invoice?.invoice_pdf,
         sign: invoice?.sign,
+        currency: invoice?.currency,
+        total_paid_amount: invoice?.total_paid_amount,
       }));
       setInvoices(invoiceData);
-      setFilteredInvoices(invoiceData);
+      const defaultCurrency = currencyData.find((c) => c.code === "USD")?.code || currencyData[0]?.code || "";
+      setFilteredInvoices(
+        invoiceData.filter((invoice) => invoice.currency === defaultCurrency)
+      );
     } catch (error) {
       setError("Failed to fetch invoices.");
+      console.error("Error fetching invoices:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch currencies and invoices sequentially
   useEffect(() => {
-    fetchCurrencies();
-    fetchInvoices();
+    const loadData = async () => {
+      setLoading(true);
+      const currencyData = await fetchCurrencies();
+      await fetchInvoices(currencyData);
+    };
+    loadData();
   }, []);
 
+  // Filter invoices based on search, date, and currency
   useEffect(() => {
     let filtered = invoices;
     if (typeof searchQuery === 'string' && searchQuery.trim() !== '') {
@@ -99,19 +113,24 @@ const InvoiceList = () => {
           invoice.clientId,
           invoice.companyName,
           invoice.invoiceId,
-          invoice.billing_company_address,
+          invoice.billingCompanyAddress,
         ].some((field) => {
           const fieldStr = field != null ? String(field) : '';
           return fieldStr.toLowerCase().includes(searchQuery.toLowerCase());
         })
       );
     }
-    if (startDate)
+    if (startDate) {
       filtered = filtered.filter((invoice) => invoice.date >= startDate);
-    if (endDate)
+    }
+    if (endDate) {
       filtered = filtered.filter((invoice) => invoice.date <= endDate);
+    }
+    if (selectedCurrency) {
+      filtered = filtered.filter((invoice) => invoice.currency === selectedCurrency);
+    }
     setFilteredInvoices(filtered);
-  }, [searchQuery, startDate, endDate, invoices]);
+  }, [searchQuery, startDate, endDate, selectedCurrency, invoices]);
 
   const openDeleteModal = (id) => {
     setSelectedInvoiceId(id);
@@ -134,10 +153,13 @@ const InvoiceList = () => {
         }
       );
       if (response.ok) {
-        setInvoices(
-          invoices.filter((invoice) => invoice.id !== selectedInvoiceId)
+        setInvoices(invoices.filter((invoice) => invoice.id !== selectedInvoiceId));
+        setFilteredInvoices(
+          filteredInvoices.filter((invoice) => invoice.id !== selectedInvoiceId)
         );
         setIsModalOpen(false);
+      } else {
+        console.error("Failed to delete invoice");
       }
     } catch (error) {
       console.error("Error deleting invoice:", error);
@@ -153,11 +175,44 @@ const InvoiceList = () => {
     navigate(`/invoice-to-payment/${invoice_id}`);
   };
 
+  const handleSendInvoice = async (id) => {
+    try {
+      const response = await fetch(
+        `${url}/service/invoice/?sent=true&invoice_id=${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      console.log("Sent API Response:", data);
+
+      if (response.ok && data.success) {
+        alert(data.message || "Invoice sent successfully");
+        const currencyData = await fetchCurrencies();
+        await fetchInvoices(currencyData);
+      } else {
+        console.error("Failed to send invoice:", data.message);
+        alert(data.message || "Failed to send invoice");
+      }
+    } catch (error) {
+      console.error("Error sending invoice:", error);
+      alert("An error occurred while sending the invoice");
+    }
+  };
+
+  const previewPDF = (invoice_pdf) => {
+    window.open(`${url}${invoice_pdf}`, '_blank');
+  };
+
   if (loading) return <div className="p-4">Loading invoices...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   const getSummaryData = () => {
-    // Initialize currency-specific totals dynamically
     const currencyTotals = currencies.reduce((acc, currency) => ({
       ...acc,
       [currency.code]: {
@@ -171,23 +226,26 @@ const InvoiceList = () => {
       },
     }), {});
 
-    // Sum amounts by currency for filtered invoices
     filteredInvoices.forEach((invoice) => {
-      const currencyCode = currencies.find((c) => c.symbol === invoice.sign)?.code || "Unknown";
+      const currencyCode = invoice.currency || "Unknown";
       if (currencyTotals[currencyCode]) {
         currencyTotals[currencyCode].amount += Number(invoice.amount || 0);
         currencyTotals[currencyCode].count += 1;
-        currencyTotals[currencyCode].paidAmount += Number(invoice.paidAmount || 0);
-        if (Number(invoice.paidAmount) > 0) {
-          currencyTotals[currencyCode].paidCount += 1;
+        currencyTotals[currencyCode].paidAmount += Number(invoice.total_paid_amount || 0);
+        if (Number(invoice?.total_paid_amount) > 0) {
+          currencyTotals[currencyCode].total_paid_amount += 1;
         }
-        currencyTotals[currencyCode].dueAmount += Number(invoice.dueAmount || 0);
-        if (Number(invoice.dueAmount) > 0) {
-          currencyTotals[currencyCode].dueCount += 1;
-        }
+        // currencyTotals[currencyCode].dueAmount += Number(invoice.dueAmount || 0);
+        // if (Number(invoice.dueAmount) > 0) {
+        //   currencyTotals[currencyCode].dueCount += 1;
+        // }
       }
     });
-
+    
+    Object.keys(currencyTotals).forEach((currency) =>{
+      currencyTotals[currency].dueAmount = currencyTotals[currency].amount - currencyTotals[currency].paidAmount
+    })
+    
     return {
       currencyTotals,
       totalInvoices: filteredInvoices.length,
@@ -196,10 +254,7 @@ const InvoiceList = () => {
 
   const { currencyTotals, totalInvoices } = getSummaryData();
 
-  const previewPDF = (invoice_pdf) => {
-    window.open(`${url}${invoice_pdf}`, '_blank');
-  };
-
+  console.log(currencyTotals)
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full">
       <h1 className="text-2xl sm:text-3xl font-semibold mb-6">
@@ -265,7 +320,7 @@ const InvoiceList = () => {
           },
           {
             title: "DUE AMOUNT",
-            amount: currencyTotals[selectedCurrency]?.dueAmount || 0,
+            amount: currencyTotals[selectedCurrency]?.dueAmount|| 0,
             count: currencyTotals[selectedCurrency]?.dueCount || 0,
             color: "text-red-600",
             render: (
@@ -337,6 +392,7 @@ const InvoiceList = () => {
             <button
               className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
               onClick={handleCreateInvoice}
+              title="Create Invoice"
             >
               <CgNotes className="h-5 w-5 sm:h-6 sm:w-6" />
               <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
@@ -347,6 +403,7 @@ const InvoiceList = () => {
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleDashboard}
+            title="Dashboard"
           >
             <PiUserListLight className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
@@ -356,6 +413,7 @@ const InvoiceList = () => {
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={fetchInvoices}
+            title="Refresh"
           >
             <IoMdRefresh className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
@@ -365,6 +423,7 @@ const InvoiceList = () => {
           <button
             className="text-lg sm:text-xl text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg relative group"
             onClick={handleDashboard}
+            title="Download"
           >
             <BsDownload className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-blue-700 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
@@ -424,22 +483,27 @@ const InvoiceList = () => {
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center">
                   {canEditInvoice && (
-                    <button onClick={() => previewPDF(invoice?.invoice_pdf)}>
+                    <button onClick={() => previewPDF(invoice?.invoice_pdf)} title="Preview PDF">
                       <VscFilePdf className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                     </button>
                   )}
                   {canEditInvoice && (
-                    <button onClick={() => handleInvoiceListToPayment(invoice?.client_invoice_id)}>
+                    <button onClick={() => handleInvoiceListToPayment(invoice?.client_invoice_id)} title="Convert to Payment">
                       <GrNotes className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     </button>
                   )}
                   {canEditInvoice && (
-                    <button onClick={() => handleEditInvoice(invoice?.client_invoice_id)}>
+                    <button onClick={() => handleEditInvoice(invoice?.client_invoice_id)} title="Edit">
                       <AiOutlineEdit className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                     </button>
                   )}
+                  {/* {canEditInvoice && (
+                    <button onClick={() => handleSendInvoice(invoice.id)} title="Send">
+                      <MdSend className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                    </button>
+                  )} */}
                   {canDeleteInvoice && (
-                    <button onClick={() => openDeleteModal(invoice.id)}>
+                    <button onClick={() => openDeleteModal(invoice.id)} title="Delete">
                       <RiDeleteBin6Line className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                     </button>
                   )}

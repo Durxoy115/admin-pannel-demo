@@ -3,10 +3,10 @@ import { FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { AiOutlineEdit } from "react-icons/ai";
 import { VscFilePdf } from "react-icons/vsc";
+import { MdSend } from "react-icons/md"; // Added for Sent button
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
-import axios from "axios";
 
 const PaymentHistory = () => {
   const [payments, setPayments] = useState([]);
@@ -16,8 +16,8 @@ const PaymentHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPaymentId, setSelectedPaymentId] = useState(null);
   const [currencies, setCurrencies] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState(""); // Default to USD
-  const [currencyTotals, setCurrencyTotals] = useState({}); // Default to USD
+  const [selectedCurrency, setSelectedCurrency] = useState("");
+  const [currencyTotals, setCurrencyTotals] = useState({});
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -26,25 +26,6 @@ const PaymentHistory = () => {
   const canAddPayment = permissions.includes("service.add_payment");
   const canUpdatePayment = permissions.includes("service.change_payment");
   const canDeletePayment = permissions.includes("service.delete_payment");
-
-  // Fetch currencies from API with token
-  // const fetchCurrencies = async () => {
-  //   try {
-  //     const response = await axios.get(`${url}/config/currency/`, {
-  //       headers: { Authorization: `Token ${token}` },
-  //     });
-  //     const currencyData = response?.data?.data.map((currency) => ({
-  //       code: currency.currency,
-  //       symbol: currency.sign,
-  //     }));
-  //     setCurrencies(currencyData);
-  //     // Set default currency to USD if available, else first currency
-  //     const defaultCurrency = currencyData.find((c) => c.code === "USD")?.code || currencyData[0]?.code;
-  //     setSelectedCurrency(defaultCurrency);
-  //   } catch (error) {
-  //     console.error("Failed to fetch currencies:", error);
-  //   }
-  // };
 
   // Fetch payments
   const fetchPayments = async () => {
@@ -56,57 +37,47 @@ const PaymentHistory = () => {
       });
       const data = await response.json();
       if (data.success) {
-        let allData = data?.data;
-        // const paymentData = data.data.map((payment) => ({
-
-        //   id: payment.id,
-        //   client_name: payment.client_name,
-        //   client_id: payment.client_id,
-        //   invoice_id: payment.invoice_id,
-        //   trans_id: payment.trans_id,
-        //   date: payment.date?.split("T")[0],
-        //   total_amount: payment.total_amount,
-        //   paid_amount: payment.paid_amount,
-        //   due_amount: payment.due_amount,
-        //   sign: payment.sign,
-        // }));
-        const paid_due_amount = {}
+        const allData = data?.data;
+        const paid_due_amount = {};
         const paymentData = [];
-        for(let i = 0; i < allData.length; i++) {
-          console.log("allData[i].currency", allData[i].currency, allData[i].currency in paid_due_amount)
-          paymentData.push(
-          {
-
-              id: allData[i].id,
-              client_name: allData[i].client_name,
-              client_id: allData[i].client_id,
-              invoice_id: allData[i].invoice_id,
-              trans_id: allData[i].trans_id,
-              date: allData[i].date?.split("T")[0],
-              total_amount: allData[i].total_amount,
-              paid_amount: allData[i].paid_amount,
-              due_amount: allData[i].due_amount,
-              sign: allData[i].sign,
-              last_due: allData[i].last_due,
-              currency: allData[i].currency,
-            })
-            if (!(allData[i].currency in paid_due_amount)){
-              paid_due_amount[allData[i].currency] = {paid_amount : 0, due_amount : 0, symbol: allData[i]?.sign}
-            }
-            if (allData[i].last_due==true){
-              paid_due_amount[allData[i].currency].paid_amount += (parseFloat(allData[i].paid_amount) + (parseFloat(allData[i].invoice_paid)))
-              paid_due_amount[allData[i].currency].due_amount += (parseFloat(allData[i].due_amount))
-            }
-            else{
-              paid_due_amount[allData[i].currency].paid_amount += (parseFloat(allData[i].paid_amount))
-            }
-
+        for (let i = 0; i < allData.length; i++) {
+          paymentData.push({
+            id: allData[i].id,
+            client_name: allData[i].client_name,
+            client_id: allData[i].client_id,
+            invoice_id: allData[i].invoice_id,
+            trans_id: allData[i].trans_id,
+            date: allData[i].date?.split("T")[0],
+            total_amount: allData[i].total_amount,
+            paid_amount: allData[i].paid_amount,
+            due_amount: allData[i].due_amount,
+            sign: allData[i].sign,
+            last_due: allData[i].last_due,
+            currency: allData[i].currency,
+            invoice_paid: allData[i].invoice_paid,
+          });
+          if (!(allData[i].currency in paid_due_amount)) {
+            paid_due_amount[allData[i].currency] = {
+              paid_amount: 0,
+              due_amount: 0,
+              symbol: allData[i]?.sign,
+            };
+          }
+          if (allData[i].last_due === true) {
+            paid_due_amount[allData[i].currency].paid_amount +=
+              parseFloat(allData[i].paid_amount) + parseFloat(allData[i].invoice_paid || 0);
+            paid_due_amount[allData[i].currency].due_amount += parseFloat(allData[i].due_amount);
+          } else {
+            paid_due_amount[allData[i].currency].paid_amount += parseFloat(allData[i].paid_amount);
+          }
         }
-        setSelectedCurrency(Object.keys(paid_due_amount)[0])
-        setCurrencies(Object.keys(paid_due_amount))
+        setCurrencies(Object.keys(paid_due_amount));
+        setSelectedCurrency(Object.keys(paid_due_amount)[0] || "");
         setCurrencyTotals(paid_due_amount);
-        setPayments(paymentData)
-        setFilteredPayments(paymentData);
+        setPayments(paymentData);
+        setFilteredPayments(
+          paymentData.filter((payment) => payment.currency === Object.keys(paid_due_amount)[0])
+        );
       } else {
         console.error("Error fetching payments:", data.message);
       }
@@ -119,32 +90,38 @@ const PaymentHistory = () => {
     fetchPayments();
   }, []);
 
+  // Filter payments based on date and currency
   useEffect(() => {
     let filtered = payments;
-    if (startDate)
+    if (startDate) {
       filtered = filtered.filter((payment) => payment.date >= startDate);
-    if (endDate)
-      filtered = filtered.filter((payment) => payment.date <= endDate);
-    console.log("filtered", filtered)
-    const paid_due_amount = {}
-    for(let i = 0; i < filtered.length; i++) {
-        if (!(filtered[i].currency in paid_due_amount)){
-          paid_due_amount[filtered[i].currency] = {paid_amount : 0, due_amount : 0, symbol: filtered[i]?.sign}
-        }
-        if (filtered[i].last_due==true){
-          paid_due_amount[filtered[i].currency].paid_amount += (parseFloat(filtered[i].paid_amount) + (parseFloat(filtered[i].invoice_paid)))
-          paid_due_amount[filtered[i].currency].due_amount += (parseFloat(filtered[i].due_amount))
-        }
-        else{
-          paid_due_amount[filtered[i].currency].paid_amount += (parseFloat(filtered[i].paid_amount))
-        }
-
     }
-    setSelectedCurrency(Object.keys(paid_due_amount)[0])
-    setCurrencies(Object.keys(paid_due_amount))
+    if (endDate) {
+      filtered = filtered.filter((payment) => payment.date <= endDate);
+    }
+    if (selectedCurrency) {
+      filtered = filtered.filter((payment) => payment.currency === selectedCurrency);
+    }
+    const paid_due_amount = {};
+    for (let i = 0; i < filtered.length; i++) {
+      if (!(filtered[i].currency in paid_due_amount)) {
+        paid_due_amount[filtered[i].currency] = {
+          paid_amount: 0,
+          due_amount: 0,
+          symbol: filtered[i]?.sign,
+        };
+      }
+      if (filtered[i].last_due === true) {
+        paid_due_amount[filtered[i].currency].paid_amount +=
+          parseFloat(filtered[i].paid_amount) + parseFloat(filtered[i].invoice_paid || 0);
+        paid_due_amount[filtered[i].currency].due_amount += parseFloat(filtered[i].due_amount);
+      } else {
+        paid_due_amount[filtered[i].currency].paid_amount += parseFloat(filtered[i].paid_amount);
+      }
+    }
     setCurrencyTotals(paid_due_amount);
     setFilteredPayments(filtered);
-  }, [startDate, endDate]);
+  }, [startDate, endDate, selectedCurrency, payments]);
 
   const handleAddPayment = () => {
     navigate("/add-payment");
@@ -165,8 +142,9 @@ const PaymentHistory = () => {
       );
 
       if (response.ok) {
-        setPayments(
-          payments.filter((payment) => payment.id !== selectedPaymentId)
+        setPayments(payments.filter((payment) => payment.id !== selectedPaymentId));
+        setFilteredPayments(
+          filteredPayments.filter((payment) => payment.id !== selectedPaymentId)
         );
         setIsModalOpen(false);
       } else {
@@ -215,41 +193,34 @@ const PaymentHistory = () => {
     }
   };
 
-  // const getSummaryData = () => {
-  //   // Initialize currency-specific totals dynamically
-  //   const currencyTotals = currencies.reduce((acc, currency) => ({
-  //     ...acc,
-  //     [currency.code]: {
-  //       paid_amount: 0,
-  //       paidCount: 0,
-  //       due_amount: 0,
-  //       dueCount: 0,
-  //       symbol: currency.symbol,
-  //     },
-  //   }), {});
+  const handleSendPayment = async (id) => {
+    try {
+      const response = await fetch(
+        `${url}/service/payment/?sent=true&payment_id=${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
 
-  //   // Sum amounts by currency for filtered payments
-  //   filteredPayments.forEach((payment) => {
-  //     const currencyCode = currencies.find((c) => c.symbol === payment.sign)?.code || "Unknown";
-  //     if (currencyTotals[currencyCode]) {
-  //       currencyTotals[currencyCode].paid_amount += Number(payment?.paid_amount || 0);
-  //       if (Number(payment?.paid_amount) > 0) {
-  //         currencyTotals[currencyCode].paidCount += 1;
-          
-  //       }
-  //       currencyTotals[currencyCode].due_amount += Number(payment?.due_amount || 0);
-  //       if (Number(payment?.due_amount) > 0) {
-  //         currencyTotals[currencyCode].dueCount += 1;
-  //       }
-  //     }
-  //   });
+      const data = await response.json();
+      console.log("Sent API Response:", data);
 
-  //   return {
-  //     currencyTotals,
-  //   };
-  // };
-
-  // const { currencyTotals } = getSummaryData();
+      if (response.ok && data.success) {
+        alert(data.message || "Payment sent successfully");
+        fetchPayments(); // Refresh payments to reflect any changes
+      } else {
+        console.error("Failed to send payment:", data.message);
+        alert(data.message || "Failed to send payment");
+      }
+    } catch (error) {
+      console.error("Error sending payment:", error);
+      alert("An error occurred while sending the payment");
+    }
+  };
 
   return (
     <div className="p-1 sm:p-1 md:p-8 lg:p-10 min-h-screen bg-gray-50 mt-16">
@@ -259,23 +230,22 @@ const PaymentHistory = () => {
           {
             title: "TOTAL PAID AMOUNT",
             amount: currencyTotals[selectedCurrency]?.paid_amount || 0,
-            count: currencyTotals[selectedCurrency]?.paidCount || 0,
             color: "text-blue-600",
             render: (
               <div className="relative">
-                {/* <div className="absolute top-0 right-0">
+                <div className="absolute top-0 right-0">
                   <select
                     value={selectedCurrency}
                     onChange={(e) => setSelectedCurrency(e.target.value)}
                     className="text-black text-xs sm:text-sm border rounded-md p-1"
                   >
                     {currencies.map((currency) => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.code}
+                      <option key={currency} value={currency}>
+                        {currency}
                       </option>
                     ))}
                   </select>
-                </div> */}
+                </div>
                 <h2 className="text-lg sm:text-xl font-semibold">
                   {currencyTotals[selectedCurrency]?.symbol || ""}
                   {(currencyTotals[selectedCurrency]?.paid_amount || 0).toLocaleString()}
@@ -286,7 +256,6 @@ const PaymentHistory = () => {
           {
             title: "TOTAL DUE AMOUNT",
             amount: currencyTotals[selectedCurrency]?.due_amount || 0,
-            count: currencyTotals[selectedCurrency]?.dueCount || 0,
             color: "text-red-600",
             render: (
               <div className="relative">
@@ -314,12 +283,6 @@ const PaymentHistory = () => {
           <div key={index} className="bg-white shadow p-4 rounded-lg">
             {item.render}
             <p className="text-xs sm:text-sm text-gray-600">{item.title}</p>
-            <div className={`text-xs sm:text-sm font-semibold ${item.color}`}>
-              {item.count}{" "}
-              {item.title.toLowerCase().includes("due")
-                ? "Unpaid by clients"
-                : "Paid by clients"}
-            </div>
           </div>
         ))}
       </div>
@@ -381,8 +344,9 @@ const PaymentHistory = () => {
                   <td className="p-3 sm:p-4 flex gap-2">
                     {canUpdatePayment && (
                       <button
-                        className="p-1.5 rounded-md text-green-500 hover:bg-green-200 hover:text-green-700 transition-colors "
+                        className="p-1.5 rounded-md text-green-500 hover:bg-green-200 hover:text-green-700 transition-colors"
                         onClick={() => previewPDF(payment.id)}
+                        title="Preview PDF"
                       >
                         <VscFilePdf className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
@@ -391,14 +355,25 @@ const PaymentHistory = () => {
                       <button
                         className="p-1.5 rounded-md text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-colors"
                         onClick={() => handlePaymentHistory(payment.id)}
+                        title="Edit"
                       >
                         <AiOutlineEdit className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     )}
+                    {/* {canUpdatePayment && (
+                      <button
+                        className="p-1.5 rounded-md text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
+                        onClick={() => handleSendPayment(payment.id)}
+                        title="Send"
+                      >
+                        <MdSend className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    )} */}
                     {canDeletePayment && (
                       <button
-                        className="p-1.5 rounded-md bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
+                        className="p-1.5 rounded-md text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
                         onClick={() => openDeleteModal(payment.id)}
+                        title="Delete"
                       >
                         <FiTrash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
