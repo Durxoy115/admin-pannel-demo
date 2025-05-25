@@ -55,6 +55,7 @@ const PaymentHistory = () => {
             last_due: allData[i].last_due,
             currency: allData[i].currency,
             invoice_paid: allData[i].invoice_paid,
+            payment_pdf: allData[i].payment_pdf,
           });
           if (!(allData[i].currency in paid_due_amount)) {
             paid_due_amount[allData[i].currency] = {
@@ -169,30 +170,33 @@ const PaymentHistory = () => {
     navigate(`/edit-payment-history/${id}`);
   };
 
-  const previewPDF = async (id) => {
-    try {
-      const response = await fetch(`${url}/service/payment-pdf/?payment_id=${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-      });
+  // const previewPDF = async (id) => {
+  //   try {
+  //     const response = await fetch(`${url}/service/payment-pdf/?payment_id=${id}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Token ${token}`,
+  //       },
+  //     });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("PDF Error:", errorData);
-        throw new Error(errorData.message || "Failed to generate PDF preview");
-      }
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       console.error("PDF Error:", errorData);
+  //       throw new Error(errorData.message || "Failed to generate PDF preview");
+  //     }
 
-      const blob = await response.blob();
-      const pdfUrl = window.URL.createObjectURL(blob);
-      window.open(pdfUrl, "_blank");
-    } catch (error) {
-      console.error("Error generating PDF preview:", error.message);
-    }
+  //     const blob = await response.blob();
+  //     const pdfUrl = window.URL.createObjectURL(blob);
+  //     window.open(pdfUrl, "_blank");
+  //   } catch (error) {
+  //     console.error("Error generating PDF preview:", error.message);
+  //   }
+  // };
+
+  const previewPDF = (payment_pdf) => {
+    window.open(`${url}${payment_pdf}`, '_blank');
   };
-
   const handleSendPayment = async (id) => {
     try {
       const response = await fetch(
@@ -233,7 +237,7 @@ const PaymentHistory = () => {
             color: "text-blue-600",
             render: (
               <div className="relative">
-                <div className="absolute top-0 right-0">
+                {/* <div className="absolute top-0 right-0">
                   <select
                     value={selectedCurrency}
                     onChange={(e) => setSelectedCurrency(e.target.value)}
@@ -245,7 +249,7 @@ const PaymentHistory = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
                 <h2 className="text-lg sm:text-xl font-semibold">
                   {currencyTotals[selectedCurrency]?.symbol || ""}
                   {(currencyTotals[selectedCurrency]?.paid_amount || 0).toLocaleString()}
@@ -345,7 +349,7 @@ const PaymentHistory = () => {
                     {canUpdatePayment && (
                       <button
                         className="p-1.5 rounded-md text-green-500 hover:bg-green-200 hover:text-green-700 transition-colors"
-                        onClick={() => previewPDF(payment.id)}
+                        onClick={() => previewPDF(payment?.payment_pdf)}
                         title="Preview PDF"
                       >
                         <VscFilePdf className="w-4 h-4 sm:w-5 sm:h-5" />

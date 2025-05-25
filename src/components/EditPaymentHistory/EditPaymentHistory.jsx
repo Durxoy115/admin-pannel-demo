@@ -74,7 +74,7 @@ const EditPaymentHistory = () => {
 
       // Fetch invoice details to get previous payments
       const invoiceResponse = await fetch(
-        `${url}/service/payment-invoice/?invoice_id=${payment.invoice_id}`,
+        `${url}/service/payment-invoice/?invoice_id=${payment.invoice_id}&payment_id=${payment.id}`,
         {
           method: "GET",
           headers: {
