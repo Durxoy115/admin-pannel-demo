@@ -44,6 +44,17 @@ import AddCurrency from "./components/AddCurrency/AddCurrency";
 import EditCurrency from "./components/EditCurrency/EditCurrency";
 import InvoiceListToPayment from "./components/InvoiceListToPayment/InvoiceListToPayment";
 import EditPaymentHistory from "./components/EditPaymentHistory/EditPaymentHistory";
+import AllExpenseCategory from "./components/AllExpenseCategory/AllExpenseCategory";
+import AddAmount from "./components/AddAmount/AddAmount";
+import AddExpenseCategory from "./components/AddExpenseCategory/AddExpenseCategory";
+import EditExpenseCategory from "./components/EditExenseCategory/EditExenseCategory";
+import AllExpensesList from "./components/AllExpensesList/AllExpensesList";
+import AllCreditAmountHistory from "./components/AllCreditAmountHistory/AllCreditAmountHistory";
+import AddExpense from "./components/AddExpense/AddExpense";
+import ExpenseAmountyearly from "./components/ExpenseAmountYearly/ExpenseAmountYearly";
+import EditExpenseFromAllList from "./components/EditExpenseFromAllList/EditExpenseFromAllList";
+import ExpenseSummaryMonthly from "./components/ExpenseSummaryMonthly/ExpenseSummaryMonthly";
+import DailyExpenseHistory from "./components/DailyExpenseHistory/DailyExpenseHistory";
 
 
 // import Test from "./components/Test";
@@ -103,6 +114,17 @@ const App = () => {
           <Route path="edit-user-role/:id" element={<EditUserRole></EditUserRole>} />
           <Route path="edit-currency/:id" element={<EditCurrency></EditCurrency>} />
           <Route path="add-currency" element={<AddCurrency></AddCurrency>} />
+          <Route path="expense-category-list" element={<AllExpenseCategory/>} />
+          <Route path= "add-amount" element={<AddAmount></AddAmount>} />
+          <Route path= "add-expense-category" element={<AddExpenseCategory></AddExpenseCategory>} />
+          <Route path= "edit-expense-category/:id" element={<EditExpenseCategory></EditExpenseCategory>} />
+          <Route path= "all-expense-list" element={<AllExpensesList/>} />
+          <Route path= "edit-expense-list/:expense_id" element={<EditExpenseFromAllList/>} />
+          <Route path= "all-credit-list" element={<AllCreditAmountHistory/>} />
+          <Route path= "add-expense" element={<AddExpense/>} />
+          <Route path= "yearly-expense-amount" element={<ExpenseAmountyearly/>} />
+          <Route path= "monthly-expense-amount/:year" element={<ExpenseSummaryMonthly/>} />
+          <Route path="/daily-expense/:month/:year" element={<DailyExpenseHistory />} />
         </Route>
       </Route>
     </Routes>

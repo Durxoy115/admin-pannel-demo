@@ -120,13 +120,14 @@ const Products = () => {
               <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-4">{product.short_description}</p>
               <hr className="border-gray-300 my-1 sm:my-2" />
               <ul className="text-left text-gray-800 mt-2 sm:mt-4 space-y-1 sm:space-y-2 text-sm sm:text-base">
-                <li className="flex items-center">
-                  <span
-                    className="text-black mr-2"
-                    dangerouslySetInnerHTML={{ __html: product?.description }}
-                  ></span>
-                </li>
-              </ul>
+  <li className="flex items-center min-h-[7.5rem]"> {/* ~5 lines of text */}
+    <span
+      className="text-black mr-2 line-clamp-5"
+      dangerouslySetInnerHTML={{ __html: product?.description }}
+    ></span>
+  </li>
+</ul>
+
 
               <p className="mt-2 sm:mt-4 text-base sm:text-lg font-semibold text-gray-700">
                 Price: {product?.price ? `$ ${product.price} ` : "Contact us"}
