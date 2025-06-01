@@ -12,10 +12,10 @@ const AllExpenseCategory = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [currencyData, setCurrencyData] = useState({});
   const [selectedCurrency, setSelectedCurrency] = useState("BDT");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
-
   const { permissions } = useUserPermission();
 
   const fetchExpenseCategory = async () => {
@@ -27,34 +27,32 @@ const AllExpenseCategory = () => {
       });
       const data = await response.json();
       if (data.success) {
-        setExpenses(data.data);
+        setExpenses(data.data || []);
       } else {
-        console.error("Error fetching users:", data.message);
+        setError("Error fetching expense categories: " + (data.message || "Unknown error"));
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      setError("Error fetching expense categories: " + error.message);
     }
   };
 
   const fetchTotalCredits = async () => {
     try {
-      const response = await fetch(`${url}/expense/credit-summary/?credit_id=yearly`, {
+      const response = await fetch(`${url}/expense/all-credit-expense-summary/`, {
         headers: {
           Authorization: `Token ${token}`,
         },
       });
-
       const data = await response.json();
-      if (data.success) {
-        const credits = data.data;
-        setCurrencyData(credits);
-        const firstCurrency = Object.keys(credits)[0];
-        setSelectedCurrency(firstCurrency || "");
+      if (data.success && data.data) {
+        setCurrencyData(data.data);
+        const firstCurrency = Object.keys(data.data)[0] || "BDT";
+        setSelectedCurrency(firstCurrency);
       } else {
-        console.error("Error fetching credits:", data.message);
+        setError("Error fetching credit summary: " + (data.message || "No data returned"));
       }
     } catch (error) {
-      console.error("Error fetching credits:", error);
+      setError("Error fetching credit summary: " + error.message);
     }
   };
 
@@ -62,12 +60,6 @@ const AllExpenseCategory = () => {
     fetchExpenseCategory();
     fetchTotalCredits();
   }, [url, token]);
-
-  const selectedCurrencyCredits = currencyData[selectedCurrency] || [];
-  const totalCreditAmount = selectedCurrencyCredits.reduce((sum, item) => {
-    const amount = parseFloat(item.total_amount);
-    return sum + (isNaN(amount) ? 0 : amount);
-  }, 0);
 
   const handleEditExpenseCategory = (id) => navigate(`/edit-expense-category/${id}`);
   const handleAddAmount = () => navigate("/add-amount");
@@ -91,10 +83,10 @@ const AllExpenseCategory = () => {
         setExpenses(expenses.filter((user) => user.id !== selectedUserId));
         setIsModalOpen(false);
       } else {
-        console.error("Failed to delete user");
+        setError("Failed to delete expense category");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      setError("Error deleting expense category: " + error.message);
     }
   };
 
@@ -114,14 +106,28 @@ const AllExpenseCategory = () => {
     );
   };
 
+  // Get selected currency data
+  const selectedCurrencyData = currencyData[selectedCurrency] || {};
+  // Fallback to currency code if currency_sign is not provided
+  const currencySign = selectedCurrencyData.currency_sign || selectedCurrency || "৳";
+
   return (
-    <div className="bg-white mt-20 sm:px-1 md:px-10">
-      <div className="flex justify-between items-center mb-2 sm:px-1 md:px-4 mt-4">
-        <h2 className="text-lg font-semibold"></h2>
+    <div className="bg-white mt-16 p-1 sm:p-6 md:p-8 w-full mx-auto">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-0">
+          
+        </h2>
         <select
           value={selectedCurrency}
           onChange={(e) => setSelectedCurrency(e.target.value)}
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
           {Object.keys(currencyData).map((currency) => (
             <option key={currency} value={currency}>
@@ -131,38 +137,41 @@ const AllExpenseCategory = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 ">
-        {['Total Amount', 'Total Expense This Month', 'Total Expense This Year'].map((label, index) => (
-          <div key={index} className="bg-white rounded-lg shadow border">
-            <div className="bg-black text-white rounded-t-lg px-4 py-2 flex justify-between items-center">
-              <h2 className="text-sm font-medium">{label}</h2>
-              {label === 'Total Amount' && (
-                <div className="flex gap-4">
-                  <IoMdAddCircleOutline onClick={handleAddAmount} />
-                  <IoIosListBox onClick={handleAllCreditAmountList} />
-                </div>
-              )}
-              {label === 'Total Expense This Year' && (
-                <div className="flex gap-4">
-                  
-                  <IoIosListBox onClick={handleYearlyExpense} />
-                </div>
-              )}
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-gray-500 mb-2">
-                Date: {new Date().toLocaleDateString("en-GB")}
-              </p>
-              <p className="text-xl font-semibold">
-                {selectedCurrencyCredits[0]?.currency_sign || ""} {totalCreditAmount.toFixed(2)}
-              </p>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {[
+    { label: "Total Amount", key: "current_credit", action: [handleAddAmount, handleAllCreditAmountList] },
+    { label: "Total Expense This Month", key: "this_month_expense" },
+    { label: "Total Expense This Year", key: "this_year_expense", action: [null, handleYearlyExpense] },
+  ].map(({ label, key, action }, index) => (
+    <div key={index} className="bg-white rounded-lg shadow border">
+      <div className="bg-black text-white rounded-t-lg px-4 py-2 flex justify-between items-center">
+        <h2 className="text-sm sm:text-base font-medium">{label}</h2>
+        {action && (
+          <div className="flex gap-3 text-lg">
+            {action[0] && <IoMdAddCircleOutline className="cursor-pointer" onClick={action[0]} />}
+            {action[1] && <IoIosListBox className="cursor-pointer" onClick={action[1]} />}
           </div>
-        ))}
+        )}
       </div>
+      <div className="p-4">
+        <p className="text-xs sm:text-sm text-gray-500 mb-2">
+          Date: {new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+        <p className="text-lg sm:text-xl font-semibold">
+          {currencySign} {(parseFloat(selectedCurrencyData[key]) || 0).toFixed(2)}
+        </p>
+      </div>
+    </div>
+  ))}
+</div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white  sm:pl-4 sm:pr-4 py-2 sm:py-3 mt-6 ">
-        <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Expense Category List</h1>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2 mt-6">
+        <h1 className="text-base sm:text-xl mb-2 sm:mb-0">Expense Category List</h1>
         <IoMdAddCircleOutline
           className="text-lg sm:text-xl cursor-pointer"
           onClick={handleAddExpenseCategory}
@@ -171,7 +180,7 @@ const AllExpenseCategory = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm" colSpan={4}>
                 <div className="flex justify-between items-center w-full">
@@ -186,32 +195,49 @@ const AllExpenseCategory = () => {
             </tr>
           </thead>
           <tbody>
-            {expenses.map((expense, index) => (
-              <tr key={expense.id} className="hover:bg-gray-50">
-                <td className="border-b border-gray-300 p-2 sm:p-3" colSpan={4}>
-                  <div className="flex justify-between items-center w-full">
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedExpenseId.includes(expense?.id)}
-                        onChange={() => toggleUserSelection(expense?.id)}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-xs sm:text-sm">{index + 1}</span>
-                      <span className="text-xs sm:text-sm ml-12">{expense?.name}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="text-purple-500 hover:text-purple-700" onClick={() => handleEditExpenseCategory(expense.id)}>
-                        <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
-                      </button>
-                      <button className="text-red-500 hover:text-red-700" onClick={() => openDeleteModal(expense.id)}>
-                        <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
-                      </button>
-                    </div>
-                  </div>
+            {expenses.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="4"
+                  className="text-center p-4 text-gray-500 text-xs sm:text-sm"
+                >
+                  No expense categories found
                 </td>
               </tr>
-            ))}
+            ) : (
+              expenses.map((expense, index) => (
+                <tr key={expense.id} className="hover:bg-gray-50">
+                  <td className="border-b border-gray-300 p-2 sm:p-3" colSpan={4}>
+                    <div className="flex justify-between items-center w-full">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedExpenseId.includes(expense?.id)}
+                          onChange={() => toggleUserSelection(expense?.id)}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-xs sm:text-sm">{index + 1}</span>
+                        <span className="text-xs sm:text-sm ml-12">{expense?.name}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className="text-purple-500 hover:text-purple-700"
+                          onClick={() => handleEditExpenseCategory(expense.id)}
+                        >
+                          <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
+                        </button>
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => openDeleteModal(expense.id)}
+                        >
+                          <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -221,13 +247,19 @@ const AllExpenseCategory = () => {
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center w-full max-w-sm">
             <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Confirm Delete</h2>
             <p className="text-gray-700 text-sm sm:text-base">
-              Are you sure you want to delete this member?
+              Are you sure you want to delete this expense category?
             </p>
             <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-              <button className="bg-red-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-red-700 text-sm sm:text-base" onClick={handleDeleteSubAdmin}>
+              <button
+                className="bg-red-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-red-700 text-sm sm:text-base"
+                onClick={handleDeleteSubAdmin}
+              >
                 Delete
               </button>
-              <button className="bg-green-300 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-green-400 text-sm sm:text-base" onClick={closeDeleteModal}>
+              <button
+                className="bg-green-300 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-green-400 text-sm sm:text-base"
+                onClick={closeDeleteModal}
+              >
                 Cancel
               </button>
             </div>

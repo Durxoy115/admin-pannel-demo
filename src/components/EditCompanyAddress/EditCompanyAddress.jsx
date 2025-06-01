@@ -78,6 +78,22 @@ const EditCompanyAddress = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="bank_name" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
+              Gateway <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="gateway"
+              id="gateway"
+              value={formData.gateway}
+              onChange={handleChange}
+              placeholder="Enter your gateway name"
+              required
+              
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+            />
+          </div>
+          <div>
+            <label htmlFor="bank_name" className="block text-gray-700 font-medium mb-1 sm:mb-2 text-sm sm:text-base">
               Bank Name <span className="text-red-500"></span>
             </label>
             <input

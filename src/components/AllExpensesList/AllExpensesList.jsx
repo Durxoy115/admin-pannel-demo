@@ -243,7 +243,7 @@ const AllExpenseList = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto mt-4">
+      <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
@@ -324,19 +324,12 @@ const AllExpenseList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
-                      {permissions.includes("delete_expense") && (
-                        <button
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() => openDeleteModal(expense.id)}
-                        >
-                          <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
-                        </button>
-                      )}
+                  
                       <button
-                        className="text-green-500 hover:text-green-700"
-                        onClick={() => handleDetailView(expense.id)}
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => openDeleteModal(expense.id)}
                       >
-                        <BsListTask className="w-4 sm:w-5 h-4 sm:h-5" />
+                        <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
                     </div>
                   </td>

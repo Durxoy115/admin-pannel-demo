@@ -55,6 +55,9 @@ import ExpenseAmountyearly from "./components/ExpenseAmountYearly/ExpenseAmountY
 import EditExpenseFromAllList from "./components/EditExpenseFromAllList/EditExpenseFromAllList";
 import ExpenseSummaryMonthly from "./components/ExpenseSummaryMonthly/ExpenseSummaryMonthly";
 import DailyExpenseHistory from "./components/DailyExpenseHistory/DailyExpenseHistory";
+import CreditAmountHistoryMonthly from "./components/CreditAmountHistoryMonthly/CreditAmountHistoryMonthly";
+import DailyCreditAmountHistory from "./components/DailyCreditAmountHistory/DailyCreditAmountHistory";
+import EmployeeList from "./components/EmployeeList/EmployeeList";
 
 
 // import Test from "./components/Test";
@@ -121,10 +124,13 @@ const App = () => {
           <Route path= "all-expense-list" element={<AllExpensesList/>} />
           <Route path= "edit-expense-list/:expense_id" element={<EditExpenseFromAllList/>} />
           <Route path= "all-credit-list" element={<AllCreditAmountHistory/>} />
+          <Route path= "monthly-credit-list/:year" element={<CreditAmountHistoryMonthly/>} />
+          <Route path= "daily-credit-list/:month/:year" element={<DailyCreditAmountHistory/>} />
           <Route path= "add-expense" element={<AddExpense/>} />
           <Route path= "yearly-expense-amount" element={<ExpenseAmountyearly/>} />
           <Route path= "monthly-expense-amount/:year" element={<ExpenseSummaryMonthly/>} />
           <Route path="/daily-expense/:month/:year" element={<DailyExpenseHistory />} />
+          <Route path="/employee-list" element={<EmployeeList/>} />
         </Route>
       </Route>
     </Routes>

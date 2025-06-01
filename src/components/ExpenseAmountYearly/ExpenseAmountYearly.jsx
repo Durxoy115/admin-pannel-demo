@@ -10,8 +10,7 @@ const ExpenseAmountyearly = () => {
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [selectedExpenseId, setSelectedExpenseId] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+
   const [showFilter, setShowFilter] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("BDT");

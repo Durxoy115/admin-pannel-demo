@@ -9,6 +9,8 @@ import { CiViewList } from "react-icons/ci";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { IoWalletOutline } from "react-icons/io5";
+import { IoIosPeople } from "react-icons/io";
+
 import { CiLogout } from "react-icons/ci";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
@@ -256,6 +258,43 @@ const Header = () => {
                       </>
                     )}
                   </MenuItem>
+
+                  {(
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={() => {
+                            handleNavigation("attendence");
+                            close(); // Close menu on click
+                          }}
+                          className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
+                            active ? "bg-gray-100" : "text-gray-700"
+                          } w-full text-left`}
+                        >
+                          <CiViewList className="mr-2 text-sm sm:text-base" />
+                          Attendence 
+                        </button>
+                      )}
+                    </MenuItem>
+                  )}
+                  {(
+                    <MenuItem>
+                      {({ active }) => (
+                        <button
+                          onClick={() => {
+                            handleNavigation("employee-list");
+                            close(); // Close menu on click
+                          }}
+                          className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm ${
+                            active ? "bg-gray-100" : "text-gray-700"
+                          } w-full text-left`}
+                        >
+                          <IoIosPeople className="mr-2 text-sm sm:text-base" />
+                          Employee List
+                        </button>
+                      )}
+                    </MenuItem>
+                  )}
 
                   {viewOrderList && (
                     <MenuItem>

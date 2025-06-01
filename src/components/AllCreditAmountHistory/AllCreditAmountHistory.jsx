@@ -7,7 +7,7 @@ import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
 
 const AllCreditAmountHistory = () => {
-  const [expenses, setExpenses] = useState([]);
+  const [creditAmounts, setCreditAmounts] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]); // For filtered data
   const [selectedExpenseId, setSelectedExpenseId] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +31,7 @@ const AllCreditAmountHistory = () => {
       const data = await response.json();
       if (data.success) {
         const flattenedExpenses = Object.values(data.data).flat();
-        setExpenses(flattenedExpenses);
+        setCreditAmounts(flattenedExpenses);
         // Default to BDT data only
         const bdtExpenses = flattenedExpenses.filter(
           (expense) => expense.currency__currency === "BDT"
@@ -51,7 +51,7 @@ const AllCreditAmountHistory = () => {
 
   // Filter expenses based on selected year and currency
   useEffect(() => {
-    let filtered = [...expenses];
+    let filtered = [...creditAmounts];
     if (selectedCurrency) {
       filtered = filtered.filter((expense) => expense.currency__currency === selectedCurrency);
     }
@@ -59,18 +59,12 @@ const AllCreditAmountHistory = () => {
       filtered = filtered.filter((expense) => expense.year === selectedYear);
     }
     setFilteredExpenses(filtered);
-  }, [selectedYear, selectedCurrency, expenses]);
+  }, [selectedYear, selectedCurrency, creditAmounts]);
 
-  const handleEditExpenseCategory = (id) => {
-    navigate(`/edit-expense-category/${id}`);
-  };
+ 
 
-  const handleAddAmount = () => {
-    navigate("/add-amount");
-  };
-
-  const handleAddExpenseCategory = () => {
-    navigate("/add-expense-category");
+  const handleMonthlyCredit = (year) => {
+    navigate(`/monthly-credit-list/${year}`);
   };
 
   const handleDeleteSubAdmin = async () => {
@@ -88,7 +82,7 @@ const AllCreditAmountHistory = () => {
       );
 
       if (response.ok) {
-        setExpenses(expenses.filter((expense) => expense.id !== selectedUserId));
+        setCreditAmounts(creditAmounts.filter((expense) => expense.id !== selectedUserId));
         setFilteredExpenses(filteredExpenses.filter((expense) => expense.id !== selectedUserId));
         setIsModalOpen(false);
       } else {
@@ -118,13 +112,13 @@ const AllCreditAmountHistory = () => {
   };
 
   // Extract unique currencies and years from expenses
-  const currencies = [...new Set(expenses.map((expense) => expense.currency__currency))];
-  const years = [...new Set(expenses.map((expense) => expense.year))].sort().reverse();
+  const currencies = [...new Set(creditAmounts.map((expense) => expense.currency__currency))];
+  const years = [...new Set(creditAmounts.map((expense) => expense.year))].sort().reverse();
 
   return (
-    <div className="bg-white mt-20">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-8 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3">
-        <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Add Amount History</h1>
+    <div className="bg-white mt-16 md:mt-20 px-1 md:px-8 ">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-8 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-2">
+        <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Yearly Add Amount History</h1>
         <div className="flex gap-4">
           <CiFilter
             className="text-lg sm:text-xl cursor-pointer"
@@ -198,7 +192,7 @@ const AllCreditAmountHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredExpenses.map((expense, index) => (
+            {filteredExpenses.map((credit, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="border-b border-gray-300 p-2 sm:p-3">
                   <input
@@ -209,22 +203,25 @@ const AllCreditAmountHistory = () => {
                   />
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.year}
+                  {credit.year}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.start_date}
+                  {credit.start_date}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.end_date}
+                  {credit.end_date}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.currency__sign} {expense.total_amount.toFixed(2)}
+                  {credit.currency__sign} {credit.total_amount.toFixed(2)}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.currency__sign} {expense.total_expense.toFixed(2)}
+                  {credit.currency__sign} {credit.total_expense.toFixed(2)}
                 </td>
                 <td className=" border-gray-300 p-2 sm:p-3 flex gap-2">
-                 <BsListTask className="bg-green-300 text-xl p-1 rounded-md"/>
+                 <BsListTask className="bg-green-300 text-xl p-1 rounded-md"
+                 onClick={() => handleMonthlyCredit(credit?.year)}
+                 />
+                 
                 </td>
               </tr>
             ))}
