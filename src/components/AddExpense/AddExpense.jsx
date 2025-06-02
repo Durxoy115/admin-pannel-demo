@@ -6,13 +6,13 @@ const AddExpense = () => {
   const [formData, setFormData] = useState({
     expense_category: "",
     expense_date: new Date().toISOString().split("T")[0], // ISO format: YYYY-MM-DD
-    qty: "",
-    unit_cost: "",
+    qty: 1,
+    unit_cost:0.00,
     payment_method: "",
     reference: "",
-    additional_cost: "",
-    sub_total: "",
-    total: "",
+    additional_cost:0.00,
+    sub_total: 0.00,
+    total: 0.00,
     expense_for: "",
     description: "",
     currency: "",
@@ -206,7 +206,7 @@ const AddExpense = () => {
         {/* Quantity */}
         <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700">
-            Quantity<span className="text-red-500">*</span>
+            Quantity<span className="text-red-500"></span>
           </label>
           <input
             type="number"

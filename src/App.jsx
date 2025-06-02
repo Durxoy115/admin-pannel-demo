@@ -58,6 +58,7 @@ import DailyExpenseHistory from "./components/DailyExpenseHistory/DailyExpenseHi
 import CreditAmountHistoryMonthly from "./components/CreditAmountHistoryMonthly/CreditAmountHistoryMonthly";
 import DailyCreditAmountHistory from "./components/DailyCreditAmountHistory/DailyCreditAmountHistory";
 import EmployeeList from "./components/EmployeeList/EmployeeList";
+import AddEmployee from "./components/AddEmployee/AddEmployee";
 
 
 // import Test from "./components/Test";
@@ -131,6 +132,7 @@ const App = () => {
           <Route path= "monthly-expense-amount/:year" element={<ExpenseSummaryMonthly/>} />
           <Route path="/daily-expense/:month/:year" element={<DailyExpenseHistory />} />
           <Route path="/employee-list" element={<EmployeeList/>} />
+          <Route path="/add-employee" element={<AddEmployee/>} />
         </Route>
       </Route>
     </Routes>
