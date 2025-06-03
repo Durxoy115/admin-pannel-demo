@@ -23,6 +23,7 @@ const InvoiceEdit = () => {
 
   const [formData, setFormData] = useState({
     client_invoice_id: "",
+    invoice_id:"",
     client_id: "",
     client_name: "",
     date: "",
@@ -437,14 +438,15 @@ const InvoiceEdit = () => {
         total_amount: +(+service.total_amount).toFixed(2),
       }));
       formDataPayload.append("services", JSON.stringify(servicesWithVat));
+      console.log("id---",id)
 
-      let reqUrl = `${url}/service/invoice/?invoice_id=${parseInt(id)}`;
+      let reqUrl = `${url}/service/invoice/?invoice_id=${(id)}`;
       if (action === "save" || action === "sent") {
         if (action === "sent") {
           reqUrl += "&sent=true";
         }
         const response = await fetch(reqUrl, {
-          method: "PATCH",
+          method: "PUT",
           headers: {
             Authorization: `Token ${token}`,
           },
@@ -453,7 +455,7 @@ const InvoiceEdit = () => {
         const data = await response.json();
         if (response.ok && data.success) {
           alert(data?.data?.message || "Invoice updated successfully!");
-          navigate("/services/invoices");
+          navigate("/invoice-list");
         } else {
           throw new Error(data?.message || `Failed to update invoice. Status: ${response.status}`);
         }

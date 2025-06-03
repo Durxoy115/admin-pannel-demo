@@ -82,6 +82,9 @@ const EmployeeList = () => {
   const handleAddEmployee = () => {
     navigate("/add-employee");
   };
+  const handleEditEmployee = (id) => {
+    navigate(`/edit-employee/${id}`);
+  }
 
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 w-full mx-auto">
@@ -204,12 +207,12 @@ const EmployeeList = () => {
                       src={
                         employee.photo
                           ? `${url}${employee.photo}`
-                          : "https://via.placeholder.com/40"
+                          : ""
                       }
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover"
                       onError={(e) =>
-                        (e.target.src = "https://via.placeholder.com/40")
+                        (e.target.src = "")
                       }
                     />
                   </td>
@@ -239,12 +242,14 @@ const EmployeeList = () => {
                     {employee.email}
                   </td>
                   <td className="border-b border-gray-300 p-1 sm:p-2">
-                    {employee.status}
+                    <span className="bg-green-400 p-2 rounded-md">{employee.status}</span>
                   </td>
                   <td className="border-b border-gray-300 p-1 sm:p-2">
                     <div className="flex gap-2">
                       <button className="text-purple-500 hover:text-purple-700">
-                        <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
+                        <FiEdit className="w-4 sm:w-5 h-4 sm:h-5"
+                        onClick={() => handleEditEmployee(employee.id)}
+                        />
                       </button>
                       <button className="text-green-500 hover:text-green-700">
                         <CiViewList className="w-4 sm:w-5 h-4 sm:h-5" />

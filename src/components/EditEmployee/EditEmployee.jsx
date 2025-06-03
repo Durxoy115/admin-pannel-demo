@@ -1,12 +1,17 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { IoAttach } from "react-icons/io5";
-import ReactQuill from "react-quill";
 import { RxCross2 } from "react-icons/rx";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import useToken from "../hooks/useToken";
 
-const AddEmployee = () => {
+const EditEmployee = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [fileName, setFileName] = useState(null);
+  const [file, setFile] = useState(null);
+  const [docDelete, setDocDelete] = useState("");
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
 
@@ -39,11 +44,80 @@ const AddEmployee = () => {
     status: "Active",
     photo: null,
     pre_work_his: "",
-    submit_doc: [{ title: "", file: null }],
+    submit_doc: [{ title: "", file: "", existing_file: null, id:null }],
+    submit_doc_del:"",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch employee data on component mount
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const response = await fetch(`${url}/employee/?employee_id=${id}`, {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (result.success) {
+          const employee = result.data;
+          setFileName (employee.submit_doc?.map(doc => ({
+            title: doc.document_name || "",
+          })) || [{ title: "", file: null }]);
+          setFormData({
+            full_name: employee.full_name || "",
+            employee_id: employee.employee_id || "",
+            job_title: employee.job_title || "",
+            joining_date: employee.joining_date || "",
+            contact: employee.contact || "",
+            email: employee.email || "",
+            dob: employee.dob || "",
+            present_address: employee.present_address || "",
+            permanent_address: employee.permanent_address || "",
+            nationality: employee.nationality || "",
+            national_id: employee.national_id || "",
+            passport_id: employee.passport_id || "",
+            marital_status: employee.marital_status || "",
+            religion: employee.religion || "",
+            blood_group: employee.blood_group || "",
+            dual_citizenship: employee.dual_citizenship || "",
+            gender: employee.gender || "",
+            emergency_contact: employee.emergency_contact || "",
+            emergency_relationship: employee.emergency_relationship || "",
+            nominee_name: employee.nominee_name || "",
+            nominee_relationship: employee.nominee_relationship || "",
+            bank_name: employee.bank_name || "",
+            bank_account_number: employee.bank_account_number || "",
+            bank_account_name: employee.bank_account_name || "",
+            e_tin: employee.e_tin || "",
+            status: employee.status || "Active",
+            photo: null,
+            pre_work_his: employee.pre_work_his || "",
+            submit_doc: employee.submit_doc?.map(doc => ({
+              id: doc.id || null,
+              title: doc.document_name || "",
+              file: null,
+              existing_file: doc.document_file || null,
+            })) || [{ title: "", file: null, existing_file: null }],
+            submit_doc_del:employee.submit_doc_del,
+          });
+          if (employee.photo) {
+            setImagePreview(employee.photo);
+          }
+        } else {
+          setError(result.message || "Failed to fetch employee data");
+        }
+      } catch (err) {
+        setError("An error occurred while fetching employee data: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployee();
+  }, [url, token, id]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -51,6 +125,10 @@ const AddEmployee = () => {
       ...prev,
       [name]: files ? files[0] : value,
     }));
+  };
+
+  const handleQuillChange = (value) => {
+    setFormData((prev) => ({ ...prev, pre_work_his: value }));
   };
 
   const handleDocChange = (index, field, value) => {
@@ -65,41 +143,58 @@ const AddEmployee = () => {
     const file = e.target.files[0];
     setFormData((prev) => {
       const newSubmitDoc = [...prev.submit_doc];
-      newSubmitDoc[index].file = file;
+      newSubmitDoc[index].file = file || newSubmitDoc[index].file;
+      newSubmitDoc[index].existing_file = file ? null : newSubmitDoc[index].existing_file;
       return { ...prev, submit_doc: newSubmitDoc };
     });
   };
+
   const handleRemoveDoc = (indexToRemove) => {
     const updatedDocs = formData.submit_doc.filter((_, i) => i !== indexToRemove);
-    setFormData({ ...formData, submit_doc: updatedDocs });
+    setFormData({
+      ...formData,
+      submit_doc: updatedDocs.length ? updatedDocs : [{ title: "", file: null, existing_file: null }],
+    });
   };
-  
 
   const addDocument = () => {
     setFormData((prev) => ({
       ...prev,
-      submit_doc: [...prev.submit_doc, { title: "", file: null }],
+      submit_doc: [...prev.submit_doc, { title: "", file: null, existing_file: null }],
     }));
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key !== "submit_doc" && formData[key]) {
+      if (key !== "submit_doc" && formData[key] && formData[key] !== null) {
         data.append(key, formData[key]);
       }
     });
+console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
     formData.submit_doc.forEach((doc, index) => {
-      if (doc.title)
-        data.append(`submit_doc[${index}].document_name`, doc.title);
-      if (doc.file) data.append(`submit_doc[${index}].document_file`, doc.file);
+      if(doc.id){
+        data.append(`submit_doc[${index}].id`, doc.id)
+      }
+        if (fileName !== doc.title) {
+          data.append(`submit_doc[${index}].document_name`, doc.title);
+        }
+        
+        if (file !== doc.file) {
+          data.append(`submit_doc[${index}].document_file`, doc.file);
+        } else if (doc.existing_file) {
+          data.append(`submit_doc[${index}]document_file`, doc.existing_file);
+        }
       
     });
 
+    
+
     try {
-      const response = await fetch(`${url}/employee/`, {
-        method: "POST",
+      const response = await fetch(`${url}/employee/?employee_id=${id}`, {
+        method: "PUT",
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -107,48 +202,16 @@ const AddEmployee = () => {
       });
       const result = await response.json();
       if (result.success) {
-        setSuccessMessage("Employee added successfully!");
-        setFormData({
-          full_name: "",
-          employee_id: "",
-          job_title: "",
-          joining_date: "",
-          contact: "",
-          email: "",
-          dob: "",
-          present_address: "",
-          permanent_address: "",
-          nationality: "",
-          national_id: "",
-          passport_id: "",
-          marital_status: "",
-          religion: "",
-          blood_group: "",
-          dual_citizenship: "",
-          gender: "",
-          emergency_contact: "",
-          emergency_relationship: "",
-          nominee_name: "",
-          nominee_relationship: "",
-          bank_name: "",
-          bank_account_number: "",
-          bank_account_name: "",
-          e_tin: "",
-          status: "Active",
-          photo: null,
-          pre_work_his: "",
-          submit_doc: [{ title: "", file: null , id: null}],
-        });
-        setImagePreview(null);
+        setSuccessMessage("Employee updated successfully!");
         setTimeout(() => navigate("/employee-list"), 2000);
       } else {
-        setError(result.message || "Failed to add employee");
+        setError(result.message || "Failed to update employee");
       }
     } catch (err) {
-      setError("An error occurred while adding the employee: " + err.message);
+      setError("An error occurred while updating the employee: " + err.message);
     }
   };
-  
+
   const handleAddFile = (e, field) => {
     e.preventDefault();
     const file = e.target.files[0];
@@ -158,11 +221,13 @@ const AddEmployee = () => {
     }
   };
 
+  if (loading) {
+    return <div className="text-center p-4">Loading...</div>;
+  }
+
   return (
     <div className="bg-white mt-4 sm:mt-8 lg:mt-16 p-1 sm:p-6 lg:p-8 lg:px-12 max-w-full mx-auto">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-        Add Employee
-      </h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Edit Employee</h1>
 
       {error && (
         <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
@@ -177,9 +242,7 @@ const AddEmployee = () => {
 
       <form onSubmit={handleSubmit} className="mt-4 sm:mt-6">
         <div className="mb-4 sm:mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
           <div className="mt-1 w-24 h-24 sm:w-32 sm:h-32 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-md">
             <input
               type="file"
@@ -204,9 +267,7 @@ const AddEmployee = () => {
               )}
             </label>
             {formData.photo && !imagePreview && (
-              <span className="mt-2 block text-xs sm:text-sm">
-                {formData.photo.name}
-              </span>
+              <span className="mt-2 block text-xs sm:text-sm">{formData.photo.name}</span>
             )}
           </div>
         </div>
@@ -236,6 +297,7 @@ const AddEmployee = () => {
               onChange={handleChange}
               className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               required
+              disabled
             />
           </div>
           <div className="mb-4">
@@ -268,9 +330,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
             <input
               type="tel"
               name="contact"
@@ -280,9 +340,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               name="email"
@@ -292,9 +350,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date of Birth
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
             <input
               type="date"
               name="dob"
@@ -304,9 +360,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Present Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Present Address</label>
             <input
               type="text"
               name="present_address"
@@ -319,9 +373,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Permanent Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Permanent Address</label>
             <input
               type="text"
               name="permanent_address"
@@ -331,9 +383,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nationality
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
             <input
               type="text"
               name="nationality"
@@ -343,9 +393,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              National ID
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">National ID</label>
             <input
               type="text"
               name="national_id"
@@ -355,9 +403,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Passport ID
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Passport ID</label>
             <input
               type="text"
               name="passport_id"
@@ -370,9 +416,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Marital Status
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
             <select
               name="marital_status"
               value={formData.marital_status}
@@ -387,9 +431,7 @@ const AddEmployee = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Religion
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
             <select
               name="religion"
               value={formData.religion}
@@ -405,9 +447,7 @@ const AddEmployee = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Blood Group
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
             <select
               name="blood_group"
               value={formData.blood_group}
@@ -426,9 +466,7 @@ const AddEmployee = () => {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Dual Citizenship
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Dual Citizenship</label>
             <input
               type="text"
               name="dual_citizenship"
@@ -441,9 +479,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gender
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
             <select
               name="gender"
               value={formData.gender}
@@ -458,7 +494,7 @@ const AddEmployee = () => {
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Emergency Contact <span className="text-red-500"></span>
+              Emergency Contact <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
@@ -466,13 +502,11 @@ const AddEmployee = () => {
               value={formData.emergency_contact}
               onChange={handleChange}
               className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-             
+              required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Emergency Relationship
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Relationship</label>
             <input
               type="text"
               name="emergency_relationship"
@@ -482,9 +516,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nominee Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nominee Name</label>
             <input
               type="text"
               name="nominee_name"
@@ -497,9 +529,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nominee Relationship
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nominee Relationship</label>
             <input
               type="text"
               name="nominee_relationship"
@@ -509,21 +539,17 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bank Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
             <input
               type="text"
               name="bank_name"
               value={formData.bank_name}
               onChange={handleChange}
-              className="block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bank Account Number
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Number</label>
             <input
               type="text"
               name="bank_account_number"
@@ -533,9 +559,7 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Bank Account Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Name</label>
             <input
               type="text"
               name="bank_account_name"
@@ -548,9 +572,7 @@ const AddEmployee = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-TIN
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">E-TIN</label>
             <input
               type="text"
               name="e_tin"
@@ -560,14 +582,12 @@ const AddEmployee = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="block w-full border border-gray-300 bg-green-400 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             >
               {[
                 { value: "Active", label: "Active" },
@@ -585,23 +605,17 @@ const AddEmployee = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Previous Work History
-          </label>
-          <textarea
-            name="pre_work_his"
+          <label className="block text-sm font-medium text-gray-700 mb-1">Previous Work History</label>
+          <ReactQuill
             value={formData.pre_work_his}
-            onChange={handleChange}
-            className="block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            rows="4"
+            onChange={handleQuillChange}
+            className="border border-gray-300 rounded-md text-sm sm:text-base"
           />
         </div>
 
         <div className="mt-4 sm:mt-6">
           <div className="flex items-center mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Submit Document
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Submit Document</label>
             <button
               type="button"
               onClick={addDocument}
@@ -611,8 +625,7 @@ const AddEmployee = () => {
             </button>
           </div>
           {formData.submit_doc.map((doc, index) => (
-            <div key={index} className="w-1/2 flex flex-col sm:flex-row gap-4 mb-4">
-              {/* Document Title */}
+            <div key={index} className="w-full flex flex-col sm:flex-row gap-4 mb-4 items-center">
               <div className="w-full sm:w-1/2">
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Document Title
@@ -620,14 +633,10 @@ const AddEmployee = () => {
                 <input
                   type="text"
                   value={doc.title}
-                  onChange={(e) =>
-                    handleDocChange(index, "title", e.target.value)
-                  }
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  onChange={(e) => handleDocChange(index, "title", e.target.value)}
+                  className="block w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-
-              {/* Attach Document */}
               <div className="w-full sm:w-1/2">
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Attach Document
@@ -635,10 +644,10 @@ const AddEmployee = () => {
                 <div className="relative w-full">
                   <input
                     type="text"
-                    value={doc.file ? doc.file.name : ""}
+                    value={doc.file ? doc.file.name : doc.existing_file ? doc.existing_file.split("/").pop() : ""}
                     placeholder="No file chosen"
                     disabled
-                    className="w-full border border-gray-300 rounded-md p-2 pr-12 text-sm sm:text-base bg-gray-100 text-gray-700 cursor-default"
+                    className="block w-full border border-gray-300 rounded-md p-2 pr-12 text-sm sm:text-base bg-gray-100 text-gray-700 cursor-default"
                   />
                   <input
                     type="file"
@@ -650,18 +659,17 @@ const AddEmployee = () => {
                     htmlFor={`doc-upload-${index}`}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-500 hover:bg-slate-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-md cursor-pointer"
                   >
-                    <IoAttach className="inline-block" 
-                   
-                    />
+                    <IoAttach className="inline-block" />
                   </label>
-                  
                 </div>
-               
               </div>
-              <span className="mt-7 text-4xl"><RxCross2
-              onClick={() => handleRemoveDoc(index)}
-              />
-              </span>
+              <button
+                type="button"
+                onClick={() => handleRemoveDoc(index)}
+                className="text-red-500 hover:text-red-700 text-lg sm:text-xl"
+              >
+                <RxCross2 />
+              </button>
             </div>
           ))}
         </div>
@@ -677,4 +685,4 @@ const AddEmployee = () => {
   );
 };
 
-export default AddEmployee;
+export default EditEmployee;
