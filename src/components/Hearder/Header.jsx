@@ -244,7 +244,7 @@ const Header = () => {
                             <li>
                               <button
                                 onClick={() => {
-                                  handleNavigation("all-salary-expense");
+                                  handleNavigation("employee-salary-list");
                                   close(); // Close menu on click
                                 }}
                                 className="flex items-center gap-2 w-full text-left hover:bg-gray-100 px-3 sm:px-4 py-2"

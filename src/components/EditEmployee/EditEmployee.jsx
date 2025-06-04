@@ -11,8 +11,13 @@ const EditEmployee = () => {
   const { id } = useParams();
   const [fileName, setFileName] = useState(null);
   const [file, setFile] = useState(null);
-  const [docDelete, setDocDelete] = useState("");
+  const [docDeleteId, setDocDeleteId] = useState("");
   const [url, getTokenLocalStorage] = useToken();
+  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [imagePreview, setImagePreview] = useState(null);
+
   const token = getTokenLocalStorage();
 
   const [formData, setFormData] = useState({
@@ -47,10 +52,7 @@ const EditEmployee = () => {
     submit_doc: [{ title: "", file: "", existing_file: null, id:null }],
     submit_doc_del:"",
   });
-  const [successMessage, setSuccessMessage] = useState("");
-  const [error, setError] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
-  const [loading, setLoading] = useState(true);
+
 
   // Fetch employee data on component mount
   useEffect(() => {
@@ -105,7 +107,7 @@ const EditEmployee = () => {
             submit_doc_del:employee.submit_doc_del,
           });
           if (employee.photo) {
-            setImagePreview(employee.photo);
+            setImagePreview(`${url}${employee.photo}`);
           }
         } else {
           setError(result.message || "Failed to fetch employee data");
@@ -149,13 +151,17 @@ const EditEmployee = () => {
     });
   };
 
-  const handleRemoveDoc = (indexToRemove) => {
-    const updatedDocs = formData.submit_doc.filter((_, i) => i !== indexToRemove);
-    setFormData({
-      ...formData,
-      submit_doc: updatedDocs.length ? updatedDocs : [{ title: "", file: null, existing_file: null }],
-    });
-  };
+  const handleRemoveDoc = (index, id) => {
+    const updatedServices = formData.submit_doc.filter((_, i) => i !== index);
+  
+    // Update state
+    setFormData((prev) => {
+      const removeId = id ? (prev.submit_doc_del || "") + `${id},` : prev.submit_doc_del;
+      const newFormData = { ...prev, submit_doc: updatedServices, submit_doc_del: removeId };
+      return { ...newFormData, };
+      });
+    };
+  
 
   const addDocument = () => {
     setFormData((prev) => ({
@@ -213,13 +219,16 @@ console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
   };
 
   const handleAddFile = (e, field) => {
-    e.preventDefault();
     const file = e.target.files[0];
-    setFormData((prev) => ({ ...prev, [field]: file }));
-    if (field === "photo" && file) {
-      setImagePreview(URL.createObjectURL(file));
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: file,
+      }));
+      setImagePreview(URL.createObjectURL(file)); // This sets the image preview
     }
   };
+  
 
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
@@ -241,36 +250,37 @@ console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
       )}
 
       <form onSubmit={handleSubmit} className="mt-4 sm:mt-6">
-        <div className="mb-4 sm:mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
-          <div className="mt-1 w-24 h-24 sm:w-32 sm:h-32 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-md">
-            <input
-              type="file"
-              name="photo"
-              onChange={(e) => handleAddFile(e, "photo")}
-              className="hidden"
-              id="photo-upload"
-              accept="image/*"
-            />
-            <label
-              htmlFor="photo-upload"
-              className="cursor-pointer text-center text-xs sm:text-sm text-gray-600"
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-cover rounded-md"
-                />
-              ) : (
-                "Upload image"
-              )}
-            </label>
-            {formData.photo && !imagePreview && (
-              <span className="mt-2 block text-xs sm:text-sm">{formData.photo.name}</span>
-            )}
-          </div>
-        </div>
+      <div className="mb-4 sm:mb-6">
+  <label className="block text-sm font-medium text-gray-700 mb-1"></label>
+  <div className="mt-1 w-24 h-24 sm:w-32 sm:h-32 border-2 border-dashed border-gray-300 flex items-center justify-center rounded-md">
+    <input
+      type="file"
+      name="photo"
+      onChange={(e) => handleAddFile(e, "photo")}
+      className="hidden"
+      id="photo-upload"
+      accept="image/*"
+    />
+   <label
+  htmlFor="photo-upload"
+  className="cursor-pointer text-center text-xs sm:text-sm text-gray-600"
+>
+  {imagePreview ? (
+    <img
+      src={imagePreview}
+      alt="Preview"
+      className="w-full h-full object-cover rounded-md"
+    />
+  ) : (
+    "Upload image"
+  )}
+</label>
+
+    {formData.photo && !imagePreview && (
+      <span className="mt-2 block text-xs sm:text-sm">{formData.photo}</span>
+    )}
+  </div>
+</div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
@@ -625,7 +635,7 @@ console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
             </button>
           </div>
           {formData.submit_doc.map((doc, index) => (
-            <div key={index} className="w-full flex flex-col sm:flex-row gap-4 mb-4 items-center">
+            <div key={index} className="w-full md:w-1/2 flex flex-col sm:flex-row gap-4 mb-4 items-center">
               <div className="w-full sm:w-1/2">
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Document Title
@@ -665,7 +675,7 @@ console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
               </div>
               <button
                 type="button"
-                onClick={() => handleRemoveDoc(index)}
+                onClick={() => handleRemoveDoc(index, doc.id)}
                 className="text-red-500 hover:text-red-700 text-lg sm:text-xl"
               >
                 <RxCross2 />
@@ -678,7 +688,7 @@ console.log("fileName", "docTitle", fileName, formData.submit_doc[0].title);
           type="submit"
           className="mt-4 sm:mt-6 bg-blue-500 text-white px-4 sm:px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
         >
-          Save
+          Update
         </button>
       </form>
     </div>

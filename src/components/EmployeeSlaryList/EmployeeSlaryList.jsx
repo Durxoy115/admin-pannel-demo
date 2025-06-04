@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
 
-const AllExpenseList = () => {
+const EmployeeSalaryList = () => {
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [selectedExpenseId, setSelectedExpenseId] = useState([]);
@@ -26,7 +26,7 @@ const AllExpenseList = () => {
 
   const fetchExpenseAmountHistory = async () => {
     try {
-      const response = await fetch(`${url}/expense/list/`, {
+      const response = await fetch(`${url}/expense/employee-salary/`, {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -75,12 +75,12 @@ const AllExpenseList = () => {
     setFilteredExpenses(filtered);
   }, [selectedYear, selectedMonth, selectedDate, selectedCurrency, expenses]);
 
-  const handleEditExpenseCategory = (id) => {
-    navigate(`/edit-expense-list/${id}`);
+  const handleEditSalary = (id) => {
+    navigate(`/edit-salary-list/${id}`);
   };
 
   const handleAddExpense = () => {
-    navigate("/add-expense");
+    navigate("/add-employee-salary");
   };
 
   const handleDetailView = (id) => {
@@ -91,7 +91,7 @@ const AllExpenseList = () => {
     if (!selectedUserId) return;
 
     try {
-      const response = await fetch(`${url}/expense/list/?expense_id=${selectedUserId}`, {
+      const response = await fetch(`${url}/expense/employee-salary/?employee_salary_id=${selectedUserId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Token ${token}`,
@@ -152,7 +152,7 @@ const AllExpenseList = () => {
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 max-w-full mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2">
-        <h1 className="text-lg sm:text-xl mb-2 sm:mb-0">Expense History</h1>
+        <h1 className="text-lg sm:text-xl mb-2 sm:mb-0">Employee Salary List</h1>
         <div className="flex gap-4 text-lg sm:text-xl">
           <CiFilter
             className="cursor-pointer"
@@ -175,8 +175,8 @@ const AllExpenseList = () => {
 
       {/* Filter Dropdowns */}
       {showFilter && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
-          <div className="">
+        <div className=" p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
+          {/* <div className="">
             <label className="block text-sm font-medium text-gray-700 mr-2">Yearly Filter:</label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -193,7 +193,7 @@ const AllExpenseList = () => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
           <div className=" min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mr-2">Monthly Filter:</label>
             <select
@@ -261,16 +261,18 @@ const AllExpenseList = () => {
                   checked={selectedExpenseId.length === filteredExpenses.length && filteredExpenses.length > 0}
                 />
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Expense For</th>
+              {/* <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Salary For</th> */}
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Date</th>
-              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Method</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Reference</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Category</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Quantity</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Unit Cost</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Sub Total</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Additional Cost</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total</th>
+              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">ID</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Employee Name</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Basic 50%</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">H.Rent 30%</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Medical 10%</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Other 10%</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Gross Salary</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Deduct</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Providient Fund</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total Paid</th>
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
             </tr>
           </thead>
@@ -292,35 +294,29 @@ const AllExpenseList = () => {
                       className="w-4 h-4"
                     />
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.expense_for || "—"}</td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.expense_date).toLocaleDateString("en-US", {
+                    {new Date(expense.date).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.payment_method || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.reference || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.expense_category_name || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{parseFloat(expense.qty || 0).toFixed(2)}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.unit_cost || 0).toFixed(2)}
-                  </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.sub_total || 0).toFixed(2)}
-                  </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.additional_cost || 0).toFixed(2)}
-                  </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.total || 0).toFixed(2)}
-                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.employee_name || "—"}</td>
+                  
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.employees_id || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.basic || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.h_rent || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.medical_allowance || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.others || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.gross_salary || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.deduct || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.provident_fund || "—"}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.total_payable || "—"}</td> 
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     <div className="flex gap-2">
                       <button
                         className="text-purple-500 hover:text-purple-700"
-                        onClick={() => handleEditExpenseCategory(expense.id)}
+                        onClick={() => handleEditSalary(expense.id)}
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
@@ -366,4 +362,4 @@ const AllExpenseList = () => {
   );
 };
 
-export default AllExpenseList;
+export default EmployeeSalaryList;

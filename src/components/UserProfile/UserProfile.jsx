@@ -12,6 +12,7 @@ import Signature from "../Signature/Signature";
 import useUserPermission from "../hooks/usePermission";
 import UserPermissionGroup from "../UserPermissionGroup/UserPermissionGroup";
 import Currency from "../Currency/Currency";
+import SalaryConfig from "../SalaryConfig/SalaryConfig";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -279,6 +280,7 @@ const MyProfile = () => {
         {viewCompany && <CompanyAddress />}
         {viewCompanyBillingAddress && <AddressBook />}
         {canViewAuthoritySign && <Signature />}
+        <SalaryConfig></SalaryConfig>
         {CanViewSupportContact && <SupportContactList />}
       </div>
     </div>

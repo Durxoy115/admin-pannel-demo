@@ -172,7 +172,7 @@ const AddExpense = () => {
             name="expense_category"
             value={formData.expense_category}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           >
             <option value="">Select Category</option>
             {categories.map((category) => (
@@ -196,7 +196,7 @@ const AddExpense = () => {
             name="expense_date"
             value={formData.expense_date}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
           {formErrors.expense_date && (
             <p className="mt-1 text-xs text-red-500">{formErrors.expense_date}</p>
@@ -213,7 +213,7 @@ const AddExpense = () => {
             name="qty"
             value={formData.qty}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             min="0"
             step="0.01"
           />
@@ -232,7 +232,7 @@ const AddExpense = () => {
             name="unit_cost"
             value={formData.unit_cost}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             min="0"
             step="0.01"
           />
@@ -250,7 +250,7 @@ const AddExpense = () => {
             name="currency"
             value={formData.currency}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           >
             <option value="">Select Currency</option>
             {currencies.map((c) => (
@@ -272,7 +272,7 @@ const AddExpense = () => {
             name="payment_method"
             value={formData.payment_method}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
         </div>
 
@@ -284,7 +284,7 @@ const AddExpense = () => {
             name="reference"
             value={formData.reference}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
         </div>
 
@@ -296,7 +296,7 @@ const AddExpense = () => {
             name="additional_cost"
             value={formData.additional_cost}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             min="0"
             step="0.01"
           />
@@ -310,7 +310,7 @@ const AddExpense = () => {
             name="sub_total"
             value={formData.sub_total}
             readOnly
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 bg-gray-100 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
           />
         </div>
 
@@ -322,7 +322,7 @@ const AddExpense = () => {
             name="total"
             value={formData.total}
             readOnly
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 bg-gray-100 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
           />
         </div>
 
@@ -334,7 +334,7 @@ const AddExpense = () => {
             name="expense_for"
             value={formData.expense_for}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
           />
         </div>
 
@@ -345,7 +345,7 @@ const AddExpense = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base h-24 resize-y"
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base h-24 resize-y"
           />
         </div>
 

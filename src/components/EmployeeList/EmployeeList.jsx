@@ -85,6 +85,9 @@ const EmployeeList = () => {
   const handleEditEmployee = (id) => {
     navigate(`/edit-employee/${id}`);
   }
+  const handleEmployeeDetails = (id) => {
+    navigate(`/employee-details/${id}`);
+  }
 
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 w-full mx-auto">
@@ -252,7 +255,9 @@ const EmployeeList = () => {
                         />
                       </button>
                       <button className="text-green-500 hover:text-green-700">
-                        <CiViewList className="w-4 sm:w-5 h-4 sm:h-5" />
+                        <CiViewList className="w-4 sm:w-5 h-4 sm:h-5"
+                        onClick={() => handleEmployeeDetails(employee.id)}
+                        />
                       </button>
 
                       <button className="text-red-500 hover:text-red-700">

@@ -4,7 +4,7 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
 
-const SupportContactList = () => {
+const SalaryConfig = () => {
   const [contacts, setContact] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -21,7 +21,7 @@ const SupportContactList = () => {
 
   const fetchAddress = async () => {
     try {
-      const response = await fetch(`${url}/company/support-contact/`, {
+      const response = await fetch(`${url}/company/salary-config/`, {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -48,7 +48,7 @@ const SupportContactList = () => {
 
     try {
       const response = await fetch(
-        `${url}/company/support-contact/?support_contact_id=${selectedContactId}`,
+        `${url}/company/salary-config/?salary_config_id=${selectedContactId}`,
         {
           method: "DELETE",
           headers: {
@@ -85,20 +85,20 @@ const SupportContactList = () => {
   };
 
   const handleContact = () => {
-    navigate("/add-support-contact");
+    navigate("/add-salary-config");
   };
 
   const handleEdit = (id) => {
-    navigate(`/edit-support-contact/${id}`);
+    navigate(`/edit-salary-config/${id}`);
   };
   
 
   return (
-    <div className="sm:p-2 lg:p-1 min-h-screen bg-white">
+    <div className="sm:p-2 lg:p-1  bg-white">
       <div className="mt-12 sm:mt-16">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl md:text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
-            Support Contact List
+            Salary Configuration
           </h1>
           {
             canAddContact && 
@@ -130,10 +130,25 @@ const SupportContactList = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
-                  Social Media Type
+                 Year
                 </th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
-                  Social Media No/Link
+                  Basic
+                </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                  House Rent
+                </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                  Madical Allowance 
+                </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                 Transport
+                </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                 Mobile
+                </th>
+                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                 Others
                 </th>
                 <th className="py-2 sm:py-3 px-4 sm:px-6 text-end border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Actions
@@ -144,10 +159,25 @@ const SupportContactList = () => {
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-gray-50">
                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
-                    {contact.name}
+                    {contact.others}
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
-                    {contact.account}
+                    {contact.basic}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.house_rent}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.medical_allow}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.transport_allow}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.mobile_allow}
+                  </td>
+                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                    {contact.others}
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
                     <div className="flex justify-end gap-2 sm:gap-3">
@@ -205,4 +235,4 @@ const SupportContactList = () => {
   );
 };
 
-export default SupportContactList;
+export default SalaryConfig;

@@ -60,6 +60,12 @@ import DailyCreditAmountHistory from "./components/DailyCreditAmountHistory/Dail
 import EmployeeList from "./components/EmployeeList/EmployeeList";
 import AddEmployee from "./components/AddEmployee/AddEmployee";
 import EditEmployee from "./components/EditEmployee/EditEmployee";
+import EmployeeDetails from "./components/EmployeeDetails/EmployeeDetails";
+import EmployeeSalaryList from "./components/EmployeeSlaryList/EmployeeSlaryList";
+import AddEmployeeSalary from "./components/AddEmployeeSalary/AddEmployeeSalary";
+import AddSalaryConfig from "./components/AddSalaryConfig/AddSalaryConfig";
+import EditSalaryConfig from "./components/EditSalaryConfig/EditSalaryConfig";
+import EditEmployeeSalary from "./components/EditEmployeeSalary/EditEmployeeSalary";
 
 
 // import Test from "./components/Test";
@@ -135,6 +141,12 @@ const App = () => {
           <Route path="/employee-list" element={<EmployeeList/>} />
           <Route path="/add-employee" element={<AddEmployee/>} />
           <Route path="/edit-employee/:id" element={<EditEmployee/>} />
+          <Route path="employee-details/:id" element={<EmployeeDetails/>} />
+          <Route path="employee-salary-list" element={<EmployeeSalaryList/>} />
+          <Route path="add-employee-salary" element={<AddEmployeeSalary/>} />
+          <Route path="edit-salary-list/:id" element={<EditEmployeeSalary/>} />
+          <Route path="add-salary-config" element={<AddSalaryConfig/>} />
+          <Route path="edit-salary-config/:id" element={<EditSalaryConfig/>} />
         </Route>
       </Route>
     </Routes>
