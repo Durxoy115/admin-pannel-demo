@@ -517,7 +517,7 @@ const AddEmployee = () => {
               name="bank_name"
               value={formData.bank_name}
               onChange={handleChange}
-              className="block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             />
           </div>
           <div className="mb-4">

@@ -4,6 +4,7 @@ import { IoAttach } from "react-icons/io5";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import useToken from "../hooks/useToken";
+import YearlySingleEmployeeSalary from "../YearlySingleEmployeeSalary/YearlySingleEmployeeSalary";
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -382,6 +383,7 @@ const EmployeeDetails = () => {
           ))}
         </div>
       </div>
+      <YearlySingleEmployeeSalary></YearlySingleEmployeeSalary>
     </div>
   );
 };
