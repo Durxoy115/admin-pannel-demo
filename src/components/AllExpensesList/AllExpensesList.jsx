@@ -6,6 +6,8 @@ import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import { pdf } from "@react-pdf/renderer";
+import myPDFDocument from "../myPDFDocument";
 
 const AllExpenseList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -126,6 +128,27 @@ const AllExpenseList = () => {
       prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
     );
   };
+  const handlePDFPreview = async () => {
+    try {
+      const title = "Expense  Report";
+      const heading = ["Expense For", " Date", "Category", "Quantity", "Unit Cost", "Sub Total", "Additional Cost", "Total"];
+      const value = ["expense_for", "expense_date", "expense_category_name", "qty", "unit_cost", "sub_total", "additional_cost", "total"];
+      const useCurrency = ["unit_cost", "sub_total", "additional_cost", "total"];
+      console.log("filteredExpenses",filteredExpenses)
+      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title,useCurrency }));
+      
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+  
+      // Open the PDF in a new tab
+      window.open(url, "_blank");
+  
+      // Optionally revoke after a few seconds to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
   // Extract unique currencies and years
   const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
@@ -158,7 +181,9 @@ const AllExpenseList = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <BsFilePdfFill className="text-red-500 cursor-pointer"
+          onClick={handlePDFPreview} />
+          
           <IoMdAddCircleOutline
             className="cursor-pointer"
             onClick={handleAddExpense}
@@ -303,7 +328,7 @@ const AllExpenseList = () => {
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.payment_method || "—"}</td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.reference || "—"}</td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.expense_category_name || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{parseFloat(expense.qty || 0).toFixed(2)}</td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{(expense.qty || 0)}</td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     {expense.currency_sign} {parseFloat(expense.unit_cost || 0).toFixed(2)}
                   </td>

@@ -116,7 +116,7 @@ const AddExpense = () => {
 
     const payload = {
       expense_category: parseInt(formData.expense_category) || 0,
-      qty: parseFloat(formData.qty) || 0,
+      qty: (formData.qty) || 0,
       unit_cost: parseFloat(formData.unit_cost).toFixed(2) || 0,
       additional_cost: parseFloat(formData.additional_cost).toFixed(2) || 0,
       sub_total: parseFloat(formData.sub_total) || 0,
@@ -215,7 +215,7 @@ const AddExpense = () => {
             onChange={handleChange}
             className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
             min="0"
-            step="0.01"
+            step="1"
           />
           {formErrors.qty && (
             <p className="mt-1 text-xs text-red-500">{formErrors.qty}</p>

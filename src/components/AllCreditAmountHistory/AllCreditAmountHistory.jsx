@@ -5,6 +5,8 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const AllCreditAmountHistory = () => {
   const [creditAmounts, setCreditAmounts] = useState([]);
@@ -110,6 +112,25 @@ const AllCreditAmountHistory = () => {
         : [...prev, userId]
     );
   };
+  const handlePDFPreview = async () => {
+    try {
+      const title = "Yearly Add Amount History"
+      const heading = ["Year", "Start Date", "End Date", "Total Add Amount", "Total Expense"];
+      const value = ["year", "start_date", "end_date", "total_amount", "total_expense"];
+      const useCurrency = ["total_amount", "total_expense"];
+      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title,useCurrency }));
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+  
+      // Open the PDF in a new tab
+      window.open(url, "_blank");
+  
+      // Optionally revoke after a few seconds to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
   // Extract unique currencies and years from expenses
   const currencies = [...new Set(creditAmounts.map((expense) => expense.currency__currency))];
@@ -124,7 +145,9 @@ const AllCreditAmountHistory = () => {
             className="text-lg sm:text-xl cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500" />
+          <BsFilePdfFill className="text-red-500" 
+          onClick={handlePDFPreview}
+          />
         </div>
       </div>
 

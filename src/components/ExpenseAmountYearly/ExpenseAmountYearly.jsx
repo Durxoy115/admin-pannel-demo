@@ -5,6 +5,8 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import { pdf } from "@react-pdf/renderer";
+import myPDFDocument from "../myPDFDocument";
 
 const ExpenseAmountyearly = () => {
   const [expenses, setExpenses] = useState([]);
@@ -70,11 +72,35 @@ const ExpenseAmountyearly = () => {
     );
   };
 
+   // Generate and preview PDF
+   const handlePDFPreview = async () => {
+    try {
+      const title = "Yearly Expense History"
+      const heading = ["Year", "Start Date", "End Date", "Receive Amount", "Total Expense"];
+      const value = ["year", "start_date", "end_date", "total_amount", "total_expense"];
+      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title }));
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+  
+      // Open the PDF in a new tab
+      window.open(url, "_blank");
+  
+      // Optionally revoke after a few seconds to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+  
+
+  // Close modal and clean up URL
+
+
   const currencies = [...new Set(expenses.map((expense) => expense.currency__currency))];
   const years = [...new Set(expenses.map((expense) => expense.year))].sort().reverse();
 
   return (
-    <div className="bg-white mt-20">
+    <div className="bg-white mt-20 p-1 md:p-8 ">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-8 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3">
         <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Yearly Expense History</h1>
         <div className="flex gap-4">
@@ -82,7 +108,8 @@ const ExpenseAmountyearly = () => {
             className="text-lg sm:text-xl cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500" />
+          <BsFilePdfFill className="text-red-500" 
+           onClick={handlePDFPreview}/>
         </div>
       </div>
 
@@ -185,6 +212,8 @@ const ExpenseAmountyearly = () => {
           </tbody>
         </table>
       </div>
+            {/* PDF Preview Modal */}
+         
     </div>
   );
 };
