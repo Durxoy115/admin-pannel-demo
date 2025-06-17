@@ -114,11 +114,15 @@ const AllCreditAmountHistory = () => {
   };
   const handlePDFPreview = async () => {
     try {
-      const title = "Yearly Add Amount History"
+
+      const title = "Yearly Debits and Credits History"
       const heading = ["Year", "Start Date", "End Date", "Total Add Amount", "Total Expense"];
       const value = ["year", "start_date", "end_date", "total_amount", "total_expense"];
       const useCurrency = ["total_amount", "total_expense"];
-      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title,useCurrency }));
+      const pdfData = selectedExpenseId.length > 0
+      ? filteredExpenses.filter((expense, index) => selectedExpenseId.includes(index))
+      : filteredExpenses;
+      const pdfDoc = pdf(myPDFDocument({ data: pdfData, heading, value, title,useCurrency }));
       const blob = await pdfDoc.toBlob();
       const url = URL.createObjectURL(blob);
   
@@ -139,7 +143,7 @@ const AllCreditAmountHistory = () => {
   return (
     <div className="bg-white mt-16 md:mt-20 px-1 md:px-8 ">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-8 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-2">
-        <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Yearly Add Amount History</h1>
+        <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">Yearly Debits and Credits History</h1>
         <div className="flex gap-4">
           <CiFilter
             className="text-lg sm:text-xl cursor-pointer"
@@ -191,25 +195,25 @@ const AllCreditAmountHistory = () => {
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 <input type="checkbox" className="mr-2" />
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 Year
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 Start Date
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 End Date
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 Total Add Amount
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 Total Expense
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">
                 Actions
               </th>
             </tr>
@@ -217,7 +221,7 @@ const AllCreditAmountHistory = () => {
           <tbody>
             {filteredExpenses.map((credit, index) => (
               <tr key={index} className="hover:bg-gray-50">
-                <td className="border-b border-gray-300 p-2 sm:p-3">
+                <td className="border-b border-gray-300 p-1 sm:p-2">
                   <input
                     type="checkbox"
                     checked={selectedExpenseId.includes(index)}
@@ -225,22 +229,22 @@ const AllCreditAmountHistory = () => {
                     className="w-4 h-4"
                   />
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                   {credit.year}
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                   {credit.start_date}
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                   {credit.end_date}
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                   {credit.currency__sign} {credit.total_amount.toFixed(2)}
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                   {credit.currency__sign} {credit.total_expense.toFixed(2)}
                 </td>
-                <td className=" border-gray-300 p-2 sm:p-3 flex gap-2">
+                <td className="border-b border-gray-300 p-1 sm:p-2  gap-2">
                  <BsListTask className="bg-green-300 text-xl p-1 rounded-md"
                  onClick={() => handleMonthlyCredit(credit?.year)}
                  />

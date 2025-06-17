@@ -3,10 +3,12 @@ import { FiTrash2 } from "react-icons/fi";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { AiOutlineEdit } from "react-icons/ai";
 import { VscFilePdf } from "react-icons/vsc";
-import { MdSend } from "react-icons/md"; // Added for Sent button
+import { MdSend } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+
+const currencyKey = (c) => (c || "").trim().toUpperCase();
 
 const PaymentHistory = () => {
   const [payments, setPayments] = useState([]);
@@ -18,6 +20,7 @@ const PaymentHistory = () => {
   const [currencies, setCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("");
   const [currencyTotals, setCurrencyTotals] = useState({});
+  const [paymentStatus, setPaymentStatus] = useState("all");
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -40,45 +43,69 @@ const PaymentHistory = () => {
         const allData = data?.data;
         const paid_due_amount = {};
         const paymentData = [];
+
         for (let i = 0; i < allData.length; i++) {
+          const payment = allData[i];
           paymentData.push({
-            id: allData[i].id,
-            client_name: allData[i].client_name,
-            client_id: allData[i].client_id,
-            invoice_id: allData[i].invoice_id,
-            trans_id: allData[i].trans_id,
-            date: allData[i].date?.split("T")[0],
-            total_amount: allData[i].total_amount,
-            paid_amount: allData[i].paid_amount,
-            due_amount: allData[i].due_amount,
-            sign: allData[i].sign,
-            last_due: allData[i].last_due,
-            currency: allData[i].currency,
-            invoice_paid: allData[i].invoice_paid,
-            payment_pdf: allData[i].payment_pdf,
+            id: payment.id,
+            client_name: payment.client_name,
+            client_id: payment.client_id,
+            invoice_id: payment.invoice_id,
+            trans_id: payment.trans_id,
+            date: payment.date?.split("T")[0],
+            total_amount: payment.total_amount,
+            paid_amount: payment.paid_amount,
+            due_amount: payment.due_amount,
+            sign: payment.sign,
+            last_due: payment.last_due,
+            currency: payment.currency,
+            invoice_paid: payment.invoice_paid,
+            payment_pdf: payment.payment_pdf,
           });
-          if (!(allData[i].currency in paid_due_amount)) {
-            paid_due_amount[allData[i].currency] = {
+
+          const currency = payment.currency;
+          if (!(currency in paid_due_amount)) {
+            paid_due_amount[currency] = {
               paid_amount: 0,
               due_amount: 0,
-              symbol: allData[i]?.sign,
+              symbol: payment?.sign,
             };
           }
-          if (allData[i].last_due === true) {
-            paid_due_amount[allData[i].currency].paid_amount +=
-              parseFloat(allData[i].paid_amount) + parseFloat(allData[i].invoice_paid || 0);
-            paid_due_amount[allData[i].currency].due_amount += parseFloat(allData[i].due_amount);
+
+          const parsedPaidAmount = parseFloat(payment.paid_amount) || 0;
+          const parsedDueAmount = parseFloat(payment.due_amount) || 0;
+          const parsedInvoicePaid = parseFloat(payment.invoice_paid) || 0;
+
+          if (payment.last_due) {
+            paid_due_amount[currency].paid_amount += parsedPaidAmount + parsedInvoicePaid;
+            paid_due_amount[currency].due_amount += parsedDueAmount;
           } else {
-            paid_due_amount[allData[i].currency].paid_amount += parseFloat(allData[i].paid_amount);
+            paid_due_amount[currency].paid_amount += parsedPaidAmount;
+          }
+
+          // Debug logging for BDT
+          if (currency === "BDT") {
+            console.log(`BDT Payment ${payment.id}:`, {
+              paid_amount: parsedPaidAmount,
+              due_amount: parsedDueAmount,
+              invoice_paid: parsedInvoicePaid,
+              last_due: payment.last_due,
+              total_paid: paid_due_amount[currency].paid_amount,
+              total_due: paid_due_amount[currency].due_amount,
+            });
           }
         }
+
         setCurrencies(Object.keys(paid_due_amount));
-        setSelectedCurrency(Object.keys(paid_due_amount)[0] || "");
+        const keys = Object.keys(paid_due_amount);
+        const defaultCurrency = keys.find((k) => currencyKey(k) === "BDT") || keys[0] || "";
+        setSelectedCurrency(defaultCurrency);
         setCurrencyTotals(paid_due_amount);
         setPayments(paymentData);
-        setFilteredPayments(
-          paymentData.filter((payment) => payment.currency === Object.keys(paid_due_amount)[0])
-        );
+        setFilteredPayments(paymentData.filter((payment) => payment.currency === defaultCurrency));
+
+        // Debug total for BDT
+        console.log("Initial BDT Totals:", paid_due_amount["BDT"]);
       } else {
         console.error("Error fetching payments:", data.message);
       }
@@ -91,9 +118,10 @@ const PaymentHistory = () => {
     fetchPayments();
   }, []);
 
-  // Filter payments based on date and currency
+  // Filter payments based on date, currency, and payment status
   useEffect(() => {
     let filtered = payments;
+
     if (startDate) {
       filtered = filtered.filter((payment) => payment.date >= startDate);
     }
@@ -103,26 +131,57 @@ const PaymentHistory = () => {
     if (selectedCurrency) {
       filtered = filtered.filter((payment) => payment.currency === selectedCurrency);
     }
+    if (paymentStatus !== "all") {
+      filtered = filtered.filter((payment) =>
+        paymentStatus === "paid"
+          ? parseFloat(payment.due_amount) <= 0
+          : parseFloat(payment.due_amount) > 0
+      );
+    }
+
     const paid_due_amount = {};
     for (let i = 0; i < filtered.length; i++) {
-      if (!(filtered[i].currency in paid_due_amount)) {
-        paid_due_amount[filtered[i].currency] = {
+      const payment = filtered[i];
+      const currency = payment.currency;
+
+      if (!(currency in paid_due_amount)) {
+        paid_due_amount[currency] = {
           paid_amount: 0,
           due_amount: 0,
-          symbol: filtered[i]?.sign,
+          symbol: payment?.sign,
         };
       }
-      if (filtered[i].last_due === true) {
-        paid_due_amount[filtered[i].currency].paid_amount +=
-          parseFloat(filtered[i].paid_amount) + parseFloat(filtered[i].invoice_paid || 0);
-        paid_due_amount[filtered[i].currency].due_amount += parseFloat(filtered[i].due_amount);
+
+      const parsedPaidAmount = parseFloat(payment.paid_amount) || 0;
+      const parsedDueAmount = parseFloat(payment.due_amount) || 0;
+      const parsedInvoicePaid = parseFloat(payment.invoice_paid) || 0;
+
+      if (payment.last_due) {
+        paid_due_amount[currency].paid_amount += parsedPaidAmount + parsedInvoicePaid;
+        paid_due_amount[currency].due_amount += parsedDueAmount;
       } else {
-        paid_due_amount[filtered[i].currency].paid_amount += parseFloat(filtered[i].paid_amount);
+        paid_due_amount[currency].paid_amount += parsedPaidAmount;
+      }
+
+      // Debug logging for BDT
+      if (currency === "BDT") {
+        console.log(`Filtered BDT Payment ${payment.id}:`, {
+          paid_amount: parsedPaidAmount,
+          due_amount: parsedDueAmount,
+          invoice_paid: parsedInvoicePaid,
+          last_due: payment.last_due,
+          total_paid: paid_due_amount[currency].paid_amount,
+          total_due: paid_due_amount[currency].due_amount,
+        });
       }
     }
+
     setCurrencyTotals(paid_due_amount);
     setFilteredPayments(filtered);
-  }, [startDate, endDate, selectedCurrency, payments]);
+
+    // Debug final totals for BDT
+    console.log("Filtered BDT Totals:", paid_due_amount["BDT"]);
+  }, [startDate, endDate, selectedCurrency, paymentStatus, payments]);
 
   const handleAddPayment = () => {
     navigate("/add-payment");
@@ -143,7 +202,9 @@ const PaymentHistory = () => {
       );
 
       if (response.ok) {
-        setPayments(payments.filter((payment) => payment.id !== selectedPaymentId));
+        setPayments(
+          payments.filter((payment) => payment.id !== selectedPaymentId)
+        );
         setFilteredPayments(
           filteredPayments.filter((payment) => payment.id !== selectedPaymentId)
         );
@@ -170,33 +231,10 @@ const PaymentHistory = () => {
     navigate(`/edit-payment-history/${id}`);
   };
 
-  // const previewPDF = async (id) => {
-  //   try {
-  //     const response = await fetch(`${url}/service/payment-pdf/?payment_id=${id}`, {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Token ${token}`,
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       console.error("PDF Error:", errorData);
-  //       throw new Error(errorData.message || "Failed to generate PDF preview");
-  //     }
-
-  //     const blob = await response.blob();
-  //     const pdfUrl = window.URL.createObjectURL(blob);
-  //     window.open(pdfUrl, "_blank");
-  //   } catch (error) {
-  //     console.error("Error generating PDF preview:", error.message);
-  //   }
-  // };
-
   const previewPDF = (payment_pdf) => {
-    window.open(`${url}${payment_pdf}`, '_blank');
+    window.open(`${url}${payment_pdf}`, "_blank");
   };
+
   const handleSendPayment = async (id) => {
     try {
       const response = await fetch(
@@ -215,7 +253,7 @@ const PaymentHistory = () => {
 
       if (response.ok && data.success) {
         alert(data.message || "Payment sent successfully");
-        fetchPayments(); // Refresh payments to reflect any changes
+        fetchPayments();
       } else {
         console.error("Failed to send payment:", data.message);
         alert(data.message || "Failed to send payment");
@@ -237,22 +275,11 @@ const PaymentHistory = () => {
             color: "text-blue-600",
             render: (
               <div className="relative">
-                {/* <div className="absolute top-0 right-0">
-                  <select
-                    value={selectedCurrency}
-                    onChange={(e) => setSelectedCurrency(e.target.value)}
-                    className="text-black text-xs sm:text-sm border rounded-md p-1"
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency} value={currency}>
-                        {currency}
-                      </option>
-                    ))}
-                  </select>
-                </div> */}
                 <h2 className="text-lg sm:text-xl font-semibold">
                   {currencyTotals[selectedCurrency]?.symbol || ""}
-                  {(currencyTotals[selectedCurrency]?.paid_amount || 0).toLocaleString()}
+                  {(
+                    currencyTotals[selectedCurrency]?.paid_amount || 0
+                  ).toLocaleString()}
                 </h2>
               </div>
             ),
@@ -278,7 +305,9 @@ const PaymentHistory = () => {
                 </div>
                 <h2 className="text-lg sm:text-xl font-semibold">
                   {currencyTotals[selectedCurrency]?.symbol || ""}
-                  {(currencyTotals[selectedCurrency]?.due_amount || 0).toLocaleString()}
+                  {(
+                    currencyTotals[selectedCurrency]?.due_amount || 0
+                  ).toLocaleString()}
                 </h2>
               </div>
             ),
@@ -309,6 +338,15 @@ const PaymentHistory = () => {
             onChange={(e) => setEndDate(e.target.value)}
             className="w-full sm:w-auto bg-white text-black px-3 py-1.5 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <select
+            value={paymentStatus}
+            onChange={(e) => setPaymentStatus(e.target.value)}
+            className="w-full sm:w-auto bg-white text-black px-3 py-1.5 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">All Payments</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
         </div>
         {canAddPayment && (
           <button
@@ -325,12 +363,16 @@ const PaymentHistory = () => {
         <table className="min-w-full bg-white rounded-lg shadow-md">
           <thead className="bg-gray-100 text-gray-700 text-xs sm:text-sm">
             <tr>
-              <th className="p-3 sm:p-4 text-left font-medium">Client Name</th>
-              <th className="p-3 sm:p-4 text-left font-medium">Client ID</th>
-              <th className="p-3 sm:p-4 text-left font-medium">Invoice ID</th>
-              <th className="p-3 sm:p-4 text-left font-medium">Transaction ID</th>
-              <th className="p-3 sm:p-4 text-left font-medium">Date</th>
-              <th className="p-3 sm:p-4 text-left font-medium">Actions</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Client Name</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Client ID</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Invoice ID</th>
+              <th className="p-1 sm:p-2 text-left font-medium">
+                Transaction ID
+              </th>
+              <th className="p-1 sm:p-2 text-left font-medium">Total Amount</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Due Amount</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Date</th>
+              <th className="p-1 sm:p-2 text-left font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -340,12 +382,24 @@ const PaymentHistory = () => {
                   key={payment.id}
                   className="border-b hover:bg-gray-50 text-xs sm:text-sm"
                 >
-                  <td className="p-3 sm:p-4">{payment.client_name}</td>
-                  <td className="p-3 sm:p-4">{payment.client_id}</td>
-                  <td className="p-3 sm:p-4">{payment.invoice_id}</td>
-                  <td className="p-3 sm:p-4">{payment.trans_id || "N/A"}</td>
-                  <td className="p-3 sm:p-4">{payment.date || "N/A"}</td>
-                  <td className="p-3 sm:p-4 flex gap-2">
+                  <td className="p-1 sm:p-2">{payment.client_name}</td>
+                  <td className="p-1 sm:p-2">{payment.client_id}</td>
+                  <td className="p-1 sm:p-2">{payment.invoice_id}</td>
+                  <td className="p-1 sm:p-2">{payment.trans_id || "N/A"}</td>
+                  <td className="p-1 sm:p-2">
+                    {payment.total_amount || "N/A"}
+                  </td>
+                  <td
+                    className={`p-1 sm:p-1 ${
+                      parseFloat(payment.due_amount) > 0
+                        ? "font-semibold text-red-600"
+                        : " text-Black"
+                    }`}
+                  >
+                    {payment.due_amount || "N/A"}
+                  </td>
+                  <td className="p-1 sm:p-1">{payment.date || "N/A"}</td>
+                  <td className="p-1 sm:p-1 flex gap-2">
                     {canUpdatePayment && (
                       <button
                         className="p-1.5 rounded-md text-green-500 hover:bg-green-200 hover:text-green-700 transition-colors"
@@ -364,15 +418,6 @@ const PaymentHistory = () => {
                         <AiOutlineEdit className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     )}
-                    {/* {canUpdatePayment && (
-                      <button
-                        className="p-1.5 rounded-md text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"
-                        onClick={() => handleSendPayment(payment.id)}
-                        title="Send"
-                      >
-                        <MdSend className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
-                    )} */}
                     {canDeletePayment && (
                       <button
                         className="p-1.5 rounded-md text-red-500 hover:bg-red-200 hover:text-red-700 transition-colors"

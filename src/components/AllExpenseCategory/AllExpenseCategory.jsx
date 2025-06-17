@@ -46,8 +46,10 @@ const AllExpenseCategory = () => {
       const data = await response.json();
       if (data.success && data.data) {
         setCurrencyData(data.data);
-        const firstCurrency = Object.keys(data.data)[0] || "BDT";
-        setSelectedCurrency(firstCurrency);
+        // Prioritize BDT as the default currency if it exists, otherwise use the first currency or empty string
+        const availableCurrencies = Object.keys(data.data);
+        const defaultCurrency = availableCurrencies.includes("BDT") ? "BDT" : availableCurrencies[0] || "";
+        setSelectedCurrency(defaultCurrency);
       } else {
         setError("Error fetching credit summary: " + (data.message || "No data returned"));
       }

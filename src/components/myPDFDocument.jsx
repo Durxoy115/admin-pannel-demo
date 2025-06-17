@@ -16,14 +16,16 @@ import {
 
 // ✅ Register the font (no symbols font)
 Font.register({
-  family: "Noto Sans",   
-     src: "../../public/assets/font/NotoSans-Regular.ttf" ,  
-  
+  family: "Noto Sans",
+  src: "/assets/font/NotoSans-Regular.ttf",
 });
 Font.register({
-  family: "Noto Sans Bengali",   
-     src: "../../public/assets/font/NotoSansBengali-Regular.ttf" ,  
-  
+  family: "Noto Sans",
+  src: "/assets/font/NotoSans-Bold.ttf",
+});
+Font.register({
+  family: "Noto Sans Bengali",
+  src: "/assets/font/NotoSansBengali-Regular.ttf",
 });
 
 const styles = StyleSheet.create({
@@ -101,9 +103,41 @@ const styles = StyleSheet.create({
     width: 50,
     height: 20,
   },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    width: 200,
+    alignSelf: "flex-end",
+    marginBottom: 5,
+  },
+  
+  totalLabel: {
+    fontWeight: "bold",
+    fontFamily: "Noto Sans",
+  },
+  
+  totalValue: {
+    fontWeight: "bold",
+    fontFamily: "Noto Sans",
+  },
+  
+  totalValueTaka: {
+    fontWeight: "bold",
+    fontFamily: "Noto Sans Bengali",
+  },
+  
 });
 
-const myPDFDocument = ({ data, heading, value, title, useCurrency }) => {
+const myPDFDocument = ({
+  data,
+  heading,
+  value,
+  title,
+  useCurrency,
+  showTotalAmount,
+}) => {
+  console.log("showTotalAmount:", showTotalAmount);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -130,39 +164,24 @@ const myPDFDocument = ({ data, heading, value, title, useCurrency }) => {
           data.map((row, index) => (
             <View style={styles.tableRow} key={index}>
               {value.map((val, idx) => (
-            //    <Text style={styles.taka} key={idx}>
-            //    {row[val] != null && !isNaN(parseFloat(row[val]))
-            //      ? `${row.currency_sign || ""} ${parseFloat(row[val]).toFixed(2)}`
-            //      : String(row[val] ?? "N/A")}
-            //  </Text>
-
-            //  <Text style={styles.cell} key={idx}>
-            //   {
-            //     val in useCurrency ?  row.currency_sign=="৳" ? <span style={styles.taka> row.currency_sign </span> : <span>row.currency_sign </span>
-            //   }
-            //   <span>
-            //   row[val]
-            //   </span>
-    
-            //   </Text>
-            <Text style={styles.cell} key={idx}>
-            {useCurrency.includes(val) && row.currency_sign ? (
-              <>
-                <Text style={row.currency_sign === "৳" ? styles.taka : styles.currency}>
-                  {row.currency_sign}{" "}
+                <Text style={styles.cell} key={idx}>
+                  {useCurrency.includes(val) && row.currency_sign ? (
+                    <>
+                      <Text
+                        style={
+                          row.currency_sign === "৳"
+                            ? styles.taka
+                            : styles.currency
+                        }
+                      >
+                        {row.currency_sign}{" "}
+                      </Text>
+                      <Text>{row[val]}</Text>
+                    </>
+                  ) : (
+                    String(row[val] ?? "N/A")
+                  )}
                 </Text>
-                <Text>{row[val]}</Text>
-              </>
-            ) : (
-              String(row[val] ?? "N/A")
-            )
-            
-            
-            }
-          </Text>
-          
-
-             
               ))}
             </View>
           ))
@@ -171,7 +190,33 @@ const myPDFDocument = ({ data, heading, value, title, useCurrency }) => {
             No data available
           </Text>
         )}
-     
+{showTotalAmount &&
+  Object.keys(showTotalAmount).some((key) => key !== "currency_sign") && (
+    <View style={{ marginTop: 20 }}>
+      {Object.entries(showTotalAmount).map(([key, value], index) => {
+        if (key === "currency_sign") return null;
+
+        const isTaka = showTotalAmount["currency_sign"] === "৳";
+
+        return (
+          <View key={index} style={styles.totalRow}>
+            <Text style={styles.totalLabel}>
+              {key.replace("_", " ")}:
+            </Text>
+            <Text style={isTaka ? styles.totalValueTaka : styles.totalValue}>
+              {showTotalAmount["currency_sign"]}
+              {typeof value === "number"
+                ? value.toFixed(2)
+                : parseFloat(value || 0).toFixed(2)}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  )}
+
+
+
 
 
         {/* Footer Signatures */}

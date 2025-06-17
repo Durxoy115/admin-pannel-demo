@@ -4,6 +4,8 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const DailyCreditAmountHistory = () => {
   const { year, month } = useParams(); // Extract year and month from URL
@@ -65,6 +67,35 @@ const DailyCreditAmountHistory = () => {
   const handleDetailView = (expenseId) => {
     navigate(`/expense-detail/${year}/${month}/${expenseId}`);
   };
+  const handlePDFPreview = async () => {
+    try {
+      const title = `Daily Debits and Credits History - ${year}-${month}`;
+      const heading = ["Date", "Amount"];
+      const value = ["date", "amount"];
+      const useCurrency = ["amount"];
+  
+      const pdfData = filteredExpenses; // Use all filteredExpenses directly
+  
+      const showTotalAmount = pdfData.reduce(
+        (totals, expense) => ({
+          Total: totals.Total + (parseFloat(expense.amount) || 0),
+        }),
+        { Total: 0 }
+      );
+      showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "";
+      console.log("pdfCal", showTotalAmount);
+  
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency, showTotalAmount })
+      );
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
   const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
 
@@ -79,7 +110,9 @@ const DailyCreditAmountHistory = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <BsFilePdfFill className="text-red-500 cursor-pointer"
+          onClick={handlePDFPreview}
+          />
         </div>
       </div>
 

@@ -495,19 +495,19 @@ const InvoiceEdit = () => {
   }
 
   return (
-    <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
+    <div className="bg-gray-100 p-1 sm:p-4 md:p-4 mt-12 md:mt-4 sm:mt-12">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-4 mb-2 sm:mt-4 md:mt-12 pl-2 sm:pl-10 md:pl-24">
         Edit Invoice
       </h1>
       {globalError && (
         <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-auto sm:w-full lg:w-5/6"
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-auto sm:w-full lg:w-full"
           role="alert"
         >
           <span className="block sm:inline">{globalError}</span>
         </div>
       )}
-      <form className="p-1 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
+      <form className="p-1 sm:p-4 md:p-4 sm:w-full lg:w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div className="grid grid-cols-2 gap-4 sm:col-span-1">
             <div>
@@ -937,7 +937,7 @@ const InvoiceEdit = () => {
                       step="0.01"
                       value={+(+service.price).toFixed(2) || ""}
                       onChange={(e) => handleServiceChange(index, "price", parseFloat(e.target.value) || 0, service.id)}
-                      className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${
+                      className={`w-28 px-2 sm:px-3 py-1 sm:py-2 border ${
                         errors[`price_${index}`] ? "border-red-500" : "border-gray-300"
                       } rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
                       required
@@ -955,7 +955,7 @@ const InvoiceEdit = () => {
                       step="0.01"
                       value={service.discount || ""}
                       onChange={(e) => handleServiceChange(index, "discount", parseFloat(e.target.value) || 0, service.id)}
-                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      className="w-20 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
@@ -964,7 +964,7 @@ const InvoiceEdit = () => {
                       step="0.01"
                       value={service.vat || ""}
                       onChange={(e) => handleServiceChange(index, "vat", parseFloat(e.target.value) || 0, service.id)}
-                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      className="w-20 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">

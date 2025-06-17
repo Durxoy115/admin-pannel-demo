@@ -37,9 +37,14 @@ const AllExpenseList = () => {
       if (data.success && data.data) {
         const allExpenses = Object.values(data.data).flat();
         setExpenses(allExpenses);
-        setFilteredExpenses(allExpenses.filter((expense) => expense.currency_title === "BDT"));
+        setFilteredExpenses(
+          allExpenses.filter((expense) => expense.currency_title === "BDT")
+        );
       } else {
-        setError("Error fetching expense summary: " + (data.message || "No data returned"));
+        setError(
+          "Error fetching expense summary: " +
+            (data.message || "No data returned")
+        );
       }
     } catch (error) {
       setError("Error fetching expense summary: " + error.message);
@@ -54,7 +59,9 @@ const AllExpenseList = () => {
   useEffect(() => {
     let filtered = [...expenses];
     if (selectedCurrency) {
-      filtered = filtered.filter((expense) => expense.currency_title === selectedCurrency);
+      filtered = filtered.filter(
+        (expense) => expense.currency_title === selectedCurrency
+      );
     }
     if (selectedYear) {
       filtered = filtered.filter((expense) => {
@@ -65,12 +72,17 @@ const AllExpenseList = () => {
     if (selectedMonth) {
       filtered = filtered.filter((expense) => {
         const expenseDate = new Date(expense.expense_date);
-        return (expenseDate.getMonth() + 1).toString().padStart(2, "0") === selectedMonth;
+        return (
+          (expenseDate.getMonth() + 1).toString().padStart(2, "0") ===
+          selectedMonth
+        );
       });
     }
     if (selectedDate) {
       filtered = filtered.filter((expense) => {
-        const expenseDate = new Date(expense.expense_date).toISOString().split("T")[0];
+        const expenseDate = new Date(expense.expense_date)
+          .toISOString()
+          .split("T")[0];
         return expenseDate === selectedDate;
       });
     }
@@ -93,16 +105,23 @@ const AllExpenseList = () => {
     if (!selectedUserId) return;
 
     try {
-      const response = await fetch(`${url}/expense/list/?expense_id=${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${url}/expense/list/?expense_id=${selectedUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
-        setExpenses(expenses.filter((expense) => expense.id !== selectedUserId));
-        setFilteredExpenses(filteredExpenses.filter((expense) => expense.id !== selectedUserId));
+        setExpenses(
+          expenses.filter((expense) => expense.id !== selectedUserId)
+        );
+        setFilteredExpenses(
+          filteredExpenses.filter((expense) => expense.id !== selectedUserId)
+        );
         setIsModalOpen(false);
         setSelectedUserId(null);
       } else {
@@ -125,24 +144,57 @@ const AllExpenseList = () => {
 
   const toggleUserSelection = (id) => {
     setSelectedExpenseId((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id]
     );
   };
   const handlePDFPreview = async () => {
     try {
       const title = "Expense  Report";
-      const heading = ["Expense For", " Date", "Category", "Quantity", "Unit Cost", "Sub Total", "Additional Cost", "Total"];
-      const value = ["expense_for", "expense_date", "expense_category_name", "qty", "unit_cost", "sub_total", "additional_cost", "total"];
-      const useCurrency = ["unit_cost", "sub_total", "additional_cost", "total"];
-      console.log("filteredExpenses",filteredExpenses)
-      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title,useCurrency }));
-      
+      const heading = [
+        "Expense For",
+        " Date",
+        "Category",
+        "Quantity",
+        "Unit Cost",
+        "Sub Total",
+        "Additional Cost",
+        "Total",
+      ];
+      const value = [
+        "expense_for",
+        "expense_date",
+        "expense_category_name",
+        "qty",
+        "unit_cost",
+        "sub_total",
+        "additional_cost",
+        "total",
+      ];
+      const useCurrency = [
+        "unit_cost",
+        "sub_total",
+        "additional_cost",
+        "total",
+      ];
+      console.log("filteredExpenses", filteredExpenses);
+      const pdfData =
+        selectedExpenseId.length > 0
+          ? filteredExpenses.filter((expense) =>
+              selectedExpenseId.includes(expense.id)
+            )
+          : filteredExpenses;
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency })
+      );
+
       const blob = await pdfDoc.toBlob();
       const url = URL.createObjectURL(blob);
-  
+
       // Open the PDF in a new tab
       window.open(url, "_blank");
-  
+
       // Optionally revoke after a few seconds to free memory
       setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch (error) {
@@ -151,8 +203,16 @@ const AllExpenseList = () => {
   };
 
   // Extract unique currencies and years
-  const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
-  const years = [...new Set(expenses.map((expense) => new Date(expense.expense_date).getFullYear().toString()))]
+  const currencies = [
+    ...new Set(expenses.map((expense) => expense.currency_title)),
+  ];
+  const years = [
+    ...new Set(
+      expenses.map((expense) =>
+        new Date(expense.expense_date).getFullYear().toString()
+      )
+    ),
+  ]
     .sort()
     .reverse();
 
@@ -181,9 +241,11 @@ const AllExpenseList = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer"
-          onClick={handlePDFPreview} />
-          
+          <BsFilePdfFill
+            className="text-red-500 cursor-pointer"
+            onClick={handlePDFPreview}
+          />
+
           <IoMdAddCircleOutline
             className="cursor-pointer"
             onClick={handleAddExpense}
@@ -202,7 +264,9 @@ const AllExpenseList = () => {
       {showFilter && (
         <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
           <div className="">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Yearly Filter:</label>
+            <label className="block text-sm font-medium text-gray-700 mr-2">
+              Yearly Filter:
+            </label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={selectedYear}
@@ -220,7 +284,9 @@ const AllExpenseList = () => {
             </select>
           </div>
           <div className=" min-w-[150px]">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Monthly Filter:</label>
+            <label className="block text-sm font-medium text-gray-700 mr-2">
+              Monthly Filter:
+            </label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={selectedMonth}
@@ -235,7 +301,9 @@ const AllExpenseList = () => {
             </select>
           </div>
           <div className="min-w-[150px]">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Date Filter:</label>
+            <label className="block text-sm font-medium text-gray-700 mr-2">
+              Date Filter:
+            </label>
             <input
               type="date"
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -251,7 +319,9 @@ const AllExpenseList = () => {
             />
           </div>
           <div className=" min-w-[150px]">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Currency Filter:</label>
+            <label className="block text-sm font-medium text-gray-700 mr-2">
+              Currency Filter:
+            </label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={selectedCurrency}
@@ -278,25 +348,52 @@ const AllExpenseList = () => {
                   className="mr-2"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedExpenseId(filteredExpenses.map((expense) => expense.id));
+                      setSelectedExpenseId(
+                        filteredExpenses.map((expense) => expense.id)
+                      );
                     } else {
                       setSelectedExpenseId([]);
                     }
                   }}
-                  checked={selectedExpenseId.length === filteredExpenses.length && filteredExpenses.length > 0}
+                  checked={
+                    selectedExpenseId.length === filteredExpenses.length &&
+                    filteredExpenses.length > 0
+                  }
                 />
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Expense For</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Date</th>
-              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Method</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Reference</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Category</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Quantity</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Unit Cost</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Sub Total</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Additional Cost</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Expense For
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Date
+              </th>
+              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Method
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Reference
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Category
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Quantity
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Unit Cost
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Sub Total
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Additional Cost
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Total
+              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -317,29 +414,46 @@ const AllExpenseList = () => {
                       className="w-4 h-4"
                     />
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.expense_for || "—"}</td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.expense_date).toLocaleDateString("en-US", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.payment_method || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.reference || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.expense_category_name || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{(expense.qty || 0)}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.unit_cost || 0).toFixed(2)}
+                    {expense.expense_for || "—"}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.sub_total || 0).toFixed(2)}
+                    {new Date(expense.expense_date).toLocaleDateString(
+                      "en-US",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.additional_cost || 0).toFixed(2)}
+                    {expense.payment_method || "—"}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign} {parseFloat(expense.total || 0).toFixed(2)}
+                    {expense.reference || "—"}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.expense_category_name || "—"}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.qty || 0}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.currency_sign}{" "}
+                    {parseFloat(expense.unit_cost || 0).toFixed(2)}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.currency_sign}{" "}
+                    {parseFloat(expense.sub_total || 0).toFixed(2)}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.currency_sign}{" "}
+                    {parseFloat(expense.additional_cost || 0).toFixed(2)}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                    {expense.currency_sign}{" "}
+                    {parseFloat(expense.total || 0).toFixed(2)}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     <div className="flex gap-2">
@@ -349,7 +463,7 @@ const AllExpenseList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
-                  
+
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => openDeleteModal(expense.id)}
@@ -368,8 +482,12 @@ const AllExpenseList = () => {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg text-center w-full max-w-sm">
-            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Confirm Delete</h2>
-            <p className="text-gray-700 text-sm sm:text-base">Are you sure you want to delete this expense?</p>
+            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-700 text-sm sm:text-base">
+              Are you sure you want to delete this expense?
+            </p>
             <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <button
                 className="bg-red-600 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-red-700 text-sm sm:text-base"

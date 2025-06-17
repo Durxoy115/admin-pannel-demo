@@ -53,20 +53,30 @@ const CreateInvoiceFromDashboard = () => {
 
   const validateForm = () => {
     const newErrors = [];
-    if (!formData.company_name) newErrors.company_name = "Client Company Name is required";
-    if (!formData.billing_address) newErrors.billing_address = "Billing Account is required";
+    if (!formData.company_name)
+      newErrors.company_name = "Client Company Name is required";
+    if (!formData.billing_address)
+      newErrors.billing_address = "Billing Account is required";
     if (!formData.client_id) newErrors.client_id = "Client ID is required";
-    if (!formData.client_name) newErrors.client_name = "Client Name is required";
+    if (!formData.client_name)
+      newErrors.client_name = "Client Name is required";
     if (!formData.date) newErrors.date = "Date is required";
     if (!formData.currency) newErrors.currency = "Currency is required";
-    if (!formData.client_email) newErrors.client_email = "Client Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.client_email)) newErrors.client_email = "Invalid email format";
-    if (!formData.client_phone) newErrors.client_phone = "Client Phone No. is required";
-    if (formData.services.length === 0) newErrors.services = "At least one service is required";
+    if (!formData.client_email)
+      newErrors.client_email = "Client Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.client_email))
+      newErrors.client_email = "Invalid email format";
+    if (!formData.client_phone)
+      newErrors.client_phone = "Client Phone No. is required";
+    if (formData.services.length === 0)
+      newErrors.services = "At least one service is required";
     formData.services.forEach((service, index) => {
-      if (!service.service_name) newErrors[`service_name_${index}`] = "Service Name is required";
-      if (service.quantity <= 0) newErrors[`quantity_${index}`] = "Quantity must be greater than 0";
-      if (service.price <= 0) newErrors[`price_${index}`] = "Price must be greater than 0";
+      if (!service.service_name)
+        newErrors[`service_name_${index}`] = "Service Name is required";
+      if (service.quantity <= 0)
+        newErrors[`quantity_${index}`] = "Quantity must be greater than 0";
+      if (service.price <= 0)
+        newErrors[`price_${index}`] = "Price must be greater than 0";
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -178,7 +188,9 @@ const CreateInvoiceFromDashboard = () => {
         if (data.success) {
           setAuthor(data.data);
         } else {
-          setGlobalError("Error fetching authority signatures: " + data.message);
+          setGlobalError(
+            "Error fetching authority signatures: " + data.message
+          );
         }
       } catch (error) {
         setGlobalError("Error fetching authority signatures: " + error.message);
@@ -206,7 +218,9 @@ const CreateInvoiceFromDashboard = () => {
             }));
           }
         } else {
-          setGlobalError("Error fetching billing addresses: " + data?.data?.message);
+          setGlobalError(
+            "Error fetching billing addresses: " + data?.data?.message
+          );
         }
       } catch (error) {
         setGlobalError("Error fetching billing addresses: " + error.message);
@@ -276,7 +290,10 @@ const CreateInvoiceFromDashboard = () => {
     setFormData((prev) => {
       const updatedData = { ...prev, [name]: value };
       if (name === "paid_amount") {
-        const dueAmount = Math.max(0, updatedData.total_amount - parseFloat(value) || 0);
+        const dueAmount = Math.max(
+          0,
+          updatedData.total_amount - parseFloat(value) || 0
+        );
         updatedData.due_amount = dueAmount;
       }
       const totals = calculateTotals(updatedData);
@@ -289,20 +306,24 @@ const CreateInvoiceFromDashboard = () => {
     const updatedServices = [...formData.services];
     if (field === "quantity" || field === "duration") {
       updatedServices[index][field] = parseInt(value, 10) || 0;
-    } else if(field === "price" ){
+    } else if (field === "price") {
       updatedServices[index][field] = parseFloat(value).toFixed(2) || 0.0;
-    }
-    else if (field === "discount" || field === "vat") {
+    } else if (field === "discount" || field === "vat") {
       updatedServices[index][field] = parseFloat(value) || 0;
     } else {
       updatedServices[index][field] = value;
     }
 
     // Calculate amount and total_amount for the service
-    updatedServices[index].amount = (updatedServices[index].quantity || 0) * (updatedServices[index].price || 0);
-    const discountAmount = (updatedServices[index].amount * (updatedServices[index].discount || 0)) / 100;
+    updatedServices[index].amount =
+      (updatedServices[index].quantity || 0) *
+      (updatedServices[index].price || 0);
+    const discountAmount =
+      (updatedServices[index].amount * (updatedServices[index].discount || 0)) /
+      100;
     const amountAfterDiscount = updatedServices[index].amount - discountAmount;
-    const vatAmount = (amountAfterDiscount * (updatedServices[index].vat || 0)) / 100;
+    const vatAmount =
+      (amountAfterDiscount * (updatedServices[index].vat || 0)) / 100;
     updatedServices[index].total_amount = amountAfterDiscount + vatAmount;
 
     setFormData((prev) => {
@@ -354,9 +375,18 @@ const CreateInvoiceFromDashboard = () => {
   };
 
   const calculateTotals = (data = formData) => {
-    const subTotal = data.services.reduce((sum, service) => sum + (service.amount || 0), 0);
-    const totalAmount = data.services.reduce((sum, service) => sum + (service.total_amount || 0), 0);
-    const dueAmount = Math.max(0, totalAmount - (parseFloat(data.paid_amount) || 0));
+    const subTotal = data.services.reduce(
+      (sum, service) => sum + (service.amount || 0),
+      0
+    );
+    const totalAmount = data.services.reduce(
+      (sum, service) => sum + (service.total_amount || 0),
+      0
+    );
+    const dueAmount = Math.max(
+      0,
+      totalAmount - (parseFloat(data.paid_amount) || 0)
+    );
 
     return {
       sub_total: parseFloat(subTotal.toFixed(2)),
@@ -383,7 +413,10 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("client_id", formData.client_id);
       formDataPayload.append("website_url", formData.website_url);
       if (formData.authority_signature) {
-        formDataPayload.append("authority_signature", formData.authority_signature);
+        formDataPayload.append(
+          "authority_signature",
+          formData.authority_signature
+        );
       }
       formDataPayload.append("invoice_date", formData.invoice_date);
       formDataPayload.append("client_name", formData.client_name);
@@ -391,11 +424,17 @@ const CreateInvoiceFromDashboard = () => {
       formDataPayload.append("due_date", formData.due_date);
       formDataPayload.append("client_email", formData.client_email);
       formDataPayload.append("client_phone", formData.client_phone);
-      formDataPayload.append("total_amount", +(+formData.total_amount).toFixed(2));
+      formDataPayload.append(
+        "total_amount",
+        +(+formData.total_amount).toFixed(2)
+      );
       formDataPayload.append("sub_total", +(+formData.sub_total).toFixed(2));
       formDataPayload.append("payment_terms", formData.payment_terms);
       formDataPayload.append("notes", formData.notes);
-      formDataPayload.append("paid_amount", +(+formData.paid_amount).toFixed(2));
+      formDataPayload.append(
+        "paid_amount",
+        +(+formData.paid_amount).toFixed(2)
+      );
       formDataPayload.append("due_amount", +(+formData.due_amount).toFixed(2));
       if (currency) {
         const findCurrency = currency.find((c) => c.id == formData.currency);
@@ -460,20 +499,20 @@ const CreateInvoiceFromDashboard = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-1 sm:p-6 md:p-6 mt-12 md:mt-4 sm:mt-12">
+    <div className="bg-gray-100 p-1 sm:p-2 md:p-4 mt-12 md:mt-4 sm:mt-12">
       <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mt-4 mb-2 sm:mt-4 md:mt-12 pl-2 sm:pl-10 md:pl-24">
         Create Invoice
       </h1>
       {globalError && (
         <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-auto sm:w-full lg:w-5/6"
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-auto sm:w-full lg:w-full"
           role="alert"
         >
           <span className="block sm:inline">{globalError}</span>
         </div>
       )}
       {isLoading && <div className="text-center">Loading client data...</div>}
-      <form className="p-1 sm:p-6 md:p-8 sm:w-full lg:w-5/6 mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
+      <form className="p-1 sm:p-2 md:p-2 sm:w-full lg:w-full mx-auto space-y-4 sm:space-y-6 bg-white rounded-2xl sm:mt-8 md:mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div className="grid grid-cols-2 gap-4 sm:col-span-1">
             <div>
@@ -495,7 +534,9 @@ const CreateInvoiceFromDashboard = () => {
                 required
               />
               {errors.company_name && (
-                <p className="text-red-500 text-xs mt-1">{errors.company_name}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.company_name}
+                </p>
               )}
             </div>
             <div>
@@ -571,7 +612,9 @@ const CreateInvoiceFromDashboard = () => {
               ))}
             </select>
             {errors.billing_address && (
-              <p className="text-red-500 text-xs mt-1">{errors.billing_address}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {errors.billing_address}
+              </p>
             )}
           </div>
           <div>
@@ -830,9 +873,17 @@ const CreateInvoiceFromDashboard = () => {
                       id={`service_name_${index}`}
                       name="service_name"
                       className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${
-                        errors[`service_name_${index}`] ? "border-red-500" : "border-gray-300"
+                        errors[`service_name_${index}`]
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-lg text-xs sm:text-sm`}
-                      onChange={(e) => handleServiceChange(index, "service_name", e.target.value)}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "service_name",
+                          e.target.value
+                        )
+                      }
                       value={service.service_name}
                       required
                     >
@@ -843,14 +894,22 @@ const CreateInvoiceFromDashboard = () => {
                       ))}
                     </select>
                     {errors[`service_name_${index}`] && (
-                      <p className="text-red-500 text-xs mt-1">{errors[`service_name_${index}`]}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors[`service_name_${index}`]}
+                      </p>
                     )}
                     <textarea
                       id={`service_description_${index}`}
                       name="description"
                       placeholder="Service Description"
                       className="w-full mt-2 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      onChange={(e) => handleServiceChange(index, "description", e.target.value)}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
                       value={service.description || ""}
                       rows="2"
                     />
@@ -859,37 +918,61 @@ const CreateInvoiceFromDashboard = () => {
                     <input
                       type="number"
                       value={service.quantity || ""}
-                      onChange={(e) => handleServiceChange(index, "quantity", parseInt(e.target.value, 10) || 0)}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "quantity",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
                       className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${
-                        errors[`quantity_${index}`] ? "border-red-500" : "border-gray-300"
+                        errors[`quantity_${index}`]
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
                       required
                     />
                     {errors[`quantity_${index}`] && (
-                      <p className="text-red-500 text-xs mt-1">{errors[`quantity_${index}`]}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors[`quantity_${index}`]}
+                      </p>
                     )}
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <select
                       value={service.service_package || ""}
-                      onChange={(e) => handleServiceChange(index, "service_package", e.target.value)}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "service_package",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     >
                       <option value="" disabled>
                         Select Package
                       </option>
-                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map((service_package) => (
-                        <option key={service_package} value={service_package}>
-                          {service_package}
-                        </option>
-                      ))}
+                      {["Hourly", "Monthly", "Project Base", "Fixed Price"].map(
+                        (service_package) => (
+                          <option key={service_package} value={service_package}>
+                            {service_package}
+                          </option>
+                        )
+                      )}
                     </select>
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     <input
                       type="number"
                       value={service.duration || ""}
-                      onChange={(e) => handleServiceChange(index, "duration", parseInt(e.target.value, 10) || 0)}
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "duration",
+                          parseInt(e.target.value, 10) || 0
+                        )
+                      }
                       className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     />
                   </td>
@@ -898,16 +981,27 @@ const CreateInvoiceFromDashboard = () => {
                       type="number"
                       step="0.01"
                       value={+(+service.price).toFixed(2) || ""}
-                      onChange={(e) => handleServiceChange(index, "price", parseFloat(e.target.value) || 0)}
-                      className={`w-full px-2 sm:px-3 py-1 sm:py-2 border ${
-                        errors[`price_${index}`] ? "border-red-500" : "border-gray-300"
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "price",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      className={`w-28 sm:w-40 px-2 sm:px-3 py-1 sm:py-2 border ${
+                        errors[`price_${index}`]
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm`}
                       required
                     />
                     {errors[`price_${index}`] && (
-                      <p className="text-red-500 text-xs mt-1">{errors[`price_${index}`]}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors[`price_${index}`]}
+                      </p>
                     )}
                   </td>
+
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
                     {service.amount.toFixed(2)}
                   </td>
@@ -916,8 +1010,14 @@ const CreateInvoiceFromDashboard = () => {
                       type="number"
                       step="0.01"
                       value={service.discount || ""}
-                      onChange={(e) => handleServiceChange(index, "discount", parseFloat(e.target.value) || 0)}
-                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "discount",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      className="w-20 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
@@ -925,8 +1025,14 @@ const CreateInvoiceFromDashboard = () => {
                       type="number"
                       step="0.01"
                       value={service.vat || ""}
-                      onChange={(e) => handleServiceChange(index, "vat", parseFloat(e.target.value) || 0)}
-                      className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
+                      onChange={(e) =>
+                        handleServiceChange(
+                          index,
+                          "vat",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      className="w-20 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 text-xs sm:text-sm"
                     />
                   </td>
                   <td className="py-1 sm:py-2 px-2 sm:px-4">
@@ -961,7 +1067,9 @@ const CreateInvoiceFromDashboard = () => {
           </div> */}
           <div className="flex justify-between items-center">
             <span className="text-lg sm:text-xl font-semibold">TOTAL:</span>
-            <span className="text-lg sm:text-xl font-semibold">{formData.total_amount.toFixed(2)}</span>
+            <span className="text-lg sm:text-xl font-semibold">
+              {formData.total_amount.toFixed(2)}
+            </span>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <div className="w-full sm:w-3/4">

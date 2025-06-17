@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { BsFilePdfFill, BsListTask } from "react-icons/bs";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const CreditAmountHistoryMonthly = () => {
-  const { year } = useParams(); // Extract year from URL
+  const { year } = useParams();
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [selectedExpenseId, setSelectedExpenseId] = useState([]);
@@ -22,7 +23,6 @@ const CreditAmountHistoryMonthly = () => {
   const token = getTokenLocalStorage();
   const { permissions } = useUserPermission();
 
-  // Calculate totals
   const calculateTotals = (expenses) => {
     return expenses.reduce(
       (totals, expense) => ({
@@ -60,11 +60,10 @@ const CreditAmountHistoryMonthly = () => {
   useEffect(() => {
     if (year) {
       fetchExpenseAmountHistory(year);
-      setSelectedYear(year); // Set default year from URL
+      setSelectedYear(year);
     }
   }, [url, token, year]);
 
-  // Filter expenses based on currency, year, month, and date
   useEffect(() => {
     let filtered = [...expenses];
     if (selectedCurrency) {
@@ -95,21 +94,53 @@ const CreditAmountHistoryMonthly = () => {
     navigate(`/daily-credit-list/${month}/${year}`);
   };
 
-  const toggleUserSelection = (id) => {
+  // ✅ Toggle checkbox by index
+  const toggleUserSelection = (index) => {
     setSelectedExpenseId((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
-  // Extract unique currencies and years
-  const currencies = [...new Set(expenses.map((expense) => expense.currency__currency))];
-  const years = [
-    ...new Set(expenses.map((expense) => new Date(expense.start_date).getFullYear().toString())),
-  ]
+  const handlePDFPreview = async () => {
+    try {
+   
+  
+      const title = `Monthly Debits and Credits History - ${year}`;
+      const heading = ["Month", "Start Date", "End Date", "Receive Amount", "Total Expense"];
+      const value = ["month", "start_date", "end_date", "total_amount", "total_expense"];
+      const useCurrency = ["total_amount", "total_expense"];
+
+      const pdfData = selectedExpenseId.length > 0
+      ? filteredExpenses.filter((expense, index) => selectedExpenseId.includes(index))
+      : filteredExpenses;
+      console.log("pdfData", pdfData);
+      const showTotalAmount = pdfData.reduce(
+            (totals, expense) => ({
+              Total_Receive: totals.Total_Receive + (parseFloat(expense.total_amount) || 0),
+              Total_Expense: totals.Total_Expense + (parseFloat(expense.total_expense) || 0),
+            }),
+            { Total_Receive: 0, Total_Expense: 0 }
+          );
+      showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "";
+      console.log("pdfCal", showTotalAmount);
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency, showTotalAmount})
+      );
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+  
+ 
+  const currencies = [...new Set(expenses.map((e) => e.currency__currency))];
+  const years = [...new Set(expenses.map((e) => new Date(e.start_date).getFullYear().toString()))]
     .sort()
     .reverse();
 
-  // Month options
   const months = [
     { value: "01", label: "January" },
     { value: "02", label: "February" },
@@ -126,61 +157,54 @@ const CreditAmountHistoryMonthly = () => {
   ];
 
   return (
-    <div className="bg-white mt-16 p-2 sm:p-6 md:p-6 w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2">
-        <h1 className="text-sm sm:text-xl  sm:mb-0">Monthly Credit History - {year}</h1>
+    <div className="bg-white mt-16 p-2 sm:p-6 w-full mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 py-2">
+        <h1 className="text-sm sm:text-xl">Monthly Credit History - {year}</h1>
         <div className="flex gap-4 text-lg sm:text-xl">
-          <CiFilter
-            className="cursor-pointer"
-            onClick={() => setShowFilter(!showFilter)}
-          />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <CiFilter onClick={() => setShowFilter(!showFilter)} className="cursor-pointer" />
+          <BsFilePdfFill onClick={handlePDFPreview} className="text-red-500 cursor-pointer" />
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
-          {error}
-        </div>
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>
       )}
 
-      {/* Filter Section */}
       {showFilter && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
-          <div className=" min-w-[150px]">
+        <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-wrap gap-4">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700">Year Filter:</label>
             <select
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2"
               value={selectedYear}
               onChange={(e) => {
                 setSelectedYear(e.target.value);
-                setSelectedMonth(""); // Reset month when year changes
-                setSelectedDate(""); // Reset date when year changes
+                setSelectedMonth("");
+                setSelectedDate("");
               }}
             >
               <option value="">All Years</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
                 </option>
               ))}
             </select>
           </div>
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700">Month Filter:</label>
             <select
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2"
               value={selectedMonth}
               onChange={(e) => {
                 setSelectedMonth(e.target.value);
-                setSelectedDate(""); // Reset date when month changes
+                setSelectedDate("");
               }}
             >
               <option value="">All Months</option>
-              {months.map((month) => (
-                <option key={month.value} value={month.value}>
-                  {month.label}
+              {months.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
                 </option>
               ))}
             </select>
@@ -189,28 +213,28 @@ const CreditAmountHistoryMonthly = () => {
             <label className="block text-sm font-medium text-gray-700">Date Filter:</label>
             <input
               type="date"
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2"
               value={selectedDate}
               onChange={(e) => {
                 setSelectedDate(e.target.value);
                 if (e.target.value) {
-                  setSelectedYear(""); // Reset year when date is selected
-                  setSelectedMonth(""); // Reset month when date is selected
+                  setSelectedYear("");
+                  setSelectedMonth("");
                 }
               }}
             />
           </div>
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700">Currency Filter:</label>
             <select
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2"
               value={selectedCurrency}
               onChange={(e) => setSelectedCurrency(e.target.value)}
             >
               <option value="">All Currencies</option>
-              {currencies.map((currency) => (
-                <option key={currency} value={currency}>
-                  {currency}
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
                 </option>
               ))}
             </select>
@@ -218,77 +242,72 @@ const CreditAmountHistoryMonthly = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto ">
+      <div className="overflow-x-auto mt-4">
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
+              <th className="border-b p-2 text-left text-sm">
                 <input
                   type="checkbox"
-                  className="mr-2"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedExpenseId(filteredExpenses.map((expense) => expense.id));
+                      setSelectedExpenseId(filteredExpenses.map((_, i) => i));
                     } else {
                       setSelectedExpenseId([]);
                     }
                   }}
-                  checked={selectedExpenseId.length === filteredExpenses.length && filteredExpenses.length > 0}
+                  checked={
+                    selectedExpenseId.length === filteredExpenses.length &&
+                    filteredExpenses.length > 0
+                  }
                 />
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Month</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Start Date</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">End Date</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Receive Amount</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total Expense</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
+              <th className="border-b p-2 text-left text-sm">Month</th>
+              <th className="border-b p-2 text-left text-sm">Start Date</th>
+              <th className="border-b p-2 text-left text-sm">End Date</th>
+              <th className="border-b p-2 text-left text-sm">Receive Amount</th>
+              <th className="border-b p-2 text-left text-sm">Total Expense</th>
+              <th className="border-b p-2 text-left text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredExpenses.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center p-4 text-gray-500 text-xs sm:text-sm">
+                <td colSpan="7" className="p-4 text-center text-gray-500 text-sm">
                   No expenses found
                 </td>
               </tr>
             ) : (
-              filteredExpenses.map((expense) => (
-                <tr key={expense.id} className="hover:bg-gray-50">
-                  <td className="border-b border-gray-300 p-2 sm:p-3">
+              filteredExpenses.map((expense, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="border-b p-2">
                     <input
                       type="checkbox"
-                      checked={selectedExpenseId.includes(expense.id)}
-                      onChange={() => toggleUserSelection(expense.id)}
-                      className="w-4 h-4"
+                      checked={selectedExpenseId.includes(index)}
+                      onChange={() => toggleUserSelection(index)}
                     />
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b p-2 text-sm">
                     {expense.month || new Date(expense.start_date).toLocaleString("default", { month: "long" })}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.start_date).toLocaleDateString("en-US", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                  <td className="border-b p-2 text-sm">
+                    {new Date(expense.start_date).toLocaleDateString("en-US")}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.end_date).toLocaleDateString("en-US", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                  <td className="border-b p-2 text-sm">
+                    {new Date(expense.end_date).toLocaleDateString("en-US")}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b p-2 text-sm">
                     {expense.currency_sign} {(parseFloat(expense.total_amount) || 0).toFixed(2)}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b p-2 text-sm">
                     {expense.currency_sign} {(parseFloat(expense.total_expense) || 0).toFixed(2)}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b p-2 text-sm">
                     <BsListTask
                       className="bg-green-300 text-xl p-1 rounded-md cursor-pointer"
-                      onClick={() => handleDailyExpense(expense.month || new Date(expense.start_date).getMonth() + 1, year)}
+                      onClick={() =>
+                        handleDailyExpense(expense.month || new Date(expense.start_date).getMonth() + 1, year)
+                      }
                     />
                   </td>
                 </tr>
@@ -298,16 +317,14 @@ const CreditAmountHistoryMonthly = () => {
           {filteredExpenses.length > 0 && (
             <tfoot className="bg-gray-50">
               <tr>
-                <td colSpan="4" className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold">
-                  
+                <td colSpan="4" className="p-2 text-right font-semibold text-sm">Total:</td>
+                <td className="p-2 text-sm">
+                  {filteredExpenses[0]?.currency_sign || ""} {totalReceive.toFixed(2)}
                 </td>
-                <td className="border-t border-gray-300 p-2 sm:p-3 text-xs sm:text-sm ">
-                 Total Receive: {filteredExpenses[0]?.currency_sign || "৳"} {totalReceive.toFixed(2)}
+                <td className="p-2 text-sm">
+                  {filteredExpenses[0]?.currency_sign || ""} {totalExpense.toFixed(2)}
                 </td>
-                <td className="border-t border-gray-300 p-2 sm:p-3 text-xs sm:text-sm ">
-                 Total Expense: {filteredExpenses[0]?.currency_sign || "৳"} {totalExpense.toFixed(2)}
-                </td>
-                <td className="border-t border-gray-300 p-2 sm:p-3"></td>
+                <td></td>
               </tr>
             </tfoot>
           )}
