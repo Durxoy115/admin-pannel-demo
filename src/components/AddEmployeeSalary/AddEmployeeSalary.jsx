@@ -139,14 +139,14 @@ const AddEmployeeSalary = () => {
       const transportPer = name === "transport_per" ? value : formData.transport_per;
       const othersPer = name === "others_per" ? value : formData.others_per;
 
-      const providentFund = grossSalary && providentFundPer ? ((parseFloat(grossSalary) * parseFloat(providentFundPer)) / 100).toFixed(2) : "";
-      const basic = grossSalary && basicPer ? ((parseFloat(grossSalary) * parseFloat(basicPer)) / 100).toFixed(2) : "";
-      const hRent = grossSalary && hRentPer ? ((parseFloat(grossSalary) * parseFloat(hRentPer)) / 100).toFixed(2) : "";
-      const mobileAllowance = grossSalary && mobileAllowancePer ? ((parseFloat(grossSalary) * parseFloat(mobileAllowancePer)) / 100).toFixed(2) : "";
-      const medicalAllowance = grossSalary && medicalAllowancePer ? ((parseFloat(grossSalary) * parseFloat(medicalAllowancePer)) / 100).toFixed(2) : "";
-      const transport = grossSalary && transportPer ? ((parseFloat(grossSalary) * parseFloat(transportPer)) / 100).toFixed(2) : "";
-      const others = grossSalary && othersPer ? ((parseFloat(grossSalary) * parseFloat(othersPer)) / 100).toFixed(2) : "";
-      const totalPayable = grossSalary ? (parseFloat(grossSalary) - (parseFloat(providentFund || 0) + parseFloat(deduct || 0))).toFixed(2) : "";
+      const providentFund = grossSalary && providentFundPer ? ((parseFloat(grossSalary) * parseFloat(providentFundPer)) / 100).toFixed(2) : 0;
+      const basic = grossSalary && basicPer ? ((parseFloat(grossSalary) * parseFloat(basicPer)) / 100).toFixed(2) : 0;
+      const hRent = grossSalary && hRentPer ? ((parseFloat(grossSalary) * parseFloat(hRentPer)) / 100).toFixed(2) : 0;
+      const mobileAllowance = grossSalary && mobileAllowancePer ? ((parseFloat(grossSalary) * parseFloat(mobileAllowancePer)) / 100).toFixed(2) : 0;
+      const medicalAllowance = grossSalary && medicalAllowancePer ? ((parseFloat(grossSalary) * parseFloat(medicalAllowancePer)) / 100).toFixed(2) : 0;
+      const transport = grossSalary && transportPer ? ((parseFloat(grossSalary) * parseFloat(transportPer)) / 100).toFixed(2) : 0;
+      const others = grossSalary && othersPer ? ((parseFloat(grossSalary) * parseFloat(othersPer)) / 100).toFixed(2) : 0;
+      const totalPayable = grossSalary ? (parseFloat(grossSalary) - (parseFloat(providentFund || 0) + parseFloat(deduct || 0))).toFixed(2) : 0;
 
       setFormData((prevData) => ({
         ...prevData,
@@ -178,15 +178,15 @@ const AddEmployeeSalary = () => {
       setFormErrors(errors);
       return;
     }
-
+  
     const payload = {
       employee: parseInt(formData.employee) || 0,
       currency: parseInt(formData.currency) || 0,
       date: formData.date,
       gross_salary: parseFloat(formData.gross_salary).toFixed(2) || "0.00",
-      provident_per: parseFloat(formData.provident_per).toFixed(2) || "0.00",
+      provident_per: formData.provident_per ? parseFloat(formData.provident_per).toFixed(2) : "0.00",
       provident_fund: parseFloat(formData.provident_fund).toFixed(2) || "0.00",
-      deduct: parseFloat(formData.deduct).toFixed(2) || "0.00",
+      deduct: formData.deduct ? parseFloat(formData.deduct).toFixed(2) : "0.00",
       deduct_for: formData.deduct_for || "",
       basic_per: parseFloat(formData.basic_per).toFixed(2) || "0.00",
       basic: parseFloat(formData.basic).toFixed(2) || "0.00",
@@ -202,7 +202,7 @@ const AddEmployeeSalary = () => {
       others: parseFloat(formData.others).toFixed(2) || "0.00",
       total_payable: parseFloat(formData.total_payable).toFixed(2) || "0.00",
     };
-
+  
     try {
       const response = await fetch(`${url}/expense/employee-salary/`, {
         method: "POST",
@@ -212,7 +212,7 @@ const AddEmployeeSalary = () => {
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (response.ok) {
         alert("Salary added successfully!");
         navigate("/employee-salary-list");

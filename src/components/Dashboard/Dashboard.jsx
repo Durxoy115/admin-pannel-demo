@@ -140,13 +140,25 @@ const Dashboard = () => {
   };
 
   // Toggle row blur/disable state
-  const handleEyeClick = (clientId) => {
-    setRowHide((prev) => ({
-      ...prev,
-      [clientId]: {
-        invisible: !prev[clientId]?.invisible,
-      },
-    }));
+  const handleEyeClick = async (clientId) => {
+    try {
+      const response = await fetch(`${url}/client-status/?client_id=${clientId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const data = await response.json();
+      if (data.success) {
+        fetchClients(); // Call the existing fetchClients function to refresh client list
+      } else {
+        console.error("Error toggling client status:", data.message);
+      }
+    } catch (error) {
+      console.error("Error toggling client status:", error);
+    }
   };
 
   return (
@@ -288,7 +300,9 @@ const Dashboard = () => {
                   <td className="text-center">{client.company_name}</td>
                   <td className="text-center">{client.country}</td>
                   <td className="text-center">
-                    {client.user_id.is_active ? "Active" : "Inactive"}
+                  <span style={{ color: client.user_id.is_active ? 'inherit' : 'red' }}>
+                      {client.user_id.is_active ? "Active" : "Inactive"}
+                    </span>
                   </td>
                   <td>
                     <div className="flex justify-center space-x-2">

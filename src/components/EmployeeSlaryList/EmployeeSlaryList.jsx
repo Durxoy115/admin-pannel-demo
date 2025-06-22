@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { BsFilePdfFill, BsListTask } from "react-icons/bs";
 import { CiFilter } from "react-icons/ci";
-import { IoMdAddCircleOutline } from "react-icons/io";
+import { IoMdAddCircleOutline, IoIosListBox } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const EmployeeSalaryList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -18,6 +20,7 @@ const EmployeeSalaryList = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("BDT");
+  const [currencyData, setCurrencyData] = useState({});
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
@@ -44,7 +47,42 @@ const EmployeeSalaryList = () => {
     }
   };
 
+  const fetchTotalCreditsSalary = async () => {
+    try {
+      const response = await fetch(`${url}/expense/all-salary-expense-summary/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success && data.data) {
+        // Transform the API response to match the expected structure
+        const transformedData = Object.keys(data.data).reduce((acc, currency) => {
+          const currencyData = data.data[currency];
+          acc[currency] = {
+            currency_sign: currency === "BDT" ? "৳" : currency === "Euro" ? "€" : "$",
+            currency_title: currency,
+            current_credit: currencyData.current_credit || 0,
+            this_month_expense: currencyData.this_month_expense || 0,
+            this_year_expense: currencyData.this_year_expense || 0,
+          };
+          return acc;
+        }, {});
+        setCurrencyData(transformedData);
+        // Prioritize BDT as the default currency if it exists, otherwise use the first currency or empty string
+        const availableCurrencies = Object.keys(transformedData);
+        const defaultCurrency = availableCurrencies.includes("BDT") ? "BDT" : availableCurrencies[0] || "";
+        setSelectedCurrency(defaultCurrency);
+      } else {
+        setError("Error fetching credit summary: " + (data.message || "No data returned"));
+      }
+    } catch (error) {
+      setError("Error fetching credit summary: " + error.message);
+    }
+  };
+
   useEffect(() => {
+    fetchTotalCreditsSalary();
     fetchExpenseAmountHistory();
   }, [url, token]);
 
@@ -86,6 +124,9 @@ const EmployeeSalaryList = () => {
   const handleDetailView = (id) => {
     navigate(`/expense-detail/${id}`);
   };
+  const handleAddAmount = () => navigate("/add-amount");
+  const handleAllCreditAmountList = () => navigate("/all-credit-list");
+  const handleYearlyExpense = () => navigate("/yearly-expense-amount");
 
   const handleDeleteSubAdmin = async () => {
     if (!selectedUserId) return;
@@ -127,8 +168,68 @@ const EmployeeSalaryList = () => {
     );
   };
 
-  // Extract unique currencies and years
-  const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
+  const handlePDFPreview = async () => {
+    try {
+      const title = "Employee Salary List";
+      const heading = [
+        "ID",
+        "Employee Name",
+        "Basic 50%",
+        "H.Rent 30%",
+        "Medical 10%",
+        "Other 10%",
+        "Gross Salary",
+        "Deduct",
+        "Providient Fund",
+        "Total Paid",
+      ];
+      const value = [
+        "employees_id",
+        "employee_name",
+        "basic",
+        "h_rent",
+        "medical_allowance",
+        "others",
+        "gross_salary",
+        "deduct",
+        "provident_fund",
+        "total_payable",
+      ];
+      const useCurrency = [
+        "h_rent",
+        "medical_allowance",
+        "others",
+        "gross_salary",
+        "deduct",
+        "provident_fund",
+        "total_payable",
+      ];
+      console.log("filteredExpenses", filteredExpenses);
+      const pdfData =
+        selectedExpenseId.length > 0
+          ? filteredExpenses.filter((expense) =>
+              selectedExpenseId.includes(expense.id)
+            )
+          : filteredExpenses;
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency })
+      );
+
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+
+      // Open the PDF in a new tab
+      window.open(url, "_blank");
+
+      // Optionally revoke after a few seconds to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+
+  // Extract unique currencies from currencyData
+  const currencies = Object.keys(currencyData);
   const years = [...new Set(expenses.map((expense) => new Date(expense.expense_date).getFullYear().toString()))]
     .sort()
     .reverse();
@@ -148,17 +249,68 @@ const EmployeeSalaryList = () => {
     { value: "11", label: "November" },
     { value: "12", label: "December" },
   ];
-
+  // Get selected currency data
+  const selectedCurrencyData = currencyData[selectedCurrency] || {};
+  // Fallback to currency code if currency_sign is not provided
+  const currencySign = selectedCurrencyData.currency_sign || selectedCurrency || "৳";
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-0"></h2>
+        <select
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-1 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          {Object.keys(currencyData).map((currency) => (
+            <option key={currency} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { label: "Total Credit Amount", key: "current_credit", action: [handleAddAmount, handleAllCreditAmountList] },
+          { label: "Current Expense", key: "this_month_expense" },
+          { label: "Total Expense This Year", key: "this_year_expense", action: [null, handleYearlyExpense] },
+        ].map(({ label, key, action }, index) => (
+          <div key={index} className="bg-white rounded-lg shadow border">
+            <div className="bg-black text-white rounded-t-lg px-4 py-2 flex justify-between items-center">
+              <h2 className="text-sm sm:text-base font-medium">{label}</h2>
+              {action && (
+                <div className="flex gap-3 text-lg">
+                  {/* {action[0] && <IoMdAddCircleOutline className="cursor-pointer" onClick={action[0]} />}
+                  {action[1] && <IoIosListBox className="cursor-pointer" onClick={action[1]} />} */}
+                </div>
+              )}
+            </div>
+            <div className="p-4">
+              <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                Date: {new Date().toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+              <p className="text-lg sm:text-xl font-semibold">
+                {currencySign} {(parseFloat(selectedCurrencyData[key]) || 0).toFixed(2)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2 mt-4">
         <h1 className="text-lg sm:text-xl mb-2 sm:mb-0">Employee Salary List</h1>
         <div className="flex gap-4 text-lg sm:text-xl">
           <CiFilter
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <BsFilePdfFill className="text-red-500 cursor-pointer" 
+            onClick={handlePDFPreview}
+          />
           <IoMdAddCircleOutline
             className="cursor-pointer"
             onClick={handleAddExpense}
@@ -175,26 +327,8 @@ const EmployeeSalaryList = () => {
 
       {/* Filter Dropdowns */}
       {showFilter && (
-        <div className=" p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
-          {/* <div className="">
-            <label className="block text-sm font-medium text-gray-700 mr-2">Yearly Filter:</label>
-            <select
-              className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              value={selectedYear}
-              onChange={(e) => {
-                setSelectedYear(e.target.value);
-                setSelectedMonth(""); // Reset month when year changes
-              }}
-            >
-              <option value="">All Years</option>
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div> */}
-          <div className=" min-w-[150px]">
+        <div className="p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mr-2">Monthly Filter:</label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -217,7 +351,6 @@ const EmployeeSalaryList = () => {
               value={selectedDate}
               onChange={(e) => {
                 setSelectedDate(e.target.value);
-                // Reset year and month when a specific date is selected
                 if (e.target.value) {
                   setSelectedYear("");
                   setSelectedMonth("");
@@ -225,7 +358,7 @@ const EmployeeSalaryList = () => {
               }}
             />
           </div>
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mr-2">Currency Filter:</label>
             <select
               className="mt-1 block w-32 border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -261,19 +394,18 @@ const EmployeeSalaryList = () => {
                   checked={selectedExpenseId.length === filteredExpenses.length && filteredExpenses.length > 0}
                 />
               </th>
-              {/* <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Salary For</th> */}
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Date</th>
-              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">ID</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Employee Name</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Basic 50%</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">H.Rent 30%</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Medical 10%</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Other 10%</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Gross Salary</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Deduct</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Providient Fund</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total Paid</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Date</th>
+              <th className="border-b border-gray-300 p-2 sm:p-1 text-left text-xs sm:text-sm">ID</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Employee Name</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Basic 50%</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">H.Rent 30%</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Medical 10%</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Other 10%</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Gross Salary</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Deduct</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Providient Fund</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Total Paid</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -286,7 +418,7 @@ const EmployeeSalaryList = () => {
             ) : (
               filteredExpenses.map((expense) => (
                 <tr key={expense.id} className="hover:bg-gray-50">
-                  <td className="border-b border-gray-300 p-2 sm:p-3">
+                  <td className="border-b border-gray-300 p-1 sm:p-1">
                     <input
                       type="checkbox"
                       checked={selectedExpenseId.includes(expense.id)}
@@ -294,25 +426,24 @@ const EmployeeSalaryList = () => {
                       className="w-4 h-4"
                     />
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                     {new Date(expense.date).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.employee_name || "—"}</td>
-                  
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.employees_id || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.basic || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.h_rent || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.medical_allowance || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.others || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.gross_salary || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.deduct || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.provident_fund || "—"}</td>
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{expense.currency_sign} {expense.total_payable || "—"}</td> 
-                  <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.employee_name || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.employees_id || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.basic || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.h_rent || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.medical_allowance || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.others || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.gross_salary || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.deduct || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.provident_fund || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.total_payable || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">
                     <div className="flex gap-2">
                       <button
                         className="text-purple-500 hover:text-purple-700"
@@ -320,7 +451,6 @@ const EmployeeSalaryList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
-                  
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => openDeleteModal(expense.id)}

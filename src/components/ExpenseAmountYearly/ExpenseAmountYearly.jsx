@@ -75,10 +75,15 @@ const ExpenseAmountyearly = () => {
    // Generate and preview PDF
    const handlePDFPreview = async () => {
     try {
-      const title = "Yearly Expense History"
+
+      const title = "Yearly Money Receive and Expense History"
       const heading = ["Year", "Start Date", "End Date", "Receive Amount", "Total Expense"];
       const value = ["year", "start_date", "end_date", "total_amount", "total_expense"];
-      const pdfDoc = pdf(myPDFDocument({ data: filteredExpenses, heading, value, title }));
+      const useCurrency = ["total_amount", "total_expense"];
+      const pdfData = selectedExpenseId.length > 0
+      ? filteredExpenses.filter((expense, index) => selectedExpenseId.includes(index))
+      : filteredExpenses;
+      const pdfDoc = pdf(myPDFDocument({ data: pdfData, heading, value, title,useCurrency }));
       const blob = await pdfDoc.toBlob();
       const url = URL.createObjectURL(blob);
   
@@ -94,7 +99,7 @@ const ExpenseAmountyearly = () => {
   
 
   // Close modal and clean up URL
-
+  
 
   const currencies = [...new Set(expenses.map((expense) => expense.currency__currency))];
   const years = [...new Set(expenses.map((expense) => expense.year))].sort().reverse();

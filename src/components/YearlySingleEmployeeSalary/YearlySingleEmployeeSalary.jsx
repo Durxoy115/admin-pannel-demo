@@ -6,6 +6,8 @@ import { FiPlusCircle } from "react-icons/fi";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const YearlySingleEmployeeSalary = () => {
   const { id } = useParams();
@@ -14,7 +16,8 @@ const YearlySingleEmployeeSalary = () => {
   const [selectedExpenseId, setSelectedExpenseId] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
-  const [selectedCurrency, setSelectedCurrency] = useState("৳"); // Default to API's currency_sign
+  const [error, setError] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState(""); // Default to empty for all currencies
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
@@ -49,9 +52,7 @@ const YearlySingleEmployeeSalary = () => {
   useEffect(() => {
     let filtered = [...expenses];
     if (selectedCurrency) {
-      filtered = filtered.filter(
-        (expense) => expense.currency_sign === selectedCurrency
-      );
+      filtered = filtered.filter((expense) => expense.currency__currency === selectedCurrency);
     }
     if (selectedYear) {
       filtered = filtered.filter((expense) => expense.year === selectedYear);
@@ -59,9 +60,9 @@ const YearlySingleEmployeeSalary = () => {
     setFilteredExpenses(filtered);
   }, [selectedYear, selectedCurrency, expenses]);
 
-  const handleMonthlyExpense = (year) => {
-    navigate(`/monthly-salary-amount/${year}`);
-  };
+  // const handleMonthlyExpense = (year) => {
+  //   navigate(`/monthly-salary-amount/${year}`);
+  // };
 
   const toggleUserSelection = (index) => {
     setSelectedExpenseId((prev) =>
@@ -70,27 +71,75 @@ const YearlySingleEmployeeSalary = () => {
         : [...prev, index]
     );
   };
+  const handleAddYearlySalary = (id) => {
+    navigate(`/add-monthly-salary/${id}`);
+  };
 
   const currencies = [
-    ...new Set(expenses.map((expense) => expense.currency_sign)),
+    ...new Set(expenses.map((expense) => expense.currency__currency)),
   ];
   const years = [...new Set(expenses.map((expense) => expense.year))]
     .sort()
     .reverse();
+    const handlePDFPreview = async (year) => {
+      try {
+        const title = `Yearly Single Employee Salary History - ${year}`;
+        const heading = ["Year", "Start Date", "End Date", "Total Amount"];
+        const value = [ "year", "start_date", "end_date", "total_salary"];
+        const useCurrency = ["total_salary"];
+  
+        const pdfData = selectedExpenseId.length > 0
+          ? filteredExpenses.filter((_, index) => selectedExpenseId.includes(index))
+          : filteredExpenses;
+  
+        if (pdfData.length === 0) {
+          setError("No data selected for PDF generation.");
+          return;
+        }
+  
+        const showTotalAmount = pdfData.reduce(
+          (totals, expense) => ({
+            Total_Receive: totals.Total_Receive + (parseFloat(expense.total_salary) || 0), // Use total_salary
+            Total_Expense: 0, // No total_expense
+          }),
+          { Total_Receive: 0, Total_Expense: 0 }
+        );
+        showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "";
+  
+        const pdfDoc = pdf(
+          myPDFDocument({ data: pdfData, heading, value, title, useCurrency, })
+        );
+        const blob = await pdfDoc.toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        setError("Error generating PDF: " + error.message);
+      }
+    };
+
+    const handleMonthlySalaryList= (year) => {
+      navigate(`/monthly-salary-list/${year}/${id}`);
+    };
 
   return (
     <div className="bg-white mt-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-8 sm:pl-4 pr-3 sm:pr-4 py-1 sm:py-2">
         <h1 className="text-lg sm:text-lg mb-2 sm:mb-0">
-          Yearly Expense History
+          Yearly Salary List
         </h1>
         <div className="flex gap-4">
           <CiFilter
             className="text-lg sm:text-xl cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500" />
-          <FiPlusCircle />
+          <BsFilePdfFill className="text-red-500" 
+          onClick={() => handlePDFPreview(selectedYear)}
+          />
+          <FiPlusCircle 
+            onClick={() => handleAddYearlySalary(id)}
+          />
         </div>
       </div>
 
@@ -174,12 +223,12 @@ const YearlySingleEmployeeSalary = () => {
                   {expense.end_date}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                  {expense.currency_sign} {expense.total_salary.toFixed(2)}
+                  {expense.currency__sign} {expense.total_salary.toFixed(2)}
                 </td>
                 <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm text-right">
                   <BsListTask
                     className="bg-green-300 text-xl p-1 rounded-md inline-block"
-                    onClick={() => handleMonthlyExpense(expense?.year)}
+                    onClick={() => handleMonthlySalaryList(expense?.year)}
                   />
                 </td>
               </tr>

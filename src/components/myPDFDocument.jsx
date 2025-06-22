@@ -30,7 +30,7 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: {
-    fontSize: 10,
+    fontSize: 8,
     padding: 20,
     backgroundColor: "#ffffff",
     fontFamily: "Noto Sans",

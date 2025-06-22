@@ -5,12 +5,14 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const DailyExpenseHistory = () => {
   const { year, month } = useParams(); // Extract year and month from URL
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [selectedExpenseId, setSelectedExpenseId] = useState([]);
+  const [selectedExpenseIndices, setSelectedExpenseIndices] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(""); // No default currency
   const [error, setError] = useState("");
@@ -19,12 +21,21 @@ const DailyExpenseHistory = () => {
   const token = getTokenLocalStorage();
   const { permissions } = useUserPermission();
 
-  // Calculate total amount
-  const calculateTotalAmount = (expenses) => {
-    return expenses.reduce((total, expense) => total + (parseFloat(expense.total) || 0), 0);
+  // Calculate total amount for all or selected indices
+  const calculateTotalAmount = (indices, allExpenses) => {
+    if (indices.length === 0) {
+      return allExpenses.reduce(
+        (total, expense) => total + (parseFloat(expense.total) || 0),
+        0
+      );
+    }
+    return indices.reduce((total, index) => {
+      const expense = allExpenses[index];
+      return total + (parseFloat(expense?.total) || 0);
+    }, 0);
   };
 
-  const totalAmount = calculateTotalAmount(filteredExpenses);
+  const totalAmount = calculateTotalAmount(selectedExpenseIndices, filteredExpenses);
 
   const fetchExpenseAmountHistory = async (month, year) => {
     try {
@@ -42,6 +53,7 @@ const DailyExpenseHistory = () => {
         const flattenedExpenses = Object.values(data.data).flat();
         setExpenses(flattenedExpenses);
         setFilteredExpenses(flattenedExpenses);
+        setSelectedExpenseIndices([]); // Reset selections on new data
         // Set default currency to the first available
         const firstCurrency = [...new Set(flattenedExpenses.map((exp) => exp.currency_title))][0] || "";
         setSelectedCurrency(firstCurrency);
@@ -65,16 +77,59 @@ const DailyExpenseHistory = () => {
       ? expenses.filter((expense) => expense.currency_title === selectedCurrency)
       : expenses;
     setFilteredExpenses(filtered);
+    setSelectedExpenseIndices([]); // Reset selections when filters change
   }, [selectedCurrency, expenses]);
 
   const handleDetailView = (expenseId) => {
     navigate(`/expense-detail/${year}/${month}/${expenseId}`);
   };
 
-  const toggleUserSelection = (id) => {
-    setSelectedExpenseId((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+  const toggleUserSelection = (index) => {
+    setSelectedExpenseIndices((prev) =>
+      prev.includes(index)
+        ? prev.filter((selectedIndex) => selectedIndex !== index)
+        : [...prev, index]
     );
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allIndices = filteredExpenses.map((_, index) => index);
+      setSelectedExpenseIndices(allIndices);
+    } else {
+      setSelectedExpenseIndices([]);
+    }
+  };
+
+  const handlePDFPreview = async () => {
+    try {
+      const title = `Daily Debits and Credits History - ${month}-${year}`;
+      const heading = ["Date", "Category", "Expense For", "Payment Method", "Total"];
+      const value = ["expense_date", "expense_category_name", "expense_for", "payment_method", "total"];
+      const useCurrency = ["total"];
+
+      const pdfData = selectedExpenseIndices.length > 0
+        ? filteredExpenses.filter((_, index) => selectedExpenseIndices.includes(index))
+        : filteredExpenses;
+
+      const showTotalAmount = pdfData.reduce(
+        (totals, expense) => ({
+          Total: totals.Total + (parseFloat(expense.total) || 0),
+        }),
+        { Total: 0 }
+      );
+      showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "৳";
+
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency, showTotalAmount })
+      );
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
@@ -90,7 +145,10 @@ const DailyExpenseHistory = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <BsFilePdfFill
+            className="text-red-500 cursor-pointer"
+            onClick={handlePDFPreview}
+          />
         </div>
       </div>
 
@@ -104,7 +162,7 @@ const DailyExpenseHistory = () => {
       {/* Currency Filter Dropdown */}
       {showFilter && (
         <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700">Currency Filter:</label>
             <select
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
@@ -130,14 +188,8 @@ const DailyExpenseHistory = () => {
                 <input
                   type="checkbox"
                   className="w-4 h-4"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedExpenseId(filteredExpenses.map((expense) => expense.id));
-                    } else {
-                      setSelectedExpenseId([]);
-                    }
-                  }}
-                  checked={selectedExpenseId.length === filteredExpenses.length && filteredExpenses.length > 0}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  checked={filteredExpenses.length > 0 && selectedExpenseIndices.length === filteredExpenses.length}
                 />
               </th>
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Date</th>
@@ -156,13 +208,13 @@ const DailyExpenseHistory = () => {
                 </td>
               </tr>
             ) : (
-              filteredExpenses.map((expense) => (
-                <tr key={expense.id} className="hover:bg-gray-50">
+              filteredExpenses.map((expense, index) => (
+                <tr key={index} className="hover:bg-gray-50">
                   <td className="border-b border-gray-300 p-2 sm:p-3">
                     <input
                       type="checkbox"
-                      checked={selectedExpenseId.includes(expense.id)}
-                      onChange={() => toggleUserSelection(expense.id)}
+                      checked={selectedExpenseIndices.includes(index)}
+                      onChange={() => toggleUserSelection(index)}
                       className="w-4 h-4"
                     />
                   </td>
@@ -206,10 +258,13 @@ const DailyExpenseHistory = () => {
           {filteredExpenses.length > 0 && (
             <tfoot className="bg-gray-50">
               <tr>
-                <td colSpan="5" className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold">
-                  Total:
+                <td
+                  colSpan="5"
+                  className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold"
+                >
+                  {selectedExpenseIndices.length === 0 ? "Total" : "Total (Selected)"}
                 </td>
-                <td className="border-t border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
+                <td className="border-t border-gray-300 p-2 sm:p-3 text-xs sm:text-sm font-semibold">
                   {filteredExpenses[0]?.currency_sign || "৳"} {totalAmount.toFixed(2)}
                 </td>
                 <td className="border-t border-gray-300 p-2 sm:p-3"></td>

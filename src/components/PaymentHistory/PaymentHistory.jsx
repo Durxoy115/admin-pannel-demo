@@ -232,6 +232,10 @@ const PaymentHistory = () => {
   };
 
   const previewPDF = (payment_pdf) => {
+    if (payment_pdf === null) {
+      alert("Payment Pdf has no value. Please save it and then try again.");
+      return;
+    }
     window.open(`${url}${payment_pdf}`, "_blank");
   };
 

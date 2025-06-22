@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { IoAttach } from "react-icons/io5";
+import { PiPlayBold } from "react-icons/pi";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import useToken from "../hooks/useToken";
@@ -8,6 +9,7 @@ import YearlySingleEmployeeSalary from "../YearlySingleEmployeeSalary/YearlySing
 
 const EmployeeDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [fileName, setFileName] = useState(null);
   const [file, setFile] = useState(null);
   const [docDeleteId, setDocDeleteId] = useState("");
@@ -16,6 +18,7 @@ const EmployeeDetails = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
+  const [disabledAttachIndex, setDisabledAttachIndex] = useState(null); // Track disabled <IoAttach>
 
   const token = getTokenLocalStorage();
 
@@ -121,9 +124,37 @@ const EmployeeDetails = () => {
     fetchEmployee();
   }, [url, token, id]);
 
+  // Handle file preview on <PiPlayBold> click
+  const handleFilePreview = (doc, index) => {
+    try {
+      setDisabledAttachIndex(index); // Disable <IoAttach> for this document
+      let fileUrl;
+      if (doc.file) {
+        // Local file
+        fileUrl = URL.createObjectURL(doc.file);
+      } else if (doc.existing_file) {
+        // Server file
+        fileUrl = doc.existing_file.startsWith("http") ? doc.existing_file : `${url}${doc.existing_file}`;
+      } else {
+        throw new Error("No file available to preview");
+      }
+      window.open(fileUrl, "_blank");
+      // Optionally revoke local URL after a delay
+      if (doc.file) {
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 5000);
+      }
+      // Reset disabled state after a delay (e.g., 3 seconds)
+      setTimeout(() => setDisabledAttachIndex(null), 3000);
+    } catch (err) {
+      setError("Error previewing file: " + err.message);
+    }
+  };
+
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
+
+
 
   return (
     <div className="bg-white mt-4 sm:mt-8 lg:mt-16 p-1 sm:p-6 lg:p-8 lg:px-12 max-w-full mx-auto">
@@ -371,19 +402,27 @@ const EmployeeDetails = () => {
                     <a
                       href={doc.existing_file}
                       target="_blank"
+                      disabled 
                       rel="noopener noreferrer"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 text-xs sm:text-sm"
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 text-xs sm:text-sm ${
+                        disabledAttachIndex === index ? "pointer-events-none opacity-50" : ""
+                      }`}
                     >
-                      <IoAttach className="inline-block" />
+                      {/* <IoAttach className="inline-block" /> */}
                     </a>
                   )}
                 </div>
               </div>
+              <PiPlayBold
+                className="text-4xl mt-5 p-1 rounded-md cursor-pointer"
+                style={{ backgroundColor: "#CEDBFF" }}
+                onClick={() => handleFilePreview(doc, index)}
+              />
             </div>
           ))}
         </div>
       </div>
-      <YearlySingleEmployeeSalary></YearlySingleEmployeeSalary>
+      <YearlySingleEmployeeSalary />
     </div>
   );
 };

@@ -4,12 +4,14 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
+import myPDFDocument from "../myPDFDocument";
+import { pdf } from "@react-pdf/renderer";
 
 const ExpenseSummaryMonthly = () => {
   const { year } = useParams(); // Extract year from URL
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [selectedExpenseId, setSelectedExpenseId] = useState([]);
+  const [selectedExpenseIndices, setSelectedExpenseIndices] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("BDT"); // Default to BDT
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -19,15 +21,21 @@ const ExpenseSummaryMonthly = () => {
   const token = getTokenLocalStorage();
   const { permissions } = useUserPermission();
 
-  // Calculate total expense
-  const calculateTotalExpense = (expenses) => {
-    return expenses.reduce(
-      (total, expense) => total + (parseFloat(expense.total_expense) || 0),
-      0
-    );
+  // Calculate total expense for all or selected indices
+  const calculateTotalExpense = (indices, allExpenses) => {
+    if (indices.length === 0) {
+      return allExpenses.reduce(
+        (total, expense) => total + (parseFloat(expense.total_expense) || 0),
+        0
+      );
+    }
+    return indices.reduce((total, index) => {
+      const expense = allExpenses[index];
+      return total + (parseFloat(expense?.total_expense) || 0);
+    }, 0);
   };
 
-  const totalExpense = calculateTotalExpense(filteredExpenses);
+  const totalExpense = calculateTotalExpense(selectedExpenseIndices, filteredExpenses);
 
   const fetchExpenseAmountHistory = async (year) => {
     try {
@@ -48,6 +56,7 @@ const ExpenseSummaryMonthly = () => {
             (expense) => expense.currency__currency === "BDT"
           )
         );
+        setSelectedExpenseIndices([]); // Reset selections on new data
       } else {
         setError(
           "Error fetching expense summary: " +
@@ -84,6 +93,7 @@ const ExpenseSummaryMonthly = () => {
       });
     }
     setFilteredExpenses(filtered);
+    setSelectedExpenseIndices([]); // Reset selections when filters change
   }, [selectedCurrency, selectedMonth, expenses]);
 
   const handleDailyExpense = (month, year) => {
@@ -92,12 +102,51 @@ const ExpenseSummaryMonthly = () => {
     navigate(`/daily-expense/${paddedMonth}/${year}`);
   };
 
-  const toggleUserSelection = (id) => {
-    setSelectedExpenseId((prev) =>
-      prev.includes(id)
-        ? prev.filter((selectedId) => selectedId !== id)
-        : [...prev, id]
+  const toggleUserSelection = (index) => {
+    setSelectedExpenseIndices((prev) =>
+      prev.includes(index)
+        ? prev.filter((selectedIndex) => selectedIndex !== index)
+        : [...prev, index]
     );
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allIndices = filteredExpenses.map((_, index) => index);
+      setSelectedExpenseIndices(allIndices);
+    } else {
+      setSelectedExpenseIndices([]);
+    }
+  };
+
+  const handlePDFPreview = async () => {
+    try {
+      const title = `Monthly Debits and Credits History - ${year}`;
+      const heading = ["Month", "Start Date", "End Date", "Receive Amount", "Total Expense"];
+      const value = ["month", "start_date", "end_date", "total_amount", "total_expense"];
+      const useCurrency = ["total_amount", "total_expense"];
+
+      const pdfData = selectedExpenseIndices.length > 0
+        ? filteredExpenses.filter((expense, index) => selectedExpenseIndices.includes(index))
+        : filteredExpenses;
+      const showTotalAmount = pdfData.reduce(
+        (totals, expense) => ({
+          Total_Receive: totals.Total_Receive + (parseFloat(expense.total_amount) || 0),
+          Total_Expense: totals.Total_Expense + (parseFloat(expense.total_expense) || 0),
+        }),
+        { Total_Receive: 0, Total_Expense: 0 }
+      );
+      showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "";
+      const pdfDoc = pdf(
+        myPDFDocument({ data: pdfData, heading, value, title, useCurrency, showTotalAmount })
+      );
+      const blob = await pdfDoc.toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   const currencies = [
@@ -132,7 +181,10 @@ const ExpenseSummaryMonthly = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer" />
+          <BsFilePdfFill
+            className="text-red-500 cursor-pointer"
+            onClick={handlePDFPreview}
+          />
         </div>
       </div>
 
@@ -183,7 +235,7 @@ const ExpenseSummaryMonthly = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto ">
+      <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
@@ -191,19 +243,8 @@ const ExpenseSummaryMonthly = () => {
                 <input
                   type="checkbox"
                   className="w-4 h-4"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedExpenseId(
-                        filteredExpenses.map((expense) => expense.id)
-                      );
-                    } else {
-                      setSelectedExpenseId([]);
-                    }
-                  }}
-                  checked={
-                    selectedExpenseId.length === filteredExpenses.length &&
-                    filteredExpenses.length > 0
-                  }
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  checked={filteredExpenses.length > 0 && selectedExpenseIndices.length === filteredExpenses.length}
                 />
               </th>
               <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
@@ -237,13 +278,13 @@ const ExpenseSummaryMonthly = () => {
                 </td>
               </tr>
             ) : (
-              filteredExpenses.map((expense) => (
-                <tr key={expense.id} className="hover:bg-gray-50">
+              filteredExpenses.map((expense, index) => (
+                <tr key={index} className="hover:bg-gray-50">
                   <td className="border-b border-gray-300 p-2 sm:p-3">
                     <input
                       type="checkbox"
-                      checked={selectedExpenseId.includes(expense.id)}
-                      onChange={() => toggleUserSelection(expense.id)}
+                      checked={selectedExpenseIndices.includes(index)}
+                      onChange={() => toggleUserSelection(index)}
                       className="w-4 h-4"
                     />
                   </td>
@@ -300,11 +341,10 @@ const ExpenseSummaryMonthly = () => {
                   colSpan="5"
                   className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold"
                 >
-                  Total:
+                  {selectedExpenseIndices.length === 0 ? "Total" : "Total (Selected)"}
                 </td>
                 <td className="border-t border-gray-300 p-2 sm:p-3 text-xs sm:text-sm font-semibold">
-                  {filteredExpenses[0]?.currency_sign || "৳"}{" "}
-                  {totalExpense.toFixed(2)}
+                  {filteredExpenses[0]?.currency_sign || "৳"} {totalExpense.toFixed(2)}
                 </td>
                 <td className="border-t border-gray-300 p-2 sm:p-3"></td>
               </tr>

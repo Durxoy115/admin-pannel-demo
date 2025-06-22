@@ -66,6 +66,9 @@ import AddEmployeeSalary from "./components/AddEmployeeSalary/AddEmployeeSalary"
 import AddSalaryConfig from "./components/AddSalaryConfig/AddSalaryConfig";
 import EditSalaryConfig from "./components/EditSalaryConfig/EditSalaryConfig";
 import EditEmployeeSalary from "./components/EditEmployeeSalary/EditEmployeeSalary";
+import AddMonthlySingleEmployeeSalary from "./components/AddMonthlySingleEmployeeSalary/AddMonthlySingleEmployeeSalary";
+import EmployeeSalaryMonthly from "./components/EmployeeSalaryMonthly/EmployeeSalaryMonthly";
+// import AddYearlySingleEmployeeSalary from "./components/AddYearlySingleEmployeeSalary/AddYearlySingleEmployeeSalary";
 
 
 // import Test from "./components/Test";
@@ -147,6 +150,9 @@ const App = () => {
           <Route path="edit-salary-list/:id" element={<EditEmployeeSalary/>} />
           <Route path="add-salary-config" element={<AddSalaryConfig/>} />
           <Route path="edit-salary-config/:id" element={<EditSalaryConfig/>} />
+          <Route path="add-monthly-salary/:id" element={<AddMonthlySingleEmployeeSalary/>} />
+          <Route path= "monthly-salary-list/:year/:id" element={<EmployeeSalaryMonthly/>} />
+          
         </Route>
       </Route>
     </Routes>

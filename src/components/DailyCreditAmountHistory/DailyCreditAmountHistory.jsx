@@ -3,6 +3,7 @@ import { BsFilePdfFill } from "react-icons/bs";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate, useParams } from "react-router-dom";
 import useToken from "../hooks/useToken";
+import { FaRegTrashAlt } from "react-icons/fa";
 import useUserPermission from "../hooks/usePermission";
 import myPDFDocument from "../myPDFDocument";
 import { pdf } from "@react-pdf/renderer";
@@ -19,9 +20,14 @@ const DailyCreditAmountHistory = () => {
   const token = getTokenLocalStorage();
   const { permissions } = useUserPermission();
 
+ 
+
   // Calculate total amount
   const calculateTotalAmount = (expenses) => {
-    return expenses.reduce((total, expense) => total + (parseFloat(expense.amount) || 0), 0);
+    return expenses.reduce(
+      (total, expense) => total + (parseFloat(expense.amount) || 0),
+      0
+    );
   };
 
   const totalAmount = calculateTotalAmount(filteredExpenses);
@@ -59,23 +65,22 @@ const DailyCreditAmountHistory = () => {
   // Filter expenses based on selected currency
   useEffect(() => {
     const filtered = selectedCurrency
-      ? expenses.filter((expense) => expense.currency_title === selectedCurrency)
+      ? expenses.filter(
+          (expense) => expense.currency_title === selectedCurrency
+        )
       : expenses;
     setFilteredExpenses(filtered);
   }, [selectedCurrency, expenses]);
 
-  const handleDetailView = (expenseId) => {
-    navigate(`/expense-detail/${year}/${month}/${expenseId}`);
-  };
   const handlePDFPreview = async () => {
     try {
       const title = `Daily Debits and Credits History - ${year}-${month}`;
       const heading = ["Date", "Amount"];
       const value = ["date", "amount"];
       const useCurrency = ["amount"];
-  
+
       const pdfData = filteredExpenses; // Use all filteredExpenses directly
-  
+
       const showTotalAmount = pdfData.reduce(
         (totals, expense) => ({
           Total: totals.Total + (parseFloat(expense.amount) || 0),
@@ -84,9 +89,16 @@ const DailyCreditAmountHistory = () => {
       );
       showTotalAmount["currency_sign"] = pdfData[0]?.currency_sign || "";
       console.log("pdfCal", showTotalAmount);
-  
+
       const pdfDoc = pdf(
-        myPDFDocument({ data: pdfData, heading, value, title, useCurrency, showTotalAmount })
+        myPDFDocument({
+          data: pdfData,
+          heading,
+          value,
+          title,
+          useCurrency,
+          showTotalAmount,
+        })
       );
       const blob = await pdfDoc.toBlob();
       const url = URL.createObjectURL(blob);
@@ -97,7 +109,40 @@ const DailyCreditAmountHistory = () => {
     }
   };
 
-  const currencies = [...new Set(expenses.map((expense) => expense.currency_title))];
+  const handleDeleteExpense = async (expenseId) => {
+
+      try {
+        const response = await fetch(
+          `${url}/expense/credit/?credit_id=${expenseId}`, // Corrected endpoint
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+
+        console.log("Delete Response:", await response.json()); // Debug response
+
+        if (response.ok) {
+          setExpenses(expenses.filter((expense) => expense.id !== expenseId));
+          setFilteredExpenses(
+            filteredExpenses.filter((expense) => expense.id !== expenseId)
+          );
+          setError("");
+        } else {
+          const data = await response.json();
+          setError(data.message || "Failed to delete expense");
+        }
+      } catch (error) {
+        setError("Error deleting expense: " + error.message);
+      }
+    
+  };
+
+  const currencies = [
+    ...new Set(expenses.map((expense) => expense.currency_title)),
+  ];
 
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 w-full mx-auto">
@@ -110,8 +155,9 @@ const DailyCreditAmountHistory = () => {
             className="cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           />
-          <BsFilePdfFill className="text-red-500 cursor-pointer"
-          onClick={handlePDFPreview}
+          <BsFilePdfFill
+            className="text-red-500 cursor-pointer"
+            onClick={handlePDFPreview}
           />
         </div>
       </div>
@@ -127,7 +173,9 @@ const DailyCreditAmountHistory = () => {
       {showFilter && (
         <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-sm font-medium text-gray-700">Currency Filter:</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Currency Filter:
+            </label>
             <select
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 sm:p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
               value={selectedCurrency}
@@ -154,6 +202,9 @@ const DailyCreditAmountHistory = () => {
               <th className="border-b border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm">
                 Amount
               </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -171,7 +222,6 @@ const DailyCreditAmountHistory = () => {
                 <tr
                   key={expense.id}
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleDetailView(expense.id)}
                 >
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     {new Date(expense.date).toLocaleDateString("en-US", {
@@ -181,7 +231,18 @@ const DailyCreditAmountHistory = () => {
                     })}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm">
-                    {expense.currency_sign} {(parseFloat(expense.amount) || 0).toFixed(2)}
+                    {expense.currency_sign}{" "}
+                    {(parseFloat(expense.amount) || 0).toFixed(2)}
+                  </td>
+                  <td className="border-b border-gray-300 p-2 sm:p-3 text-end text-xs sm:text-sm ">
+                    <div className="flex justify-end">
+                      
+                        <FaRegTrashAlt
+                          className="bg-red-300 text-xl text-red-600 p-1 rounded-md cursor-pointer"
+                          onClick={() => handleDeleteExpense(expense.id)}
+                        />
+                     
+                    </div>
                   </td>
                 </tr>
               ))
@@ -190,11 +251,10 @@ const DailyCreditAmountHistory = () => {
           {filteredExpenses.length > 0 && (
             <tfoot className="bg-gray-50">
               <tr>
+                <td className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold"></td>
                 <td className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold">
-                  
-                </td>
-                <td className="border-t border-gray-300 p-2 sm:p-3 text-right text-xs sm:text-sm font-semibold">
-                  Total: {filteredExpenses[0]?.currency_sign || "৳"} {totalAmount.toFixed(2)}
+                  Total: {filteredExpenses[0]?.currency_sign || "৳"}{" "}
+                  {totalAmount.toFixed(2)}
                 </td>
               </tr>
             </tfoot>
