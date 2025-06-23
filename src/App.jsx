@@ -68,6 +68,11 @@ import EditSalaryConfig from "./components/EditSalaryConfig/EditSalaryConfig";
 import EditEmployeeSalary from "./components/EditEmployeeSalary/EditEmployeeSalary";
 import AddMonthlySingleEmployeeSalary from "./components/AddMonthlySingleEmployeeSalary/AddMonthlySingleEmployeeSalary";
 import EmployeeSalaryMonthly from "./components/EmployeeSalaryMonthly/EmployeeSalaryMonthly";
+import AddTotalSalaryAmount from "./components/AddTotalSalaryAmount/AddTotalSalaryAmount";
+import SalaryCreditSummary from "./components/SalaryCreditSummary/SalaryCreditSummary";
+import SalarySummaryMonthly from "./components/SalarySummaryMonthly/SalarySummaryMonthly";
+import DailySalaryCreditAmount from "./components/DailySalaryCreditAmount/DailySalaryCreditAmount";
+import DailySalaryExpenseAmount from "./components/DailySalaryExpenseHistory/DailySalaryExpenseHistory";
 // import AddYearlySingleEmployeeSalary from "./components/AddYearlySingleEmployeeSalary/AddYearlySingleEmployeeSalary";
 
 
@@ -152,6 +157,11 @@ const App = () => {
           <Route path="edit-salary-config/:id" element={<EditSalaryConfig/>} />
           <Route path="add-monthly-salary/:id" element={<AddMonthlySingleEmployeeSalary/>} />
           <Route path= "monthly-salary-list/:year/:id" element={<EmployeeSalaryMonthly/>} />
+          <Route path= "add-total-salary-amount" element={<AddTotalSalaryAmount/>} />
+          <Route path= "total-salary-credit-amount-sumary" element={<SalaryCreditSummary/>} />
+          <Route path= "monthly-salary-credit-expense-amount/:year" element={<SalarySummaryMonthly/>} />
+          <Route path= "daily-salary-credit-list/:month/:year" element={<DailySalaryCreditAmount/>} />
+          <Route path= "daily-salary-expense-list/:month/:year" element={<DailySalaryExpenseAmount/>} />
           
         </Route>
       </Route>

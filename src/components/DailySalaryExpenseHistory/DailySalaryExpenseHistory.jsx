@@ -8,7 +8,7 @@ import useUserPermission from "../hooks/usePermission";
 import myPDFDocument from "../myPDFDocument";
 import { pdf } from "@react-pdf/renderer";
 
-const DailyCreditAmountHistory = () => {
+const DailySalaryExpenseAmount = () => {
   const { year, month } = useParams(); // Extract year and month from URL
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
@@ -35,7 +35,7 @@ const DailyCreditAmountHistory = () => {
   const fetchExpenseAmountHistory = async (month, year) => {
     try {
       const response = await fetch(
-        `${url}/expense/credit-summary/?credit_id=daily-${month}-${year}`,
+        `${url}/expense/salary-credit-summary/?salary_credit_id=daily-expense-${month}-${year}`,
         {
           headers: {
             Authorization: `Token ${token}`,
@@ -74,9 +74,9 @@ const DailyCreditAmountHistory = () => {
 
   const handlePDFPreview = async () => {
     try {
-      const title = `Daily Debits and Credits History - ${year}-${month}`;
+      const title = `Daily Debits  History - ${year}-${month}`;
       const heading = ["Date", "Amount"];
-      const value = ["date", "amount"];
+      const value = ["payment_date", "amount"];
       const useCurrency = ["amount"];
 
       const pdfData = filteredExpenses; // Use all filteredExpenses directly
@@ -112,7 +112,7 @@ const DailyCreditAmountHistory = () => {
   const handleDeleteExpense = async (expenseId) => {
     try {
       const response = await fetch(
-        `${url}/expense/credit/?credit_id=${expenseId}`,
+        `${url}/expense/monthly-salary/?monthly_salary_id=${expenseId}`,
         {
           method: "DELETE",
           headers: {
@@ -159,7 +159,7 @@ const DailyCreditAmountHistory = () => {
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 w-full mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2">
         <h1 className="text-lg sm:text-xl mb-2 sm:mb-0">
-          Daily Credit History - {month} {year}
+          Daily Salary Expense History - {month} {year}
         </h1>
         <div className="flex gap-4 text-lg sm:text-xl">
           <CiFilter
@@ -235,7 +235,7 @@ const DailyCreditAmountHistory = () => {
                   className="hover:bg-gray-50 cursor-pointer"
                 >
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.date).toLocaleDateString("en-US", {
+                    {new Date(expense.payment_date).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
@@ -300,4 +300,4 @@ const DailyCreditAmountHistory = () => {
   );
 };
 
-export default DailyCreditAmountHistory;
+export default DailySalaryExpenseAmount;

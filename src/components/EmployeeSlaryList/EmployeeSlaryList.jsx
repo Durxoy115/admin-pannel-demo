@@ -8,6 +8,7 @@ import useToken from "../hooks/useToken";
 import useUserPermission from "../hooks/usePermission";
 import myPDFDocument from "../myPDFDocument";
 import { pdf } from "@react-pdf/renderer";
+import EmployeePaySlip from "../employeePaySlip";
 
 const EmployeeSalaryList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -124,8 +125,8 @@ const EmployeeSalaryList = () => {
   const handleDetailView = (id) => {
     navigate(`/expense-detail/${id}`);
   };
-  const handleAddAmount = () => navigate("/add-amount");
-  const handleAllCreditAmountList = () => navigate("/all-credit-list");
+  const handleAddAmount = () => navigate("/add-total-salary-amount");
+  const handleAllSalaryCreditAmountList = () => navigate("/total-salary-credit-amount-sumary");
   const handleYearlyExpense = () => navigate("/yearly-expense-amount");
 
   const handleDeleteSubAdmin = async () => {
@@ -228,6 +229,32 @@ const EmployeeSalaryList = () => {
     }
   };
 
+  const handlePDFPreviewOfEmployeePaySlip = async (id) =>{
+    try {
+      const response = await fetch(
+        `${url}/expense/employee-pay-slip/?employee_id=${id}`, // Replace 6 with the actual employee_id
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (data && data.success && data.data) {
+        const pdfDoc = pdf(<EmployeePaySlip data={data.data} />);
+        const blob = await pdfDoc.toBlob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } else {
+        setError("Error fetching pay slip data: No data returned");
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      setError("Error generating PDF: " + error.message);
+    }
+  };
+
   // Extract unique currencies from currencyData
   const currencies = Object.keys(currencyData);
   const years = [...new Set(expenses.map((expense) => new Date(expense.expense_date).getFullYear().toString()))]
@@ -272,17 +299,17 @@ const EmployeeSalaryList = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { label: "Total Credit Amount", key: "current_credit", action: [handleAddAmount, handleAllCreditAmountList] },
+          { label: "Total Credit Amount", key: "current_credit", action: [handleAddAmount, handleAllSalaryCreditAmountList] },
           { label: "Current Expense", key: "this_month_expense" },
-          { label: "Total Expense This Year", key: "this_year_expense", action: [null, handleYearlyExpense] },
+          { label: "Total Expense This Year", key: "this_year_expense", action: [null,  handleAllSalaryCreditAmountList] },
         ].map(({ label, key, action }, index) => (
           <div key={index} className="bg-white rounded-lg shadow border">
             <div className="bg-black text-white rounded-t-lg px-4 py-2 flex justify-between items-center">
               <h2 className="text-sm sm:text-base font-medium">{label}</h2>
               {action && (
                 <div className="flex gap-3 text-lg">
-                  {/* {action[0] && <IoMdAddCircleOutline className="cursor-pointer" onClick={action[0]} />}
-                  {action[1] && <IoIosListBox className="cursor-pointer" onClick={action[1]} />} */}
+                  {action[0] && <IoMdAddCircleOutline className="cursor-pointer" onClick={action[0]} />}
+                  {action[1] && <IoIosListBox className="cursor-pointer" onClick={action[1]} />}
                 </div>
               )}
             </div>
@@ -451,6 +478,15 @@ const EmployeeSalaryList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                      
+                      >
+                        <BsFilePdfFill className="w-4 sm:w-5 h-4 sm:h-5" 
+                        onClick={() => handlePDFPreviewOfEmployeePaySlip(expense.id)}
+                        />
+                      </button>
+                      
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => openDeleteModal(expense.id)}
