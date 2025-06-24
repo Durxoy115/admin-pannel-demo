@@ -73,6 +73,8 @@ import SalaryCreditSummary from "./components/SalaryCreditSummary/SalaryCreditSu
 import SalarySummaryMonthly from "./components/SalarySummaryMonthly/SalarySummaryMonthly";
 import DailySalaryCreditAmount from "./components/DailySalaryCreditAmount/DailySalaryCreditAmount";
 import DailySalaryExpenseAmount from "./components/DailySalaryExpenseHistory/DailySalaryExpenseHistory";
+import AddTaxConfig from "./components/AddTaxConfig/AddTaxConfig";
+import EditTaxConfig from "./components/EditTaxConfig/EditTaxConfig";
 // import AddYearlySingleEmployeeSalary from "./components/AddYearlySingleEmployeeSalary/AddYearlySingleEmployeeSalary";
 
 
@@ -162,6 +164,8 @@ const App = () => {
           <Route path= "monthly-salary-credit-expense-amount/:year" element={<SalarySummaryMonthly/>} />
           <Route path= "daily-salary-credit-list/:month/:year" element={<DailySalaryCreditAmount/>} />
           <Route path= "daily-salary-expense-list/:month/:year" element={<DailySalaryExpenseAmount/>} />
+          <Route path= "add-tax-config" element={<AddTaxConfig/>} />
+          <Route path="edit-tax-config/:id" element={<EditTaxConfig/>} />
           
         </Route>
       </Route>

@@ -13,6 +13,7 @@ import useUserPermission from "../hooks/usePermission";
 import UserPermissionGroup from "../UserPermissionGroup/UserPermissionGroup";
 import Currency from "../Currency/Currency";
 import SalaryConfig from "../SalaryConfig/SalaryConfig";
+import TaxConfig from "../TaxConfig/TaxConfig";
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -281,6 +282,7 @@ const MyProfile = () => {
         {viewCompanyBillingAddress && <AddressBook />}
         {canViewAuthoritySign && <Signature />}
         <SalaryConfig></SalaryConfig>
+        <TaxConfig></TaxConfig>
         {CanViewSupportContact && <SupportContactList />}
       </div>
     </div>

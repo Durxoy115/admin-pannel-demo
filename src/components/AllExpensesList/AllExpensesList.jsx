@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { BsFilePdfFill, BsListTask } from "react-icons/bs";
-import { CiFilter } from "react-icons/ci";
+import { CiFilter, CiViewList } from "react-icons/ci";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useToken from "../hooks/useToken";
@@ -20,6 +20,7 @@ const AllExpenseList = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("BDT");
+  const [currencyData, setCurrencyData] = useState({});
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
@@ -51,11 +52,32 @@ const AllExpenseList = () => {
     }
   };
 
+  const fetchTotalCredits = async () => {
+    try {
+      const response = await fetch(`${url}/expense/all-credit-expense-summary/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success && data.data) {
+        setCurrencyData(data.data);
+        const availableCurrencies = Object.keys(data.data);
+        const defaultCurrency = availableCurrencies.includes("BDT") ? "BDT" : availableCurrencies[0] || "";
+        setSelectedCurrency(defaultCurrency);
+      } else {
+        setError("Error fetching credit summary: " + (data.message || "No data returned"));
+      }
+    } catch (error) {
+      setError("Error fetching credit summary: " + error.message);
+    }
+  };
+
   useEffect(() => {
     fetchExpenseAmountHistory();
+    fetchTotalCredits();
   }, [url, token]);
 
-  // Filter expenses based on year, month, date, and currency
   useEffect(() => {
     let filtered = [...expenses];
     if (selectedCurrency) {
@@ -73,8 +95,7 @@ const AllExpenseList = () => {
       filtered = filtered.filter((expense) => {
         const expenseDate = new Date(expense.expense_date);
         return (
-          (expenseDate.getMonth() + 1).toString().padStart(2, "0") ===
-          selectedMonth
+          (expenseDate.getMonth() + 1).toString().padStart(2, "0") === selectedMonth
         );
       });
     }
@@ -100,6 +121,9 @@ const AllExpenseList = () => {
   const handleDetailView = (id) => {
     navigate(`/expense-detail/${id}`);
   };
+
+  const handleAllCreditAmountList = () => navigate("/all-credit-list");
+  const handleYearlyExpense = () => navigate("/yearly-expense-amount");
 
   const handleDeleteSubAdmin = async () => {
     if (!selectedUserId) return;
@@ -149,12 +173,13 @@ const AllExpenseList = () => {
         : [...prev, id]
     );
   };
+
   const handlePDFPreview = async () => {
     try {
-      const title = "Expense  Report";
+      const title = "Expense Report";
       const heading = [
         "Expense For",
-        " Date",
+        "Date",
         "Category",
         "Quantity",
         "Unit Cost",
@@ -178,7 +203,6 @@ const AllExpenseList = () => {
         "additional_cost",
         "total",
       ];
-      console.log("filteredExpenses", filteredExpenses);
       const pdfData =
         selectedExpenseId.length > 0
           ? filteredExpenses.filter((expense) =>
@@ -191,18 +215,14 @@ const AllExpenseList = () => {
 
       const blob = await pdfDoc.toBlob();
       const url = URL.createObjectURL(blob);
-
-      // Open the PDF in a new tab
       window.open(url, "_blank");
-
-      // Optionally revoke after a few seconds to free memory
       setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch (error) {
       console.error("Error generating PDF:", error);
+      setError("Error generating PDF: " + error.message);
     }
   };
 
-  // Extract unique currencies and years
   const currencies = [
     ...new Set(expenses.map((expense) => expense.currency_title)),
   ];
@@ -212,11 +232,8 @@ const AllExpenseList = () => {
         new Date(expense.expense_date).getFullYear().toString()
       )
     ),
-  ]
-    .sort()
-    .reverse();
+  ].sort().reverse();
 
-  // Month options (1-12, padded with leading zeros)
   const months = [
     { value: "01", label: "January" },
     { value: "02", label: "February" },
@@ -232,9 +249,67 @@ const AllExpenseList = () => {
     { value: "12", label: "December" },
   ];
 
+  const selectedCurrencyData = currencyData[selectedCurrency] || {};
+  const currencySign = selectedCurrencyData.currency_sign || selectedCurrency || "৳";
+
   return (
     <div className="bg-white mt-16 p-4 sm:p-6 md:p-8 max-w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2">
+      {/* Error Message */}
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-0"></h2>
+        <select
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="">All Currencies</option>
+          {currencies.map((currency) => (
+            <option key={currency} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { label: "Total Amount", key: "current_credit", action: [handleAddExpense, handleAllCreditAmountList] },
+          { label: "Total Expense This Month", key: "this_month_expense" },
+          { label: "Total Expense This Year", key: "this_year_expense", action: [null, handleYearlyExpense] },
+        ].map(({ label, key, action }, index) => (
+          <div key={index} className="bg-white rounded-lg shadow border">
+            <div className="bg-black text-white rounded-t-lg px-4 py-2 flex justify-between items-center">
+              <h2 className="text-sm sm:text-base font-medium">{label}</h2>
+              {action && (
+                <div className="flex gap-3 text-lg">
+                  {action[0] && <IoMdAddCircleOutline className="cursor-pointer" onClick={action[0]} />}
+                  {action[1] && <BsListTask className="cursor-pointer" onClick={action[1]} />}
+                </div>
+              )}
+            </div>
+            <div className="p-4">
+              <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                Date: {new Date().toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+              <p className="text-lg sm:text-xl font-semibold">
+                {currencySign} {(parseFloat(selectedCurrencyData[key]) || 0).toFixed(2)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 sm:px-6 py-2 sm:py-2 mt-6">
         <h1 className="text-lg sm:text-xl mb-2 sm:mb-0">Expense History</h1>
         <div className="flex gap-4 text-lg sm:text-xl">
           <CiFilter
@@ -245,7 +320,6 @@ const AllExpenseList = () => {
             className="text-red-500 cursor-pointer"
             onClick={handlePDFPreview}
           />
-
           <IoMdAddCircleOutline
             className="cursor-pointer"
             onClick={handleAddExpense}
@@ -253,17 +327,9 @@ const AllExpenseList = () => {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
-          {error}
-        </div>
-      )}
-
-      {/* Filter Dropdowns */}
       {showFilter && (
         <div className="mt-4 p-4 bg-gray-100 rounded-md flex flex-col sm:flex-row gap-4 sm:gap-6 flex-wrap">
-          <div className="">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mr-2">
               Yearly Filter:
             </label>
@@ -272,7 +338,7 @@ const AllExpenseList = () => {
               value={selectedYear}
               onChange={(e) => {
                 setSelectedYear(e.target.value);
-                setSelectedMonth(""); // Reset month when year changes
+                setSelectedMonth("");
               }}
             >
               <option value="">All Years</option>
@@ -283,7 +349,7 @@ const AllExpenseList = () => {
               ))}
             </select>
           </div>
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mr-2">
               Monthly Filter:
             </label>
@@ -310,7 +376,6 @@ const AllExpenseList = () => {
               value={selectedDate}
               onChange={(e) => {
                 setSelectedDate(e.target.value);
-                // Reset year and month when a specific date is selected
                 if (e.target.value) {
                   setSelectedYear("");
                   setSelectedMonth("");
@@ -318,7 +383,7 @@ const AllExpenseList = () => {
               }}
             />
           </div>
-          <div className=" min-w-[150px]">
+          <div className="min-w-[150px]">
             <label className="block text-sm font-medium text-gray-700 mr-2">
               Currency Filter:
             </label>
@@ -361,39 +426,17 @@ const AllExpenseList = () => {
                   }
                 />
               </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Expense For
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Date
-              </th>
-              <th className="border-b border-gray usadas-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Method
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Reference
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Category
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Quantity
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Unit Cost
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Sub Total
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Additional Cost
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Total
-              </th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">
-                Actions
-              </th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Expense For</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Date</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Method</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Reference</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Category</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Quantity</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Unit Cost</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Sub Total</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Additional Cost</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Total</th>
+              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -418,14 +461,11 @@ const AllExpenseList = () => {
                     {expense.expense_for || "—"}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {new Date(expense.expense_date).toLocaleDateString(
-                      "en-US",
-                      {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      }
-                    )}
+                    {new Date(expense.expense_date).toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     {expense.payment_method || "—"}
@@ -440,20 +480,16 @@ const AllExpenseList = () => {
                     {expense.qty || 0}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign}{" "}
-                    {parseFloat(expense.unit_cost || 0).toFixed(2)}
+                    {expense.currency_sign} {parseFloat(expense.unit_cost || 0).toFixed(2)}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign}{" "}
-                    {parseFloat(expense.sub_total || 0).toFixed(2)}
+                    {expense.currency_sign} {parseFloat(expense.sub_total || 0).toFixed(2)}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign}{" "}
-                    {parseFloat(expense.additional_cost || 0).toFixed(2)}
+                    {expense.currency_sign} {parseFloat(expense.additional_cost || 0).toFixed(2)}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
-                    {expense.currency_sign}{" "}
-                    {parseFloat(expense.total || 0).toFixed(2)}
+                    {expense.currency_sign} {parseFloat(expense.total || 0).toFixed(2)}
                   </td>
                   <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">
                     <div className="flex gap-2">
@@ -463,7 +499,12 @@ const AllExpenseList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
-
+                      <button
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => handleDetailView(expense.id)}
+                      >
+                        <CiViewList className="w-4 sm:w-5 h-4 sm:h-5" />
+                      </button>
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => openDeleteModal(expense.id)}

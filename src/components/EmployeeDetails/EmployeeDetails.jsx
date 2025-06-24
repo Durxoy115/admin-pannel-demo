@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { IoAttach } from "react-icons/io5";
 import { PiPlayBold } from "react-icons/pi";
+import { BiSolidFilePdf } from "react-icons/bi";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import useToken from "../hooks/useToken";
 import YearlySingleEmployeeSalary from "../YearlySingleEmployeeSalary/YearlySingleEmployeeSalary";
+import TaxPDF from "../taxPDF";
+import { pdf } from "@react-pdf/renderer";
 
 const EmployeeDetails = () => {
   const { id } = useParams();
@@ -116,13 +119,39 @@ const EmployeeDetails = () => {
           setError(result.message || "Failed to fetch employee data");
         }
       } catch (err) {
-        setError("An error occurred while fetching employee data: " + err.message);
+        setError(
+          "An error occurred while fetching employee data: " + err.message
+        );
       } finally {
         setLoading(false);
       }
     };
     fetchEmployee();
   }, [url, token, id]);
+  const handlePreviewTaxPDF = async (token, url) => {
+    try {
+      const response = await fetch(`${url}/expense/employee-tax/?employee_id=${id}`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+  
+      const result = await response.json();
+      console.log("Employee tax API response:", result, id);
+  
+      if (!result.success || !result.data) {
+        throw new Error("Failed to fetch employee tax data");
+      }
+  
+      const blob = await pdf(<TaxPDF data={result.data} />).toBlob();
+      const blobURL = URL.createObjectURL(blob);
+      window.open(blobURL, "_blank");
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      alert("Failed to generate PDF preview.");
+    }
+  };
+  
 
   // Handle file preview on <PiPlayBold> click
   const handleFilePreview = (doc, index) => {
@@ -134,7 +163,9 @@ const EmployeeDetails = () => {
         fileUrl = URL.createObjectURL(doc.file);
       } else if (doc.existing_file) {
         // Server file
-        fileUrl = doc.existing_file.startsWith("http") ? doc.existing_file : `${url}${doc.existing_file}`;
+        fileUrl = doc.existing_file.startsWith("http")
+          ? doc.existing_file
+          : `${url}${doc.existing_file}`;
       } else {
         throw new Error("No file available to preview");
       }
@@ -154,11 +185,11 @@ const EmployeeDetails = () => {
     return <div className="text-center p-4">Loading...</div>;
   }
 
-
-
   return (
     <div className="bg-white mt-4 sm:mt-8 lg:mt-16 p-1 sm:p-6 lg:p-8 lg:px-12 max-w-full mx-auto">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Employee Details</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+        Employee Details
+      </h1>
 
       {error && (
         <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md text-sm sm:text-base">
@@ -189,25 +220,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.full_name || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Employee ID
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.employee_id || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Job Title
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.job_title || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Joining Date
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.joining_date || "-"}
             </p>
@@ -216,25 +255,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.contact || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.email || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date of Birth
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.dob || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Present Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Present Address
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.present_address || "-"}
             </p>
@@ -243,25 +290,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Permanent Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Permanent Address
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.permanent_address || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nationality
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.nationality || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">National ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              National ID
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.national_id || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Passport ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Passport ID
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.passport_id || "-"}
             </p>
@@ -270,25 +325,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Marital Status
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.marital_status || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Religion
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.religion || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Blood Group
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.blood_group || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dual Citizenship</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Dual Citizenship
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.dual_citizenship || "-"}
             </p>
@@ -297,25 +360,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Gender
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.gender || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Contact</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Emergency Contact
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.emergency_contact || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Relationship</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Emergency Relationship
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.emergency_relationship || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nominee Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nominee Name
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.nominee_name || "-"}
             </p>
@@ -324,25 +395,33 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nominee Relationship</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nominee Relationship
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.nominee_relationship || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bank Name
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.bank_name || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bank Account Number
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.bank_account_number || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bank Account Name
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.bank_account_name || "-"}
             </p>
@@ -351,13 +430,17 @@ const EmployeeDetails = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-TIN</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              E-TIN
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.e_tin || "-"}
             </p>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
             <p className="block w-full border border-gray-300 rounded-md p-1 sm:p-2 text-sm sm:text-base bg-gray-100">
               {formData.status || "-"}
             </p>
@@ -365,7 +448,9 @@ const EmployeeDetails = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Previous Work History</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Previous Work History
+          </label>
           <div className="border border-gray-300 rounded-md text-sm sm:text-base bg-gray-100 p-2">
             <ReactQuill
               value={formData.pre_work_his || "-"}
@@ -378,48 +463,80 @@ const EmployeeDetails = () => {
 
         <div className="mt-4 sm:mt-6">
           <div className="flex items-center mb-4">
-            <label className="block text-sm font-medium text-gray-700">Submitted Documents</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Submitted Documents
+            </label>
           </div>
           {formData.submit_doc.map((doc, index) => (
-            <div key={index} className="w-full md:w-1/2 flex flex-col sm:flex-row gap-4 mb-4 items-center">
-              <div className="w-full sm:w-1/2">
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Document Title
-                </label>
-                <p className="block w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base bg-gray-100">
-                  {doc.title || "-"}
-                </p>
-              </div>
-              <div className="w-full sm:w-1/2">
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Document
-                </label>
-                <div className="relative w-full">
-                  <p className="block w-full border border-gray-300 rounded-md p-2 pr-12 text-sm sm:text-base bg-gray-100 text-gray-700">
-                    {doc.file ? doc.file.name : doc.existing_file ? doc.existing_file.split("/").pop() : "-"}
-                  </p>
-                  {doc.existing_file && (
-                    <a
-                      href={doc.existing_file}
-                      target="_blank"
-                      disabled 
-                      rel="noopener noreferrer"
-                      className={`absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 text-xs sm:text-sm ${
-                        disabledAttachIndex === index ? "pointer-events-none opacity-50" : ""
-                      }`}
-                    >
-                      {/* <IoAttach className="inline-block" /> */}
-                    </a>
-                  )}
-                </div>
-              </div>
-              <PiPlayBold
-                className="text-4xl mt-5 p-1 rounded-md cursor-pointer"
-                style={{ backgroundColor: "#CEDBFF" }}
-                onClick={() => handleFilePreview(doc, index)}
-              />
-            </div>
-          ))}
+  <div key={index} className="flex flex-col sm:flex-col md:flex-row w-full justify-between gap-4 mb-6">
+    {/* Left Section */}
+    <div className="w-full md:w-3/4 flex flex-col sm:flex-col md:flex-row gap-4">
+      {/* Document Title */}
+      <div className="w-full md:w-1/2">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+          Document Title
+        </label>
+        <p className="block w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base bg-gray-100">
+          {doc.title || "-"}
+        </p>
+      </div>
+
+      {/* Document File Info */}
+      <div className="w-full md:w-1/2">
+        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+          Document
+        </label>
+        <div className="relative w-full">
+          <p className="block w-full border border-gray-300 rounded-md p-2 pr-12 text-sm sm:text-base bg-gray-100 text-gray-700 truncate">
+            {doc.file
+              ? doc.file.name
+              : doc.existing_file
+              ? doc.existing_file.split("/").pop()
+              : "-"}
+          </p>
+          {doc.existing_file && (
+            <a
+              href={doc.existing_file}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 text-xs sm:text-sm ${
+                disabledAttachIndex === index ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              {/* <IoAttach /> */}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Preview Button */}
+      <div className="flex justify-start md:items-center mt-4">
+        <PiPlayBold
+          className="text-4xl p-1 rounded-md cursor-pointer"
+          style={{ backgroundColor: "#CEDBFF" }}
+          onClick={() => handleFilePreview(doc, index)}
+        />
+      </div>
+    </div>
+  </div>
+))}
+
+{/* ✅ Show Tax Year input + PDF icon once (below the list) */}
+<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4 w-full md:w-1/4 mt-2">
+  <input
+    type="number"
+    name="year"
+    value={formData.year || ""}
+    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+    placeholder="Enter Tax Year"
+    className="w-full sm:w-2/3 p-2 sm:p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+  />
+  <BiSolidFilePdf
+    className="text-5xl text-red-600 cursor-pointer bg-red-200 p-3 rounded-md"
+    onClick={() => handlePreviewTaxPDF(token, url)}
+  />
+</div>
+
         </div>
       </div>
       <YearlySingleEmployeeSalary />

@@ -238,7 +238,7 @@ const Header = () => {
                                 className="flex items-center gap-2 w-full text-left hover:bg-gray-100 px-3 sm:px-4 py-2"
                               >
                                 <span className="w-2 h-2 rounded-full bg-white border border-black"></span>
-                                All Expense
+                                Expense History
                               </button>
                             </li>
                             <li>
@@ -250,7 +250,7 @@ const Header = () => {
                                 className="flex items-center gap-2 w-full text-left hover:bg-gray-100 px-3 sm:px-4 py-2"
                               >
                                 <span className="w-2 h-2 rounded-full bg-white border border-black"></span>
-                                All Salary Expense
+                                Salary Details
                               </button>
                             </li>
                           </ul>
