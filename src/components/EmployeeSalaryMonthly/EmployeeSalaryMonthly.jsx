@@ -38,7 +38,7 @@ const EmployeeSalaryMonthly = () => {
   const fetchEmployeeSalary = async (year, id) => {
     try {
       const response = await fetch(
-        `${url}/expense/salary-summary/?summary_for=monthly-${year}&employee_id=${id}`, // Match API format
+        `${url}/expense/salary-summary/?summary_for=monthly-${year}&employee_id=${id}`, 
         {
           headers: {
             Authorization: `Token ${token}`,
@@ -140,8 +140,8 @@ const EmployeeSalaryMonthly = () => {
     }
   };
 
-  const handleMonthlySalaryList = (year) => {
-    navigate(`/monthly-salary-list/${year}/${id}`); // Use employeeId from useParams
+  const handleDailySalary = (month, year, id) => {
+    navigate(`/daily-salary-list/${month}/${year}/${id}`,);
   };
 
   const currencies = [...new Set(expenses.map((e) => e.currency__currency))];
@@ -167,7 +167,7 @@ const EmployeeSalaryMonthly = () => {
   return (
     <div className="bg-white mt-16 p-2 sm:p-6 w-full mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white px-4 py-2">
-        <h1 className="text-sm sm:text-xl">Monthly Credit History - {selectedYear || year}</h1>
+        <h1 className="text-sm sm:text-xl">Monthly Salary History - {selectedYear || year}</h1>
         <div className="flex gap-4 text-lg sm:text-xl">
           <CiFilter onClick={() => setShowFilter(!showFilter)} className="cursor-pointer" />
           <BsFilePdfFill onClick={handlePDFPreview} className="text-red-500 cursor-pointer" />
@@ -322,7 +322,7 @@ const EmployeeSalaryMonthly = () => {
                   <td className="border-b p-2 text-sm">
                     <BsListTask
                       className="bg-green-300 text-xl p-1 rounded-md cursor-pointer"
-                      onClick={() => handleMonthlySalaryList(selectedYear || year)}
+                      onClick={() => handleDailySalary( expense.month, selectedYear || year, id)}
                     />
                   </td>
                 </tr>

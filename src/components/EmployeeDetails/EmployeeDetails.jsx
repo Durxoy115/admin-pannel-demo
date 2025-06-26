@@ -11,9 +11,10 @@ import TaxPDF from "../taxPDF";
 import { pdf } from "@react-pdf/renderer";
 
 const EmployeeDetails = () => {
-  const { id } = useParams();
+  const { id, year } = useParams();
   const navigate = useNavigate();
   const [fileName, setFileName] = useState(null);
+  const [taxYear, setTaxYear] = useState("");
   const [file, setFile] = useState(null);
   const [docDeleteId, setDocDeleteId] = useState("");
   const [url, getTokenLocalStorage] = useToken();
@@ -128,9 +129,9 @@ const EmployeeDetails = () => {
     };
     fetchEmployee();
   }, [url, token, id]);
-  const handlePreviewTaxPDF = async (token, url) => {
+  const handlePreviewTaxPDF = async (token, url, year) => {
     try {
-      const response = await fetch(`${url}/expense/employee-tax/?employee_id=${id}`, {
+      const response = await fetch(`${url}/expense/employee-tax/?employee_id=${id}&year=${year}`, {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -523,19 +524,19 @@ const EmployeeDetails = () => {
 
 {/* ✅ Show Tax Year input + PDF icon once (below the list) */}
 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4 w-full md:w-1/4 mt-2">
-  <input
-    type="number"
-    name="year"
-    value={formData.year || ""}
-    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-    placeholder="Enter Tax Year"
-    className="w-full sm:w-2/3 p-2 sm:p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-  />
-  <BiSolidFilePdf
-    className="text-5xl text-red-600 cursor-pointer bg-red-200 p-3 rounded-md"
-    onClick={() => handlePreviewTaxPDF(token, url)}
-  />
+<input
+  type="number"
+  value={taxYear}
+  onChange={(e) => setTaxYear(e.target.value)}
+  placeholder="Enter Tax Year"
+  className="w-full sm:w-2/3 p-2 sm:p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+/>
+<BiSolidFilePdf
+  className="text-4xl text-red-600 cursor-pointer bg-red-200 p-2 rounded-md"
+  onClick={() => handlePreviewTaxPDF(token, url, taxYear)}
+/>
 </div>
+
 
         </div>
       </div>

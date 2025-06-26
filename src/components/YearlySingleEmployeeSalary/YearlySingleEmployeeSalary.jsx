@@ -71,9 +71,9 @@ const YearlySingleEmployeeSalary = () => {
         : [...prev, index]
     );
   };
-  const handleAddYearlySalary = (id) => {
-    navigate(`/add-monthly-salary/${id}`);
-  };
+  // const handleAddYearlySalary = (id) => {
+  //   navigate(`/add-monthly-salary/${id}`);
+  // };
 
   const currencies = [
     ...new Set(expenses.map((expense) => expense.currency__currency)),
@@ -137,9 +137,9 @@ const YearlySingleEmployeeSalary = () => {
           <BsFilePdfFill className="text-red-500" 
           onClick={() => handlePDFPreview(selectedYear)}
           />
-          <FiPlusCircle 
+          {/* <FiPlusCircle 
             onClick={() => handleAddYearlySalary(id)}
-          />
+          /> */}
         </div>
       </div>
 

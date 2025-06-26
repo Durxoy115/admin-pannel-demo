@@ -53,7 +53,7 @@ const AddAmount = () => {
       console.log("Success:", response.data);
       alert("Credit added successfully!");
       setFormData({ date: "", amount: 0.00, currency: "", reference: "" });
-      navigate("/expense-category-list");
+      navigate("/all-expense-list");
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to add credit.");

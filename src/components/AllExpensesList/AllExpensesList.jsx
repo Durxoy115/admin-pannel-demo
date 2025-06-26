@@ -114,6 +114,9 @@ const AllExpenseList = () => {
     navigate(`/edit-expense-list/${id}`);
   };
 
+  const handleCreditAmount = () => {
+    navigate("/add-amount");
+  };
   const handleAddExpense = () => {
     navigate("/add-expense");
   };
@@ -279,7 +282,7 @@ const AllExpenseList = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { label: "Total Amount", key: "current_credit", action: [handleAddExpense, handleAllCreditAmountList] },
+          { label: "Total Amount", key: "current_credit", action: [handleCreditAmount, handleAllCreditAmountList] },
           { label: "Total Expense This Month", key: "this_month_expense" },
           { label: "Total Expense This Year", key: "this_year_expense", action: [null, handleYearlyExpense] },
         ].map(({ label, key, action }, index) => (
@@ -499,12 +502,7 @@ const AllExpenseList = () => {
                       >
                         <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
                       </button>
-                      <button
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => handleDetailView(expense.id)}
-                      >
-                        <CiViewList className="w-4 sm:w-5 h-4 sm:h-5" />
-                      </button>
+                    
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => openDeleteModal(expense.id)}

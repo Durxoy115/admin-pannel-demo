@@ -460,8 +460,9 @@ const EmployeeSalaryList = () => {
                       year: "numeric",
                     })}
                   </td>
-                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.employee_name || "—"}</td>
+                
                   <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.employees_id || "—"}</td>
+                  <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.employee_name || "—"}</td>
                   <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.basic || "—"}</td>
                   <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.h_rent || "—"}</td>
                   <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{expense.currency_sign} {expense.medical_allowance || "—"}</td>

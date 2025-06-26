@@ -23,6 +23,8 @@ const EditEmployeeSalary = () => {
     medical_allowance: "",
     transport_per: "",
     transport: "",
+    festival_per: "",
+    festival: "",
     others_per: "",
     others: "",
     total_payable: "",
@@ -34,7 +36,7 @@ const EditEmployeeSalary = () => {
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
- const { id } = useParams(); // Get employee salary ID from URL
+  const { id } = useParams(); // Get employee salary ID from URL
 
   // Fetch employees
   const fetchEmployees = async () => {
@@ -48,7 +50,10 @@ const EditEmployeeSalary = () => {
       if (data.success) {
         setEmployees(data.data || []);
       } else {
-        setGlobalError("Error fetching employees: " + (data?.data?.message || "Unknown error"));
+        setGlobalError(
+          "Error fetching employees: " +
+            (data?.data?.message || "Unknown error")
+        );
       }
     } catch (error) {
       setGlobalError("Error fetching employees: " + error.message);
@@ -68,7 +73,10 @@ const EditEmployeeSalary = () => {
       if (data.success) {
         setCurrencies(data.data || []);
       } else {
-        setGlobalError("Error fetching currencies: " + (data?.data?.message || "Unknown error"));
+        setGlobalError(
+          "Error fetching currencies: " +
+            (data?.data?.message || "Unknown error")
+        );
       }
     } catch (error) {
       setGlobalError("Error fetching currencies: " + error.message);
@@ -78,38 +86,52 @@ const EditEmployeeSalary = () => {
   // Fetch active salary configuration
   const fetchSalaryConfig = async () => {
     try {
-      const response = await axios.get(`${url}/company/salary-config/?salary_config_id=active`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${url}/company/salary-config/?salary_config_id=active`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
       if (response.data.success) {
         const data = response.data.data;
         setFormData((prevData) => ({
           ...prevData,
           basic_per: data.basic || prevData.basic_per,
           h_rent_per: data.house_rent || prevData.h_rent_per,
-          medical_allowance_per: data.medical_allow || prevData.medical_allowance_per,
-          mobile_allowance_per: data.mobile_allow || prevData.mobile_allowance_per,
+          medical_allowance_per:
+            data.medical_allow || prevData.medical_allowance_per,
+          mobile_allowance_per:
+            data.mobile_allow || prevData.mobile_allowance_per,
           transport_per: data.transport_allow || prevData.transport_per,
           others_per: data.others || prevData.others_per,
         }));
       } else {
-        setGlobalError("Error fetching salary configuration: " + (response.data.message || "Unknown error"));
+        setGlobalError(
+          "Error fetching salary configuration: " +
+            (response.data.message || "Unknown error")
+        );
       }
     } catch (error) {
-      setGlobalError("Error fetching salary configuration: " + (error.response?.data?.message || error.message));
+      setGlobalError(
+        "Error fetching salary configuration: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
   // Fetch employee salary data
   const fetchEmployeeSalary = async () => {
     try {
-      const response = await fetch(`${url}/expense/employee-salary/?employee_salary_id=${id}`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${url}/expense/employee-salary/?employee_salary_id=${id}`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (data.success) {
         const salaryData = data.data;
@@ -137,7 +159,7 @@ const EditEmployeeSalary = () => {
             console.warn("Error parsing date from API:", salaryData.date, e);
           }
         }
-  
+
         setFormData({
           employee: salaryData.employee || "",
           currency: salaryData.currency || "",
@@ -162,7 +184,9 @@ const EditEmployeeSalary = () => {
           total_payable: salaryData.total_payable || "",
         });
       } else {
-        setGlobalError("Error fetching salary data: " + (data.message || "Unknown error"));
+        setGlobalError(
+          "Error fetching salary data: " + (data.message || "Unknown error")
+        );
       }
     } catch (error) {
       setGlobalError("Error fetching salary data: " + error.message);
@@ -196,26 +220,80 @@ const EditEmployeeSalary = () => {
       name === "mobile_allowance_per" ||
       name === "medical_allowance_per" ||
       name === "transport_per" ||
+      name === "festival_per" ||
       name === "others_per"
     ) {
-      const grossSalary = name === "gross_salary" ? value : formData.gross_salary;
-      const providentFundPer = name === "provident_per" ? value : formData.provident_per;
+      const grossSalary =
+        name === "gross_salary" ? value : formData.gross_salary;
+      const providentFundPer =
+        name === "provident_per" ? value : formData.provident_per;
       const deduct = name === "deduct" ? value : formData.deduct;
       const basicPer = name === "basic_per" ? value : formData.basic_per;
       const hRentPer = name === "h_rent_per" ? value : formData.h_rent_per;
-      const mobileAllowancePer = name === "mobile_allowance_per" ? value : formData.mobile_allowance_per;
-      const medicalAllowancePer = name === "medical_allowance_per" ? value : formData.medical_allowance_per;
-      const transportPer = name === "transport_per" ? value : formData.transport_per;
+      const mobileAllowancePer =
+        name === "mobile_allowance_per" ? value : formData.mobile_allowance_per;
+      const medicalAllowancePer =
+        name === "medical_allowance_per"
+          ? value
+          : formData.medical_allowance_per;
+      const transportPer =
+        name === "transport_per" ? value : formData.transport_per;
+      const festivalPer =
+        name === "festival_per" ? value : formData.festival_per;
       const othersPer = name === "others_per" ? value : formData.others_per;
 
-      const providentFund = grossSalary && providentFundPer ? ((parseFloat(grossSalary) * parseFloat(providentFundPer)) / 100).toFixed(2) : "";
-      const basic = grossSalary && basicPer ? ((parseFloat(grossSalary) * parseFloat(basicPer)) / 100).toFixed(2) : "";
-      const hRent = grossSalary && hRentPer ? ((parseFloat(grossSalary) * parseFloat(hRentPer)) / 100).toFixed(2) : "";
-      const mobileAllowance = grossSalary && mobileAllowancePer ? ((parseFloat(grossSalary) * parseFloat(mobileAllowancePer)) / 100).toFixed(2) : "";
-      const medicalAllowance = grossSalary && medicalAllowancePer ? ((parseFloat(grossSalary) * parseFloat(medicalAllowancePer)) / 100).toFixed(2) : "";
-      const transport = grossSalary && transportPer ? ((parseFloat(grossSalary) * parseFloat(transportPer)) / 100).toFixed(2) : "";
-      const others = grossSalary && othersPer ? ((parseFloat(grossSalary) * parseFloat(othersPer)) / 100).toFixed(2) : "";
-      const totalPayable = grossSalary ? (parseFloat(grossSalary) - (parseFloat(providentFund || 0) + parseFloat(deduct || 0))).toFixed(2) : "";
+      const providentFund =
+        grossSalary && providentFundPer
+          ? (
+              (parseFloat(grossSalary) * parseFloat(providentFundPer)) /
+              100
+            ).toFixed(2)
+          : "";
+      const basic =
+        grossSalary && basicPer
+          ? ((parseFloat(grossSalary) * parseFloat(basicPer)) / 100).toFixed(2)
+          : "";
+      const hRent =
+        grossSalary && hRentPer
+          ? ((parseFloat(grossSalary) * parseFloat(hRentPer)) / 100).toFixed(2)
+          : "";
+      const mobileAllowance =
+        grossSalary && mobileAllowancePer
+          ? (
+              (parseFloat(grossSalary) * parseFloat(mobileAllowancePer)) /
+              100
+            ).toFixed(2)
+          : "";
+      const medicalAllowance =
+        grossSalary && medicalAllowancePer
+          ? (
+              (parseFloat(grossSalary) * parseFloat(medicalAllowancePer)) /
+              100
+            ).toFixed(2)
+          : "";
+      const transport =
+        grossSalary && transportPer
+          ? (
+              (parseFloat(grossSalary) * parseFloat(transportPer)) /
+              100
+            ).toFixed(2)
+          : "";
+      const festival =
+        grossSalary && festivalPer
+          ? ((parseFloat(grossSalary) * parseFloat(festivalPer)) / 100).toFixed(
+              2
+            )
+          : "";
+      const others =
+        grossSalary && othersPer
+          ? ((parseFloat(grossSalary) * parseFloat(othersPer)) / 100).toFixed(2)
+          : "";
+      const totalPayable = grossSalary
+        ? (
+            parseFloat(grossSalary) -
+            (parseFloat(providentFund || 0) + parseFloat(deduct || 0))
+          ).toFixed(2)
+        : "";
 
       setFormData((prevData) => ({
         ...prevData,
@@ -225,6 +303,7 @@ const EditEmployeeSalary = () => {
         mobile_allowance: mobileAllowance,
         medical_allowance: medicalAllowance,
         transport,
+        festival,
         others,
         total_payable: totalPayable,
       }));
@@ -236,7 +315,8 @@ const EditEmployeeSalary = () => {
     if (!formData.employee) errors.employee = "Employee is required";
     if (!formData.currency) errors.currency = "Currency is required";
     if (!formData.date) errors.date = "Date is required";
-    if (!formData.gross_salary) errors.gross_salary = "Gross salary is required";
+    if (!formData.gross_salary)
+      errors.gross_salary = "Gross salary is required";
     return errors;
   };
 
@@ -261,33 +341,44 @@ const EditEmployeeSalary = () => {
       basic: parseFloat(formData.basic).toFixed(2) || "0.00",
       h_rent_per: parseFloat(formData.h_rent_per).toFixed(2) || "0.00",
       h_rent: parseFloat(formData.h_rent).toFixed(2) || "0.00",
-      mobile_allowance_per: parseFloat(formData.mobile_allowance_per).toFixed(2) || "0.00",
-      mobile_allowance: parseFloat(formData.mobile_allowance).toFixed(2) || "0.00",
-      medical_allowance_per: parseFloat(formData.medical_allowance_per).toFixed(2) || "0.00",
-      medical_allowance: parseFloat(formData.medical_allowance).toFixed(2) || "0.00",
+      mobile_allowance_per:
+        parseFloat(formData.mobile_allowance_per).toFixed(2) || "0.00",
+      mobile_allowance:
+        parseFloat(formData.mobile_allowance).toFixed(2) || "0.00",
+      medical_allowance_per:
+        parseFloat(formData.medical_allowance_per).toFixed(2) || "0.00",
+      medical_allowance:
+        parseFloat(formData.medical_allowance).toFixed(2) || "0.00",
       transport_per: parseFloat(formData.transport_per).toFixed(2) || "0.00",
       transport: parseFloat(formData.transport).toFixed(2) || "0.00",
+      festival_per: parseFloat(formData.festival_per).toFixed(2) || "0.00",
+      festival: parseFloat(formData.festival).toFixed(2) || "0.00",
       others_per: parseFloat(formData.others_per).toFixed(2) || "0.00",
       others: parseFloat(formData.others).toFixed(2) || "0.00",
       total_payable: parseFloat(formData.total_payable).toFixed(2) || "0.00",
     };
 
     try {
-      const response = await fetch(`${url}/expense/employee-salary/?employee_salary_id=${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${url}/expense/employee-salary/?employee_salary_id=${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         alert("Salary updated successfully!");
         navigate("/employee-salary-list");
       } else {
         const errorData = await response.json();
-        setGlobalError("Error updating salary: " + (errorData.message || "Unknown error"));
+        setGlobalError(
+          "Error updating salary: " + (errorData.message || "Unknown error")
+        );
       }
     } catch (error) {
       setGlobalError("Error updating salary: " + error.message);
@@ -296,7 +387,9 @@ const EditEmployeeSalary = () => {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md mt-16 max-w-full">
-      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">Edit Employee Salary</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+        Edit Employee Salary
+      </h2>
 
       {/* Global Error Message */}
       {globalError && (
@@ -305,7 +398,10 @@ const EditEmployeeSalary = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+      >
         {/* Employee */}
         <div className="col-span-1">
           <label className="block text-sm font-medium text-gray-700">
@@ -353,22 +449,22 @@ const EditEmployeeSalary = () => {
         </div>
 
         {/* Date */}
-      {/* Date */}
-<div className="col-span-1">
-  <label className="block text-sm font-medium text-gray-700">
-    Date<span className="text-red-500">*</span>
-  </label>
-  <input
-    type="date"
-    name="date"
-    value={formData.date} // Expects YYYY-MM-DD format
-    onChange={handleChange}
-    className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-  />
-  {formErrors.date && (
-    <p className="mt-1 text-xs text-red-500">{formErrors.date}</p>
-  )}
-</div>
+        {/* Date */}
+        <div className="col-span-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Date<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date} // Expects YYYY-MM-DD format
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+          />
+          {formErrors.date && (
+            <p className="mt-1 text-xs text-red-500">{formErrors.date}</p>
+          )}
+        </div>
 
         {/* Gross Salary */}
         <div className="col-span-1">
@@ -385,13 +481,17 @@ const EditEmployeeSalary = () => {
             step="0.01"
           />
           {formErrors.gross_salary && (
-            <p className="mt-1 text-xs text-red-500">{formErrors.gross_salary}</p>
+            <p className="mt-1 text-xs text-red-500">
+              {formErrors.gross_salary}
+            </p>
           )}
         </div>
 
         {/* Provident Fund Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Provident Fund (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Provident Fund (%)
+          </label>
           <input
             type="number"
             name="provident_per"
@@ -405,7 +505,9 @@ const EditEmployeeSalary = () => {
 
         {/* Provident Fund */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Provident Fund</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Provident Fund
+          </label>
           <input
             type="text"
             name="provident_fund"
@@ -417,7 +519,9 @@ const EditEmployeeSalary = () => {
 
         {/* Deduct */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Deduct</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Deduct
+          </label>
           <input
             type="number"
             name="deduct"
@@ -431,7 +535,9 @@ const EditEmployeeSalary = () => {
 
         {/* Deduct For */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Deduct For</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Deduct For
+          </label>
           <input
             type="text"
             name="deduct_for"
@@ -443,7 +549,9 @@ const EditEmployeeSalary = () => {
 
         {/* Basic Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Basic (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Basic (%)
+          </label>
           <input
             type="number"
             name="basic_per"
@@ -457,7 +565,9 @@ const EditEmployeeSalary = () => {
 
         {/* Basic */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Basic</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Basic
+          </label>
           <input
             type="text"
             name="basic"
@@ -469,7 +579,9 @@ const EditEmployeeSalary = () => {
 
         {/* House Rent Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">House Rent (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            House Rent (%)
+          </label>
           <input
             type="number"
             name="h_rent_per"
@@ -483,7 +595,9 @@ const EditEmployeeSalary = () => {
 
         {/* House Rent */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">House Rent</label>
+          <label className="block text-sm font-medium text-gray-700">
+            House Rent
+          </label>
           <input
             type="text"
             name="h_rent"
@@ -495,7 +609,9 @@ const EditEmployeeSalary = () => {
 
         {/* Mobile Allowance Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Mobile Allowance (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Mobile Allowance (%)
+          </label>
           <input
             type="number"
             name="mobile_allowance_per"
@@ -509,7 +625,9 @@ const EditEmployeeSalary = () => {
 
         {/* Mobile Allowance */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Mobile Allowance</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Mobile Allowance
+          </label>
           <input
             type="text"
             name="mobile_allowance"
@@ -521,7 +639,9 @@ const EditEmployeeSalary = () => {
 
         {/* Medical Allowance Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Medical Allowance (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Medical Allowance (%)
+          </label>
           <input
             type="number"
             name="medical_allowance_per"
@@ -535,7 +655,9 @@ const EditEmployeeSalary = () => {
 
         {/* Medical Allowance */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Medical Allowance</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Medical Allowance
+          </label>
           <input
             type="text"
             name="medical_allowance"
@@ -547,7 +669,9 @@ const EditEmployeeSalary = () => {
 
         {/* Transport Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Transport (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Transport (%)
+          </label>
           <input
             type="number"
             name="transport_per"
@@ -561,7 +685,9 @@ const EditEmployeeSalary = () => {
 
         {/* Transport */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Transport</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Transport
+          </label>
           <input
             type="text"
             name="transport"
@@ -570,10 +696,41 @@ const EditEmployeeSalary = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
           />
         </div>
+        {/* Festival Percentage */}
+        <div className="col-span-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Festival (%)
+          </label>
+          <input
+            type="number"
+            name="festival_per"
+            value={formData.festival_per}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Festival */}
+        <div className="col-span-1">
+          <label className="block text-sm font-medium text-gray-700">
+            Festival Bonus
+          </label>
+          <input
+            type="text"
+            name="festival"
+            value={formData.festival}
+            readOnly
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
+          />
+        </div>
 
         {/* Others Percentage */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Others (%)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Others (%)
+          </label>
           <input
             type="number"
             name="others_per"
@@ -587,7 +744,9 @@ const EditEmployeeSalary = () => {
 
         {/* Others */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Others</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Others
+          </label>
           <input
             type="text"
             name="others"
@@ -599,7 +758,9 @@ const EditEmployeeSalary = () => {
 
         {/* Total Payable */}
         <div className="col-span-1">
-          <label className="block text-sm font-medium text-gray-700">Total Payable</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Total Payable
+          </label>
           <input
             type="text"
             name="total_payable"

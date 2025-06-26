@@ -23,6 +23,8 @@ const AddEmployeeSalary = () => {
     medical_allowance: "",
     transport_per: "",
     transport: "",
+    festival_per: "",
+    festival: "",
     others_per: "",
     others: "",
     total_payable: "",
@@ -127,6 +129,7 @@ const AddEmployeeSalary = () => {
       name === "mobile_allowance_per" ||
       name === "medical_allowance_per" ||
       name === "transport_per" ||
+      name === "festival_per" ||
       name === "others_per"
     ) {
       const grossSalary = name === "gross_salary" ? value : formData.gross_salary;
@@ -137,6 +140,7 @@ const AddEmployeeSalary = () => {
       const mobileAllowancePer = name === "mobile_allowance_per" ? value : formData.mobile_allowance_per;
       const medicalAllowancePer = name === "medical_allowance_per" ? value : formData.medical_allowance_per;
       const transportPer = name === "transport_per" ? value : formData.transport_per;
+      const festivalPer = name === "festival_per" ? value : formData.festival_per;
       const othersPer = name === "others_per" ? value : formData.others_per;
 
       const providentFund = grossSalary && providentFundPer ? ((parseFloat(grossSalary) * parseFloat(providentFundPer)) / 100).toFixed(2) : 0;
@@ -145,6 +149,7 @@ const AddEmployeeSalary = () => {
       const mobileAllowance = grossSalary && mobileAllowancePer ? ((parseFloat(grossSalary) * parseFloat(mobileAllowancePer)) / 100).toFixed(2) : 0;
       const medicalAllowance = grossSalary && medicalAllowancePer ? ((parseFloat(grossSalary) * parseFloat(medicalAllowancePer)) / 100).toFixed(2) : 0;
       const transport = grossSalary && transportPer ? ((parseFloat(grossSalary) * parseFloat(transportPer)) / 100).toFixed(2) : 0;
+      const festival = grossSalary && festivalPer ? ((parseFloat(grossSalary) * parseFloat(festivalPer)) / 100).toFixed(2) : 0;
       const others = grossSalary && othersPer ? ((parseFloat(grossSalary) * parseFloat(othersPer)) / 100).toFixed(2) : 0;
       const totalPayable = grossSalary ? (parseFloat(grossSalary) - (parseFloat(providentFund || 0) + parseFloat(deduct || 0))).toFixed(2) : 0;
 
@@ -156,6 +161,7 @@ const AddEmployeeSalary = () => {
         mobile_allowance: mobileAllowance,
         medical_allowance: medicalAllowance,
         transport,
+        festival,
         others,
         total_payable: totalPayable,
       }));
@@ -198,6 +204,8 @@ const AddEmployeeSalary = () => {
       medical_allowance: parseFloat(formData.medical_allowance).toFixed(2) || "0.00",
       transport_per: parseFloat(formData.transport_per).toFixed(2) || "0.00",
       transport: parseFloat(formData.transport).toFixed(2) || "0.00",
+      festival_per: parseFloat(formData.festival_per).toFixed(2) || "0.00",
+      festival: parseFloat(formData.festival).toFixed(2) || "0.00",
       others_per: parseFloat(formData.others_per).toFixed(2) || "0.00",
       others: parseFloat(formData.others).toFixed(2) || "0.00",
       total_payable: parseFloat(formData.total_payable).toFixed(2) || "0.00",
@@ -496,6 +504,31 @@ const AddEmployeeSalary = () => {
             type="text"
             name="transport"
             value={formData.transport}
+            readOnly
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
+          />
+        </div>
+            {/* Festival Percentage */}
+            <div className="col-span-1">
+          <label className="block text-sm font-medium text-gray-700">Festival (%)</label>
+          <input
+            type="number"
+            name="festival_per"
+            value={formData.festival_per}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Festival  */}
+        <div className="col-span-1">
+          <label className="block text-sm font-medium text-gray-700">Festival Amount</label>
+          <input
+            type="text"
+            name="festival"
+            value={formData.festival}
             readOnly
             className="mt-1 block w-full border border-gray-300 rounded-md p-1 sm:p-2 bg-gray-100 text-sm sm:text-base"
           />
