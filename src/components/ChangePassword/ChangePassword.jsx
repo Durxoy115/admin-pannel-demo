@@ -40,15 +40,13 @@ const ChangePassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     setIsLoading(true);
     setMessage("");
-
+  
     try {
-      // Simulate API call to a dummy endpoint (e.g., jsonplaceholder)
       const response = await fetch(`${url}/auth/user/change-password/`, {
         method: "POST",
-      
         headers: {
           Authorization: `Token ${token}`,
           "Content-Type": "application/json",
@@ -58,12 +56,13 @@ const ChangePassword = () => {
           new_password: formData.new_password,
         }),
       });
-
-      if (!response.success) {
-        throw new Error("Failed to change password");
+  
+      const data = await response.json(); // Parse the JSON response
+  
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to change password");
       }
-
-      // Simulate success response
+  
       setMessage("Password changed successfully!");
       setFormData({ password: "", new_password: "" });
       setTimeout(() => navigate("/dashboard"), 2000); // Redirect after 2 seconds

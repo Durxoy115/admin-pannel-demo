@@ -170,7 +170,7 @@ const Dashboard = () => {
         <h1 className="text-3xl font-semibold mt-16 md:mt-12">Clients Information</h1>
       </div>
 
-      <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mt-4 min-h-[4rem]">
+      <div className="bg-gray-800 text-white p-1 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 mt-4 min-h-[4rem]">
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="text-center sm:text-left">
             <p className="text-sm sm:text-base">Clients Details</p>
@@ -181,7 +181,7 @@ const Dashboard = () => {
               placeholder="Search..."
               value={searchQuery}
               onChange={handleSearch}
-              className="w-full text-black px-3 py-1 sm:px-4 sm:py-2 border border-gray-700 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full text-black px-2 py-1 sm:px-4 sm:py-2 border border-gray-700 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>

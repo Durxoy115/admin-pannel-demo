@@ -129,13 +129,13 @@ const Currency = () => {
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Name
                 </th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Sign
                 </th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-end border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-end border-b text-xs sm:text-sm md:text-base font-medium text-gray-700">
                   Actions
                 </th>
               </tr>
@@ -144,13 +144,13 @@ const Currency = () => {
               {currency.map((contact) => (
                 <tr key={contact.id} className="hover:bg-gray-50">
               
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
                     {contact.currency}
                   </td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
                     {contact.sign}
                   </td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b">
                     <div className="flex justify-end gap-2 sm:gap-3">
                       {
                         canEditUserPermissionGroup && 

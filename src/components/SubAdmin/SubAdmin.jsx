@@ -100,7 +100,7 @@ const SubAdmin = () => {
 // console.log("------", canViewUserList)
   return (
       <div className=" bg-white">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-3 sm:pl-4 pr-3 sm:pr-4 py-2 sm:py-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-3 sm:pl-4 pr-3 sm:pr-4 py-1 sm:py-2">
         <h1 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Sub-Admin List</h1>
         {
           canAddUser && 
@@ -118,19 +118,19 @@ const SubAdmin = () => {
         <table className="min-w-full border-collapse border border-gray-300 ">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Name</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">User Name</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Password</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Email</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Mobile</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Member Type</th>
-              <th className="border-b border-gray-300 p-2 sm:p-3 text-left text-xs sm:text-sm">Actions</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Name</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">User Name</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Password</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Email</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Mobile</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Member Type</th>
+              <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="border-b border-gray-300 p-2 sm:p-3">
+                <td className="border-b border-gray-300 p-1 sm:p-2">
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -150,12 +150,12 @@ const SubAdmin = () => {
                     </span>
                   </div>
                 </td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{user.username}</td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">********</td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{user.email}</td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{user.contact || "N/A"}</td>
-                <td className="border-b border-gray-300 p-2 sm:p-3 text-xs sm:text-sm">{user.user_type?.name || "N/A"}</td>
-                <td className="border-b border-gray-300 p-2 sm:p-3">
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{user.username}</td>
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">********</td>
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{user.email}</td>
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{user.contact || "N/A"}</td>
+                <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{user.user_type?.name || "N/A"}</td>
+                <td className="border-b border-gray-300 p-1 sm:p-2">
                   <div className="flex gap-2">
                     {
                       canUpdateUser && 

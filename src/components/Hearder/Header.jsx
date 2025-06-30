@@ -85,7 +85,7 @@ const Header = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-2 sm:px-2 md:px-7 py-2">
+    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white shadow-md px-2 sm:px-2 md:px-7 py-1">
       {/* Logo Section */}
       <div className="flex-shrink-0">
         <img
@@ -106,7 +106,7 @@ const Header = () => {
           {({ close }) => (
             <>
               <MenuButton
-                className="flex items-center gap-1 sm:gap-2 rounded-full bg-gray-100 px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex items-center gap-1 sm:gap-2 rounded-full bg-gray-100 px-1 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <span className="truncate max-w-[80px] sm:max-w-[120px]">
                   {userDetails.username}

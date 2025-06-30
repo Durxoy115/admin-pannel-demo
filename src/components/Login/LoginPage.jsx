@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 import useToken from "../hooks/useToken";
+import localStorageWrapper from "../../localStorage";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -27,7 +28,7 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        localStorage.setItem("office_token", data.data.token);
+        localStorageWrapper.setItem("office_token", data.data.token, 3600 * 1000 );
         setMessage("Login successful!");
         setIsSuccess(true);
 
