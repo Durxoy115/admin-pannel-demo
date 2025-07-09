@@ -102,33 +102,33 @@ const CompanyAddress = () => {
           <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md ">
             <thead>
               <tr className="bg-gray-100">
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Name</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Logo</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Email</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Contact</th>
-                {/* <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Number</th>
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Routing Number</th> */}
-                <th className="py-2 sm:py-3 px-4 sm:px-6 text-center border-b text-xs sm:text-sm">Actions</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Name</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Company Logo</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Email</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Contact</th>
+                {/* <th className=1py-2 sm2py-3 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Name</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Account Number</th>
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-left border-b text-xs sm:text-sm">Routing Number</th> */}
+                <th className="py-1 sm:py-2 px-4 sm:px-6 text-center border-b text-xs sm:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {addresses.map((address) => (
                 <tr key={address.id} className="hover:bg-gray-50">
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.name}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.name}</td>
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b">
                     <img
                       src={`${url}/${address.logo}`}
                       alt="logo"
                       className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mr-2 sm:mr-3 object-cover"
                     />
                   </td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.email}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.contact}</td>
-                  {/* <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_number}</td>
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td> */}
-                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b">
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.email}</td>
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.contact}</td>
+                  {/* <td className="1py-2 sm2py-3 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_name}</td>
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.account_number}</td>
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b text-xs sm:text-sm">{address.routing_number}</td> */}
+                  <td className="py-1 sm:py-2 px-4 sm:px-6 border-b">
                     <div className="flex justify-center gap-2 sm:gap-3">
                       {
                         canEditCompany && 

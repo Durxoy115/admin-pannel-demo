@@ -159,7 +159,7 @@ const SalaryConfig = () => {
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-gray-50">
                  <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
-                    {contact.others}
+                    {new Date(contact.updated_at).toLocaleDateString("en-GB")}
                   </td>
                   <td className="py-2 sm:py-3 px-4 sm:px-6 border-b text-xs sm:text-sm text-gray-700">
                     {contact.basic}

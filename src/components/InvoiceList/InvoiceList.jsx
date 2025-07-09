@@ -13,6 +13,12 @@ import useToken from "../hooks/useToken";
 import { useNavigate } from "react-router-dom";
 import useUserPermission from "../hooks/usePermission";
 
+const Spinner = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
@@ -73,6 +79,7 @@ const InvoiceList = () => {
         billingCompanyAddress: invoice.billing_company_name,
         companyName: invoice.company_name,
         amount: invoice.total_amount,
+        last_due_amount: invoice.last_due_amount,
         paidAmount: invoice.paid_amount,
         dueAmount: invoice.due_amount,
         date: invoice?.date?.split("T")[0],
@@ -219,7 +226,7 @@ const InvoiceList = () => {
     window.open(`${url}${invoice_pdf}`, "_blank");
   };
 
-  if (loading) return <div className="p-4">Loading invoices...</div>;
+  if (loading) return <Spinner />;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   const getSummaryData = () => {
@@ -402,6 +409,7 @@ const InvoiceList = () => {
                 "Client Name",
                 "Company Name",
                 "Amount",
+                "Due Amount",
                 "Date",
                 "Payment Method",
                 "Actions",
@@ -433,6 +441,12 @@ const InvoiceList = () => {
                 <td className="px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm">
                   {invoice?.sign}
                   {invoice?.amount}
+                </td>
+                <td className={`px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm ${ 
+                  parseFloat(invoice?.last_due_amount || 0) > 0 ? 'text-red-500' : 'text-black'
+                }`}>
+                  {invoice?.sign}
+                  {invoice?.last_due_amount || 0}
                 </td>
                 <td className="px-4 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm">
                   {invoice.date}

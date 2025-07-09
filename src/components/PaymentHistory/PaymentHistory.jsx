@@ -391,7 +391,7 @@ const PaymentHistory = () => {
                   <td className="p-1 sm:p-2">{payment.invoice_id}</td>
                   <td className="p-1 sm:p-2">{payment.trans_id || "N/A"}</td>
                   <td className="p-1 sm:p-2">
-                    {payment.total_amount || "N/A"}
+                   {payment.sign} {payment.total_amount || "N/A"}
                   </td>
                   <td
                     className={`p-1 sm:p-1 ${
@@ -400,7 +400,7 @@ const PaymentHistory = () => {
                         : " text-Black"
                     }`}
                   >
-                    {payment.due_amount || "N/A"}
+                   {payment.sign} {payment.due_amount || "N/A"}
                   </td>
                   <td className="p-1 sm:p-1">{payment.date || "N/A"}</td>
                   <td className="p-1 sm:p-1 flex gap-2">

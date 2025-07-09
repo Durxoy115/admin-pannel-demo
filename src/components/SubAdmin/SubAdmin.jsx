@@ -11,19 +11,16 @@ const SubAdmin = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Added for pagination
+  const usersPerPage = 10; // Added for pagination
   const navigate = useNavigate();
   const [url, getTokenLocalStorage] = useToken();
   const token = getTokenLocalStorage();
-  const {permissions} = useUserPermission();
-
-  
+  const { permissions } = useUserPermission();
 
   const canAddUser = permissions.includes("users.add_user");
   const canUpdateUser = permissions.includes("users.change_user");
   const canDeletedUser = permissions.includes("users.delete_user");
-  
-  
-
 
   const fetchUsers = async () => {
     try {
@@ -97,25 +94,39 @@ const SubAdmin = () => {
         : [...prev, userId]
     );
   };
-// console.log("------", canViewUserList)
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(users.length / usersPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
-      <div className=" bg-white">
+    <div className="bg-white">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-black rounded-t-lg text-white pl-3 sm:pl-4 pr-3 sm:pr-4 py-1 sm:py-2">
         <h1 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Sub-Admin List</h1>
-        {
-          canAddUser && 
+        {canAddUser && (
           <IoMdAddCircleOutline
-          className="text-lg sm:text-xl cursor-pointer"
-          onClick={handleAddSubAdmin}
-        />
-        }
-          
-        
-        
+            className="text-lg sm:text-xl cursor-pointer"
+            onClick={handleAddSubAdmin}
+          />
+        )}
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 ">
+        <table className="min-w-full border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
               <th className="border-b border-gray-300 p-1 sm:p-2 text-left text-xs sm:text-sm">Name</th>
@@ -128,7 +139,7 @@ const SubAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {currentUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="border-b border-gray-300 p-1 sm:p-2">
                   <div className="flex items-center">
@@ -157,31 +168,53 @@ const SubAdmin = () => {
                 <td className="border-b border-gray-300 p-1 sm:p-2 text-xs sm:text-sm">{user.user_type?.name || "N/A"}</td>
                 <td className="border-b border-gray-300 p-1 sm:p-2">
                   <div className="flex gap-2">
-                    {
-                      canUpdateUser && 
+                    {canUpdateUser && (
                       <button
-                      className="text-purple-500 hover:text-purple-700"
-                      onClick={() => handleEditSubAdmin(user.id)}
-                    >
-                      <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
-                    </button>
-                    }
-                   {
-                    canDeletedUser && 
-                    <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => openDeleteModal(user.id)}
-                  >
-                    <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
-                  </button>
-                   }
-                   
+                        className="text-purple-500 hover:text-purple-700"
+                        onClick={() => handleEditSubAdmin(user.id)}
+                      >
+                        <FiEdit className="w-4 sm:w-5 h-4 sm:h-5" />
+                      </button>
+                    )}
+                    {canDeletedUser && (
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => openDeleteModal(user.id)}
+                      >
+                        <FiTrash2 className="w-4 sm:w-5 h-4 sm:h-5" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between mt-4 px-4">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 rounded-md text-sm sm:text-base ${
+            currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-800 text-white hover:bg-gray-700"
+          }`}
+        >
+          Previous
+        </button>
+        <span className="text-sm sm:text-base">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 rounded-md text-sm sm:text-base ${
+            currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-gray-800 text-white hover:bg-gray-700"
+          }`}
+        >
+          Next
+        </button>
       </div>
 
       {isModalOpen && (
@@ -209,7 +242,6 @@ const SubAdmin = () => {
         </div>
       )}
     </div>
-    
   );
 };
 
